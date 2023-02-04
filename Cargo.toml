@@ -1,0 +1,6 @@
+[workspace]
+members = ['osmos-nn']
+
+[profile.release]
+lto = true
+strip = true
