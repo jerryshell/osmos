@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Network {
     pub layer_list: Vec<crate::layer::Layer>,
 }

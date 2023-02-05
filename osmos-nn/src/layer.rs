@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Layer {
     pub neuron_list: Vec<crate::neuron::Neuron>,
 }
@@ -22,7 +23,7 @@ impl Layer {
         self.neuron_list
             .iter()
             .map(|neuron| neuron.feed(input_list))
-            .map(relu)
+            // .map(relu)
             .collect()
     }
 }

@@ -43,6 +43,7 @@ pub struct Cell {
     pub x: f32,
     pub y: f32,
     pub energy: usize,
+    pub network_output: Vec<f32>,
 }
 
 impl From<&osmos_core::cell::Cell> for Cell {
@@ -51,6 +52,7 @@ impl From<&osmos_core::cell::Cell> for Cell {
             x: value.position.x,
             y: value.position.y,
             energy: value.energy,
+            network_output: value.network_output.clone(),
         }
     }
 }

@@ -18,6 +18,7 @@ const render = () => {
     // console.table(cell)
     ctx.arc(cell.x * window.innerWidth, cell.y * window.innerHeight, cell.energy * 5, 0, 2 * Math.PI);
     ctx.fill();
+    // console.log(cell.network_output)
   }
   world.step()
   requestAnimationFrame(render)
