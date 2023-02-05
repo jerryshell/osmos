@@ -1,5 +1,5 @@
 [workspace]
-members = ['osmos-nn']
+members = ['osmos-core', 'osmos-ga', 'osmos-nn', 'osmos-wasm']
 
 [profile.release]
 lto = true
