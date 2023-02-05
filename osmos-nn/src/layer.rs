@@ -18,10 +18,10 @@ impl Layer {
         Self { neuron_list }
     }
 
-    pub fn forward(&self, input_list: &[f32]) -> Vec<f32> {
+    pub fn feed(&self, input_list: &[f32]) -> Vec<f32> {
         self.neuron_list
             .iter()
-            .map(|neuron| neuron.forward(input_list))
+            .map(|neuron| neuron.feed(input_list))
             .map(relu)
             .collect()
     }
@@ -46,7 +46,7 @@ mod tests {
         }
     }
 
-    mod forward {
+    mod feed {
         #[test]
         fn test() {
             let neuron_list = vec![
@@ -54,7 +54,8 @@ mod tests {
                 crate::neuron::Neuron::new(1.0, vec![2.0, 3.0, 4.0]),
             ];
             let layer = crate::layer::Layer::new(neuron_list);
-            let output_list = layer.forward(&[2.0, 2.0, 2.0]);
+            let input_list = vec![2.0, 2.0, 2.0];
+            let output_list = layer.feed(&input_list);
             assert_eq!(output_list, &[19.0, 19.0]);
         }
     }

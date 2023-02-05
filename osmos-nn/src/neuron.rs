@@ -16,7 +16,7 @@ impl Neuron {
         Self { bias, weight_list }
     }
 
-    pub fn forward(&self, input_list: &[f32]) -> f32 {
+    pub fn feed(&self, input_list: &[f32]) -> f32 {
         let sum = input_list
             .iter()
             .zip(&self.weight_list)
@@ -42,11 +42,12 @@ mod tests {
         }
     }
 
-    mod forward {
+    mod feed {
         #[test]
         fn test() {
             let neuron = crate::neuron::Neuron::new(1.0, vec![2.0, 3.0, 4.0]);
-            let output = neuron.forward(&[2.0, 2.0, 2.0]);
+            let input_list = vec![2.0, 2.0, 2.0];
+            let output = neuron.feed(&input_list);
             assert!(output == 19.0);
         }
     }
