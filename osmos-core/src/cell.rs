@@ -20,28 +20,20 @@ impl Cell {
     }
 
     pub fn step(&mut self, rng: &mut rand::rngs::ThreadRng) {
-        let rate = 0.001;
-        let v_x = rand::Rng::gen_range(rng, -rate..=rate);
-        let v_y = rand::Rng::gen_range(rng, -rate..=rate);
-        let v = nalgebra::Vector2::new(v_x, v_y);
-        self.velocity += v;
+        let rate = 0.0005;
+        let acceleration_x = rand::Rng::gen_range(rng, -rate..=rate);
+        let acceleration_y = rand::Rng::gen_range(rng, -rate..=rate);
+        let acceleration = nalgebra::Vector2::new(acceleration_x, acceleration_y);
+
+        self.velocity += acceleration;
         self.velocity = nalgebra::clamp(
             self.velocity,
             nalgebra::Vector2::new(-self.velocity_max_magnitude, -self.velocity_max_magnitude),
             nalgebra::Vector2::new(self.velocity_max_magnitude, self.velocity_max_magnitude),
         );
-        self.position += self.velocity;
-        self.position.x = wrap(self.position.x, 0.0, 1.0);
-        self.position.y = wrap(self.position.y, 0.0, 1.0);
-    }
-}
 
-fn wrap(n: f32, min: f32, max: f32) -> f32 {
-    let mut result = n;
-    if n > max {
-        result = 0.0
-    } else if n < min {
-        result = 1.0
+        self.position += self.velocity;
+        self.position.x = nalgebra::wrap(self.position.x, 0.0, 1.0);
+        self.position.y = nalgebra::wrap(self.position.y, 0.0, 1.0);
     }
-    result
 }
