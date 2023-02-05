@@ -1,23 +1,26 @@
 import './style.css'
-import javascriptLogo from './javascript.svg'
-import { setupCounter } from './counter.js'
+import * as osmos from './osmos-wasm'
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const world = new osmos.World()
 
-setupCounter(document.querySelector('#counter'))
+const canvasElement = document.getElementById('canvas')
+canvasElement.width = window.innerWidth
+canvasElement.height = window.innerHeight
+
+const ctx = canvasElement.getContext('2d')
+
+const render = () => {
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+  const cellList = world.cell_list()
+  for (let cell of cellList) {
+    ctx.beginPath();
+    ctx.fillStyle = 'rgb(0,255,128)'
+    // console.table(cell)
+    ctx.arc(cell.x * window.innerWidth, cell.y * window.innerHeight, cell.energy * 5, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  world.step()
+  requestAnimationFrame(render)
+}
+
+render()
