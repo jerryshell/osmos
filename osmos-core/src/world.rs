@@ -6,7 +6,7 @@ pub struct World {
 impl Default for World {
     fn default() -> Self {
         let mut rng = rand::thread_rng();
-        let cell_list = (0..100)
+        let cell_list = (0..200)
             .map(|_| crate::cell::Cell::random(&mut rng))
             .collect();
         Self { rng, cell_list }

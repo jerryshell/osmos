@@ -23,14 +23,14 @@ impl Layer {
         self.neuron_list
             .iter()
             .map(|neuron| neuron.feed(input_list))
-            // .map(relu)
+            .map(relu)
             .collect()
     }
 }
 
-// fn relu(n: f32) -> f32 {
-//     n.max(0.0)
-// }
+fn relu(n: f32) -> f32 {
+    n.max(0.0)
+}
 
 #[cfg(test)]
 mod tests {

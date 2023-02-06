@@ -19,7 +19,7 @@ impl Cell {
         let acceleration = nalgebra::Vector2::new(0.0, 0.0);
         let velocity = nalgebra::Vector2::new(0.0, 0.0);
         let sensor = crate::sensor::Sensor::new(0.5);
-        let network = osmos_nn::network::Network::random(rng, &[4, 10, 2]);
+        let network = osmos_nn::network::Network::random(rng, &[4, 10, 5]);
         Self {
             position,
             acceleration,
