@@ -1,7 +1,7 @@
 import './style.css'
 import * as osmos from './osmos-wasm'
 
-const world = new osmos.World()
+const sim = new osmos.Simulator()
 
 const canvasElement = document.getElementById('canvas')
 const width = 1000
@@ -13,17 +13,17 @@ const ctx = canvasElement.getContext('2d')
 
 const render = () => {
   ctx.clearRect(0, 0, width, height)
-  const cellList = world.cell_list()
-  for (let cell of cellList) {
+  const objectList = sim.object_list()
+  for (let object of objectList) {
     ctx.beginPath();
     ctx.fillStyle = 'rgb(0,255,128)'
-    // console.table(cell)
-    ctx.arc(cell.x * width, cell.y * height, cell.energy, 0, 2 * Math.PI);
+    // console.table(object)
+    ctx.arc(object.x * width, object.y * height, object.energy, 0, 2 * Math.PI);
     ctx.fill();
   }
-  world.step()
+  sim.step()
   requestAnimationFrame(render)
-  // console.table(cellList[0].network_output)
+  // console.table(objectList[0].network_output)
 }
 
 render()

@@ -5,47 +5,48 @@ pub fn hello() -> String {
 
 #[derive(Default)]
 #[wasm_bindgen::prelude::wasm_bindgen]
-pub struct World {
-    world: osmos_core::world::World,
+pub struct Simulator {
+    simulator: osmos_sim::simulator::Simulator,
 }
 
 #[wasm_bindgen::prelude::wasm_bindgen]
-impl World {
+impl Simulator {
     #[wasm_bindgen::prelude::wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Default::default()
     }
 
-    pub fn cell_list(&self) -> wasm_bindgen::JsValue {
-        let cell_list = self
-            .world
-            .cell_list
+    #[wasm_bindgen::prelude::wasm_bindgen]
+    pub fn object_list(&self) -> wasm_bindgen::JsValue {
+        let object_list = self
+            .simulator
+            .object_list
             .iter()
-            .map(Cell::from)
-            .collect::<Vec<Cell>>();
-        serde_wasm_bindgen::to_value(&cell_list).unwrap()
+            .map(Object::from)
+            .collect::<Vec<Object>>();
+        serde_wasm_bindgen::to_value(&object_list).unwrap()
     }
 
     pub fn step(&mut self) {
-        self.world.step()
+        self.simulator.step()
     }
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
-pub struct Cell {
+pub struct Object {
     pub x: f32,
     pub y: f32,
     pub energy: usize,
     pub network_output: Vec<f32>,
 }
 
-impl From<&osmos_core::cell::Cell> for Cell {
-    fn from(value: &osmos_core::cell::Cell) -> Self {
+impl From<&osmos_sim::object::Object> for Object {
+    fn from(object: &osmos_sim::object::Object) -> Self {
         Self {
-            x: value.position.x,
-            y: value.position.y,
-            energy: value.energy,
-            network_output: value.network_output.clone(),
+            x: object.cell.position.x,
+            y: object.cell.position.y,
+            energy: object.cell.energy,
+            network_output: object.network_output.clone(),
         }
     }
 }

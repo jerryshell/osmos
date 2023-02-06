@@ -158,7 +158,6 @@ name = "osmos-core"
 version = "0.1.0"
 dependencies = [
  "nalgebra",
- "osmos-nn",
  "rand",
 ]
 
@@ -166,6 +165,8 @@ dependencies = [
 name = "osmos-ga"
 version = "0.1.0"
 dependencies = [
+ "osmos-core",
+ "osmos-nn",
  "rand",
 ]
 
@@ -177,11 +178,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "osmos-sim"
+version = "0.1.0"
+dependencies = [
+ "nalgebra",
+ "osmos-core",
+ "osmos-nn",
+ "rand",
+]
+
+[[package]]
 name = "osmos-wasm"
 version = "0.1.0"
 dependencies = [
  "getrandom",
- "osmos-core",
+ "osmos-sim",
  "serde",
  "serde-wasm-bindgen",
  "wasm-bindgen",

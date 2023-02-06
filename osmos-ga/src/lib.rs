@@ -1,5 +1,11 @@
-pub fn fitness() -> f32 {
-    todo!()
+pub trait Fitness {
+    fn fitness(&self) -> isize;
+}
+
+impl Fitness for osmos_core::cell::Cell {
+    fn fitness(&self) -> isize {
+        self.energy as isize
+    }
 }
 
 pub fn selection() -> f32 {
