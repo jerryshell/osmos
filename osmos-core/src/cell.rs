@@ -23,7 +23,7 @@ impl Cell {
             position,
             acceleration,
             velocity,
-            velocity_max_magnitude: 0.005,
+            velocity_max_magnitude: 0.001,
             energy: rand::Rng::gen_range(rng, 1..=5),
             sensor,
             network,
@@ -37,15 +37,13 @@ impl Cell {
     }
 
     pub fn process_network(&mut self, cell_list: &[Cell]) {
-        let rate = 0.0005;
         let sensor_output = self.sensor.process(self, cell_list);
         let mut nn_output = self.network.feed(sensor_output);
+        // 0.0~1.0 => -0.5~0.5
         nn_output = nn_output.iter().map(|n| sigmoid(*n) - 0.5).collect();
         self.network_output = nn_output.clone();
-        self.acceleration = nalgebra::Vector2::new(
-            nalgebra::clamp(nn_output[0] / 100.0, -rate, rate),
-            nalgebra::clamp(nn_output[1] / 100.0, -rate, rate),
-        );
+        // -0.5~0.5 => -0.0005~0.0005
+        self.acceleration = nalgebra::Vector2::new(nn_output[0] / 1000.0, nn_output[1] / 1000.0);
     }
 
     pub fn process_move(&mut self, rng: &mut rand::rngs::ThreadRng) {

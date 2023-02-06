@@ -23,7 +23,7 @@ impl Layer {
         self.neuron_list
             .iter()
             .map(|neuron| neuron.feed(input_list))
-            // .map(relu)
+            // .map(sigmoid)
             .collect()
     }
 }
