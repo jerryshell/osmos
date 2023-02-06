@@ -16,8 +16,8 @@ impl Simulator {
         Default::default()
     }
 
-    #[wasm_bindgen::prelude::wasm_bindgen]
-    pub fn object_list(&self) -> wasm_bindgen::JsValue {
+    #[wasm_bindgen::prelude::wasm_bindgen(js_name = getObjectList)]
+    pub fn get_object_list(&self) -> wasm_bindgen::JsValue {
         let object_list = self
             .simulator
             .object_list

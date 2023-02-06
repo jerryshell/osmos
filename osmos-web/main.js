@@ -13,7 +13,7 @@ const ctx = canvasElement.getContext('2d')
 
 const render = () => {
   ctx.clearRect(0, 0, width, height)
-  const objectList = sim.object_list()
+  const objectList = sim.getObjectList()
   for (let object of objectList) {
     ctx.beginPath();
     ctx.fillStyle = 'rgb(0,255,128)'
