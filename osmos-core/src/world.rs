@@ -14,7 +14,7 @@ impl World {
 
     pub fn step(&mut self) {
         crate::system::sensor::process(&mut self.cell_list);
-        self.cell_list.iter_mut().for_each(|cell| cell.step());
+        crate::system::network::process(&mut self.cell_list);
         crate::system::movement::process(&mut self.cell_list);
     }
 }
