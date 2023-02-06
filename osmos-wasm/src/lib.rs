@@ -3,17 +3,10 @@ pub fn hello() -> String {
     "devzero".to_string()
 }
 
+#[derive(Default)]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub struct World {
     world: osmos_core::world::World,
-}
-
-impl Default for World {
-    fn default() -> Self {
-        Self {
-            world: osmos_core::world::World::random(),
-        }
-    }
 }
 
 #[wasm_bindgen::prelude::wasm_bindgen]
