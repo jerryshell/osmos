@@ -6,6 +6,7 @@ pub struct Cell {
     pub velocity_max_magnitude: f32,
     pub energy: usize,
     pub sensor: crate::sensor::Sensor,
+    pub sensor_data_list: Vec<f32>,
     pub network: osmos_nn::network::Network,
     pub network_output: Vec<f32>,
 }
@@ -26,18 +27,18 @@ impl Cell {
             velocity_max_magnitude: 0.001,
             energy: rand::Rng::gen_range(rng, 1..=5),
             sensor,
+            sensor_data_list: vec![0.0, 0.0, 0.0, 0.0],
             network,
             network_output: vec![],
         }
     }
 
-    pub fn step(&mut self, rng: &mut rand::rngs::ThreadRng, cell_list: &[Cell]) {
-        self.process_network(cell_list);
+    pub fn step(&mut self) {
+        self.process_network();
     }
 
-    pub fn process_network(&mut self, cell_list: &[Cell]) {
-        let sensor_output = self.sensor.process(self, cell_list);
-        let mut nn_output = self.network.feed(sensor_output);
+    pub fn process_network(&mut self) {
+        let mut nn_output = self.network.feed(&self.sensor_data_list);
         // 0.0~1.0 => -0.5~0.5
         nn_output = nn_output.iter().map(|n| sigmoid(*n) - 0.5).collect();
         self.network_output = nn_output.clone();

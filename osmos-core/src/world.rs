@@ -13,10 +13,8 @@ impl World {
     }
 
     pub fn step(&mut self) {
+        crate::system::sensor::process(&mut self.cell_list);
+        self.cell_list.iter_mut().for_each(|cell| cell.step());
         crate::system::movement::process(&mut self.cell_list);
-        let c = self.cell_list.clone();
-        self.cell_list
-            .iter_mut()
-            .for_each(|cell| cell.step(&mut self.rng, &c));
     }
 }

@@ -16,8 +16,8 @@ impl Network {
         Self { layer_list }
     }
 
-    pub fn feed(&self, input_list: Vec<f32>) -> Vec<f32> {
-        let mut output_list = self.layer_list[0].feed(&input_list);
+    pub fn feed(&self, input_list: &[f32]) -> Vec<f32> {
+        let mut output_list = self.layer_list[0].feed(input_list);
         self.layer_list
             .iter()
             .skip(1)
@@ -60,7 +60,7 @@ mod tests {
             let layer_list = vec![layer_1, layer_2];
             let network = crate::network::Network::new(layer_list);
             let input_list = vec![2.0, 2.0, 2.0];
-            let output_list = network.feed(input_list);
+            let output_list = network.feed(&input_list);
             assert_eq!(output_list, vec![96.0, 96.0]);
         }
     }
