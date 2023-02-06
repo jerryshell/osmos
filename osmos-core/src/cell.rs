@@ -1,4 +1,3 @@
-#[derive(Clone)]
 pub struct Cell {
     pub position: nalgebra::Point2<f32>,
     pub acceleration: nalgebra::Vector2<f32>,

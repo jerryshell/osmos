@@ -1,4 +1,3 @@
-#[derive(Clone)]
 pub struct Sensor {
     pub range: f32,
     pub data_list: Vec<f32>,

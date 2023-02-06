@@ -1,4 +1,3 @@
-#[derive(Clone)]
 pub struct Layer {
     pub neuron_list: Vec<crate::neuron::Neuron>,
 }

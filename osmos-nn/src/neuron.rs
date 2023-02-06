@@ -1,4 +1,3 @@
-#[derive(Clone)]
 pub struct Neuron {
     pub bias: f32,
     pub weight_list: Vec<f32>,
