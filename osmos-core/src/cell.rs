@@ -33,7 +33,6 @@ impl Cell {
 
     pub fn step(&mut self, rng: &mut rand::rngs::ThreadRng, cell_list: &[Cell]) {
         self.process_network(cell_list);
-        self.process_move(rng);
     }
 
     pub fn process_network(&mut self, cell_list: &[Cell]) {
@@ -44,25 +43,6 @@ impl Cell {
         self.network_output = nn_output.clone();
         // -0.5~0.5 => -0.0005~0.0005
         self.acceleration = nalgebra::Vector2::new(nn_output[0] / 1000.0, nn_output[1] / 1000.0);
-    }
-
-    pub fn process_move(&mut self, rng: &mut rand::rngs::ThreadRng) {
-        // let rate = 0.0005;
-        // self.acceleration = nalgebra::Vector2::new(
-        //     rand::Rng::gen_range(rng, -rate..=rate),
-        //     rand::Rng::gen_range(rng, -rate..=rate),
-        // );
-
-        self.velocity += self.acceleration;
-        self.velocity = nalgebra::clamp(
-            self.velocity,
-            nalgebra::Vector2::new(-self.velocity_max_magnitude, -self.velocity_max_magnitude),
-            nalgebra::Vector2::new(self.velocity_max_magnitude, self.velocity_max_magnitude),
-        );
-
-        self.position += self.velocity;
-        self.position.x = nalgebra::wrap(self.position.x, 0.0, 1.0);
-        self.position.y = nalgebra::wrap(self.position.y, 0.0, 1.0);
     }
 }
 

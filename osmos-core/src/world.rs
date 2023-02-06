@@ -13,6 +13,7 @@ impl World {
     }
 
     pub fn step(&mut self) {
+        crate::system::movement::process(&mut self.cell_list);
         let c = self.cell_list.clone();
         self.cell_list
             .iter_mut()
