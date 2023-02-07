@@ -32,7 +32,13 @@ osmos
 ├── osmos-core # 核心数据结构
 ├── osmos-ga   # 遗传算法
 ├── osmos-nn   # 神经网络
-├── osmos-sim  # 进化模拟器，驱动全局数据
+├── osmos-sim  # 进化模拟器，使用类似 ECS 的模式驱动全局数据
+│   └── src
+│       └── system
+│           ├── collision.rs # 碰撞系统
+│           ├── movement.rs  # 移动系统
+│           ├── network.rs   # 神经网络系统
+│           └── sensor.rs    # 感知器系统
 ├── osmos-wasm # 将模拟器编译为 WASM，代理模式
 └── osmos-web  # Web UI，通过导入 WASM 启动模拟器，并将模拟器的数据渲染到 Canvas 中
 ```
