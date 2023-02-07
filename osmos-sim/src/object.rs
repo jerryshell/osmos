@@ -13,3 +13,9 @@ impl Object {
         }
     }
 }
+
+impl osmos_ga::Fitness for Object {
+    fn fitness(&self) -> isize {
+        self.cell.energy as isize
+    }
+}

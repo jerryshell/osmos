@@ -35,6 +35,10 @@ impl Simulator {
     pub fn step(&mut self) {
         self.simulator.step()
     }
+
+    pub fn selection(&mut self) -> usize {
+        self.simulator.selection()
+    }
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]

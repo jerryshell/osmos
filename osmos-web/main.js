@@ -27,6 +27,10 @@ const render = () => {
   if (stepCount < 2000) {
     requestAnimationFrame(render)
   } else {
+    const selectionIndex = sim.selection()
+    console.log('selectionIndex', selectionIndex)
+    const selectObject = objectList[selectionIndex]
+    console.log('selectObject', selectObject)
     sim = new osmos.Simulator()
     requestAnimationFrame(render)
   }

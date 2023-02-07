@@ -26,4 +26,22 @@ impl Simulator {
         crate::system::movement::process(&mut self.object_list);
         crate::system::collision::process(&mut self.object_list);
     }
+
+    pub fn selection(&mut self) -> usize {
+        osmos_ga::selection(&mut self.rng, &self.object_list)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    mod selection {
+        #[test]
+        fn test() {
+            let mut sim = crate::simulator::Simulator::default();
+            for _ in 0..10 {
+                sim.selection();
+                sim.step();
+            }
+        }
+    }
 }
