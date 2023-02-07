@@ -1,7 +1,7 @@
 import './style.css'
 import * as osmos from './osmos-wasm'
 
-const sim = new osmos.Simulator()
+let sim = new osmos.Simulator()
 
 const canvasElement = document.getElementById('canvas')
 const width = 1000
@@ -22,7 +22,14 @@ const render = () => {
     ctx.fill();
   }
   sim.step()
-  requestAnimationFrame(render)
+  const stepCount = sim.getStepCount()
+  console.log('stepCount', stepCount)
+  if (stepCount < 2000) {
+    requestAnimationFrame(render)
+  } else {
+    sim = new osmos.Simulator()
+    requestAnimationFrame(render)
+  }
   // console.table(objectList[0].network_output)
 }
 

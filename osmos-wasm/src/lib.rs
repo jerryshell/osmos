@@ -27,6 +27,11 @@ impl Simulator {
         serde_wasm_bindgen::to_value(&object_list).unwrap()
     }
 
+    #[wasm_bindgen::prelude::wasm_bindgen(js_name = getStepCount)]
+    pub fn get_step_count(&self) -> usize {
+        self.simulator.step_count
+    }
+
     pub fn step(&mut self) {
         self.simulator.step()
     }
