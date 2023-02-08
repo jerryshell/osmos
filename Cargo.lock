@@ -165,8 +165,6 @@ dependencies = [
 name = "osmos-ga"
 version = "0.1.0"
 dependencies = [
- "osmos-core",
- "osmos-nn",
  "rand",
 ]
 
