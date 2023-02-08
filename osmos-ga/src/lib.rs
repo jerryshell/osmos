@@ -30,10 +30,10 @@ pub fn crossover<T: Gene>(rng: &mut rand::rngs::ThreadRng, parent_a: &T, parent_
     child_gene_data_list
 }
 
-pub fn mutation<T: Gene>(object: &T) -> Vec<f32> {
-    todo!()
-}
+// pub fn mutation<T: Gene>(object: &T) -> Vec<f32> {
+//     todo!()
+// }
 
-pub fn evole<T: Score + Gene>(object_list: &[T]) {
-    todo!()
-}
+// pub fn evole<T: Score + Gene>(object_list: &[T]) {
+//     todo!()
+// }

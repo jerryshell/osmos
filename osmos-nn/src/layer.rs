@@ -9,11 +9,11 @@ impl Layer {
 
     pub fn random(
         rng: &mut rand::rngs::ThreadRng,
-        weight_list_size_per_neuron: usize,
+        weight_list_len_per_neuron: usize,
         neuron_count: usize,
     ) -> Self {
         let neuron_list = (0..neuron_count)
-            .map(|_| crate::neuron::Neuron::random(rng, weight_list_size_per_neuron))
+            .map(|_| crate::neuron::Neuron::random(rng, weight_list_len_per_neuron))
             .collect::<Vec<crate::neuron::Neuron>>();
         Self { neuron_list }
     }

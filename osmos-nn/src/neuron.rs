@@ -11,9 +11,9 @@ impl Neuron {
         }
     }
 
-    pub fn random(rng: &mut rand::rngs::ThreadRng, weight_list_size: usize) -> Self {
+    pub fn random(rng: &mut rand::rngs::ThreadRng, weight_list_len: usize) -> Self {
         let bias = rand::Rng::gen_range(rng, -1.0..=1.0);
-        let weight_list = (0..weight_list_size)
+        let weight_list = (0..weight_list_len)
             .map(|_| rand::Rng::gen_range(rng, -1.0..=1.0))
             .collect::<Vec<f32>>();
         Self { bias, weight_list }

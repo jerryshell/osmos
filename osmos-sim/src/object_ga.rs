@@ -16,8 +16,15 @@ fn get_gene_data_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> Vec<f32>
     gene_data_list
 }
 
-fn build_neuron_from_gene_data_list(gene_data_list: &[f32]) -> osmos_nn::neuron::Neuron {
-    osmos_nn::neuron::Neuron::new(gene_data_list[0], &gene_data_list[1..])
+fn build_neuron_from_gene_data_iter(
+    weight_list_len: usize,
+    gene_data_iter: &mut impl Iterator<Item = f32>,
+) -> osmos_nn::neuron::Neuron {
+    let bias = gene_data_iter.next().unwrap();
+    let weight_list = (0..weight_list_len)
+        .map(|_| gene_data_iter.next().unwrap())
+        .collect::<Vec<f32>>();
+    osmos_nn::neuron::Neuron::new(bias, &weight_list)
 }
 
 fn get_gene_data_list_from_layer(layer: &osmos_nn::layer::Layer) -> Vec<f32> {
@@ -28,18 +35,13 @@ fn get_gene_data_list_from_layer(layer: &osmos_nn::layer::Layer) -> Vec<f32> {
         .collect::<Vec<f32>>()
 }
 
-fn build_layer_from_gene_data_list(
+fn build_layer_from_gene_data_iter(
+    weight_list_len_per_neuron: usize,
     neuron_count: usize,
-    gene_data_list: &[f32],
+    gene_data_iter: &mut impl Iterator<Item = f32>,
 ) -> osmos_nn::layer::Layer {
-    let gene_data_list_len_per_neuron = gene_data_list.len() / neuron_count;
     let neuron_list = (0..neuron_count)
-        .map(|n| {
-            build_neuron_from_gene_data_list(
-                &gene_data_list
-                    [n * gene_data_list_len_per_neuron..(n + 1) * gene_data_list_len_per_neuron],
-            )
-        })
+        .map(|_| build_neuron_from_gene_data_iter(weight_list_len_per_neuron, gene_data_iter))
         .collect::<Vec<osmos_nn::neuron::Neuron>>();
     osmos_nn::layer::Layer::new(neuron_list)
 }
@@ -56,25 +58,11 @@ pub fn build_network_from_gene_data_list(
     layer_topology: &[usize],
     gene_data_list: &[f32],
 ) -> osmos_nn::network::Network {
-    let gene_data_list_len_per_layer = layer_topology
+    let mut gene_data_iter = gene_data_list.iter().copied();
+    let layer_list = layer_topology
         .windows(2)
-        .map(|window| window[0] * window[1] + window[1])
-        .collect::<Vec<usize>>();
-    let layer_count = gene_data_list_len_per_layer.len();
-    let layer_list = (0..layer_count)
-        .map(|layer_index| {
-            let index_begin = gene_data_list_len_per_layer[0..layer_index]
-                .iter()
-                .sum::<usize>();
-            let index_end = gene_data_list_len_per_layer[0..=layer_index]
-                .iter()
-                .sum::<usize>();
-            build_layer_from_gene_data_list(
-                layer_topology[layer_index + 1],
-                &gene_data_list[index_begin..index_end],
-            )
-        })
-        .collect::<Vec<osmos_nn::layer::Layer>>();
+        .map(|window| build_layer_from_gene_data_iter(window[0], window[1], &mut gene_data_iter))
+        .collect();
     osmos_nn::network::Network::new(layer_list)
 }
 

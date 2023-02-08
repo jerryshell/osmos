@@ -123,7 +123,7 @@ mod tests {
                 );
             }
         }
-        mod danger_ul {
+        mod danger_lu {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
@@ -143,7 +143,7 @@ mod tests {
                 )
             }
         }
-        mod danger_ur {
+        mod danger_ru {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
@@ -163,7 +163,7 @@ mod tests {
                 )
             }
         }
-        mod danger_dl {
+        mod danger_ld {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
@@ -183,7 +183,7 @@ mod tests {
                 )
             }
         }
-        mod safe_dl {
+        mod safe_ld {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();

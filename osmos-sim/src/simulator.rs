@@ -39,8 +39,8 @@ mod tests {
         fn test() {
             let mut sim = crate::simulator::Simulator::default();
             for _ in 0..10 {
-                sim.selection();
                 sim.step();
+                sim.selection();
             }
         }
     }
