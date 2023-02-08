@@ -16,7 +16,7 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
             );
             let energy_sum = object_list[current_object_index].cell.energy
                 + object_list[other_object_index].cell.energy;
-            if distance >= energy_sum as f32 / 1000.0 {
+            if distance >= energy_sum as f64 / 1000.0 {
                 continue;
             }
             if object_list[current_object_index].cell.energy

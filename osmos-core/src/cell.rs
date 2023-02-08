@@ -1,8 +1,8 @@
 pub struct Cell {
-    pub position: nalgebra::Point2<f32>,
-    pub acceleration: nalgebra::Vector2<f32>,
-    pub velocity: nalgebra::Vector2<f32>,
-    pub velocity_max_magnitude: f32,
+    pub position: nalgebra::Point2<f64>,
+    pub acceleration: nalgebra::Vector2<f64>,
+    pub velocity: nalgebra::Vector2<f64>,
+    pub velocity_max_magnitude: f64,
     pub energy: usize,
     pub sensor: crate::sensor::Sensor,
 }

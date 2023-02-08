@@ -15,6 +15,6 @@ pub fn process(object_list: &mut [crate::object::Object]) {
     }
 }
 
-// fn sigmoid(x: f32) -> f32 {
-//     1.0 / (1.0 + std::f32::consts::E.powf(-x))
+// fn sigmoid(x: f64) -> f64 {
+//     1.0 / (1.0 + std::f64::consts::E.powf(-x))
 // }

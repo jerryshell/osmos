@@ -15,7 +15,7 @@ impl Network {
         Self { layer_list }
     }
 
-    pub fn feed(&self, input_list: &[f32]) -> Vec<f32> {
+    pub fn feed(&self, input_list: &[f64]) -> Vec<f64> {
         let mut output_list = self.layer_list[0].feed(input_list);
         self.layer_list
             .iter()

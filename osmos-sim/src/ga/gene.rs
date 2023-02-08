@@ -1,4 +1,4 @@
-pub type GeneList = Vec<f32>;
+pub type GeneList = Vec<f64>;
 
 impl crate::object::Object {
     pub fn get_gene_list(&self) -> GeneList {
@@ -14,7 +14,7 @@ fn get_gene_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> GeneList {
 
 fn build_neuron_from_gene_data_iter(
     weight_list_len: usize,
-    gene_data_iter: &mut impl Iterator<Item = f32>,
+    gene_data_iter: &mut impl Iterator<Item = f64>,
 ) -> osmos_nn::neuron::Neuron {
     let bias = gene_data_iter.next().unwrap();
     let weight_list = (0..weight_list_len)
@@ -34,7 +34,7 @@ fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> GeneList {
 fn build_layer_from_gene_data_iter(
     weight_list_len_per_neuron: usize,
     neuron_count: usize,
-    gene_data_iter: &mut impl Iterator<Item = f32>,
+    gene_data_iter: &mut impl Iterator<Item = f64>,
 ) -> osmos_nn::layer::Layer {
     let neuron_list = (0..neuron_count)
         .map(|_| build_neuron_from_gene_data_iter(weight_list_len_per_neuron, gene_data_iter))
@@ -52,7 +52,7 @@ fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> GeneList 
 
 pub fn build_network_from_gene_list(
     layer_topology: &[usize],
-    gene_list: &[f32],
+    gene_list: &[f64],
 ) -> osmos_nn::network::Network {
     let mut gene_data_iter = gene_list.iter().copied();
     let layer_list = layer_topology

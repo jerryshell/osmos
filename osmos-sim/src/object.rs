@@ -1,7 +1,7 @@
 pub struct Object {
     pub cell: osmos_core::cell::Cell,
     pub network: osmos_nn::network::Network,
-    pub network_output: Vec<f32>,
+    pub network_output: Vec<f64>,
 }
 
 impl Object {

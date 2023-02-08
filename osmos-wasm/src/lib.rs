@@ -43,10 +43,10 @@ impl Simulator {
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Object {
-    pub x: f32,
-    pub y: f32,
+    pub x: f64,
+    pub y: f64,
     pub energy: usize,
-    pub network_output: Vec<f32>,
+    pub network_output: Vec<f64>,
 }
 
 impl From<&osmos_sim::object::Object> for Object {
