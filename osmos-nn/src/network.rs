@@ -49,12 +49,12 @@ mod tests {
         #[test]
         fn test() {
             let layer_1 = crate::layer::Layer::new(vec![
-                crate::neuron::Neuron::new(1.0, vec![2.0, 3.0, 4.0]),
-                crate::neuron::Neuron::new(1.0, vec![2.0, 3.0, 4.0]),
+                crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]),
+                crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]),
             ]);
             let layer_2 = crate::layer::Layer::new(vec![
-                crate::neuron::Neuron::new(1.0, vec![2.0, 3.0]),
-                crate::neuron::Neuron::new(1.0, vec![2.0, 3.0]),
+                crate::neuron::Neuron::new(1.0, &[2.0, 3.0]),
+                crate::neuron::Neuron::new(1.0, &[2.0, 3.0]),
             ]);
             let layer_list = vec![layer_1, layer_2];
             let network = crate::network::Network::new(layer_list);

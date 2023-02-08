@@ -50,8 +50,8 @@ mod tests {
         #[test]
         fn test() {
             let neuron_list = vec![
-                crate::neuron::Neuron::new(1.0, vec![2.0, 3.0, 4.0]),
-                crate::neuron::Neuron::new(1.0, vec![2.0, 3.0, 4.0]),
+                crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]),
+                crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]),
             ];
             let layer = crate::layer::Layer::new(neuron_list);
             let input_list = vec![2.0, 2.0, 2.0];

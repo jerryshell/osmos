@@ -4,8 +4,11 @@ pub struct Neuron {
 }
 
 impl Neuron {
-    pub fn new(bias: f32, weight_list: Vec<f32>) -> Self {
-        Self { bias, weight_list }
+    pub fn new(bias: f32, weight_list: &[f32]) -> Self {
+        Self {
+            bias,
+            weight_list: weight_list.to_vec(),
+        }
     }
 
     pub fn random(rng: &mut rand::rngs::ThreadRng, weight_list_size: usize) -> Self {
@@ -45,7 +48,7 @@ mod tests {
     mod feed {
         #[test]
         fn test() {
-            let neuron = crate::neuron::Neuron::new(1.0, vec![2.0, 3.0, 4.0]);
+            let neuron = crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]);
             let input_list = vec![2.0, 2.0, 2.0];
             let output = neuron.feed(&input_list);
             assert!(output == 19.0);

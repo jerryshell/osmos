@@ -13,9 +13,3 @@ impl Object {
         }
     }
 }
-
-impl osmos_ga::Score for Object {
-    fn score(&self) -> isize {
-        self.cell.energy as isize
-    }
-}
