@@ -12,4 +12,15 @@ impl Object {
             network_output: vec![],
         }
     }
+
+    pub fn from_network(
+        rng: &mut rand::rngs::ThreadRng,
+        network: osmos_nn::network::Network,
+    ) -> Self {
+        Self {
+            cell: osmos_core::cell::Cell::random(rng),
+            network,
+            network_output: vec![],
+        }
+    }
 }
