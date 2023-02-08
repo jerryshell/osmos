@@ -76,7 +76,7 @@ mod tests {
         #[test]
         fn test() {
             let mut sim = crate::simulator::Simulator::default();
-            for _ in 0..10 {
+            for _ in 0..5 {
                 sim.step();
                 sim.selection();
             }

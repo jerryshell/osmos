@@ -13,6 +13,12 @@ speedDownBtn.onclick = () => {
   speed -= 1
   speedTextElement.textContent = `Speed: ${speed}x`
 }
+const speedInput = document.getElementById('speedInput')
+const setSpeedBtn = document.getElementById('setSpeedBtn')
+setSpeedBtn.onclick = () => {
+  speed = speedInput.value
+  speedTextElement.textContent = `Speed: ${speed}x`
+}
 
 let sim = new osmos.Simulator()
 

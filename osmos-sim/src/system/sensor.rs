@@ -183,7 +183,7 @@ mod tests {
                 )
             }
         }
-        mod safe_ld {
+        mod food_ld {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
