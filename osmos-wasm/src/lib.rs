@@ -46,7 +46,6 @@ pub struct Object {
     pub x: f64,
     pub y: f64,
     pub energy: usize,
-    pub network_output: Vec<f64>,
 }
 
 impl From<&osmos_sim::object::Object> for Object {
@@ -55,7 +54,6 @@ impl From<&osmos_sim::object::Object> for Object {
             x: object.cell.position.x,
             y: object.cell.position.y,
             energy: object.cell.energy,
-            network_output: object.network_output.clone(),
         }
     }
 }

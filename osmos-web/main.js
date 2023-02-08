@@ -23,19 +23,8 @@ const render = () => {
   }
   sim.step()
   const stepCount = sim.getStepCount()
-  console.log('stepCount', stepCount)
-  // if (stepCount < 2000) {
+  console.log('stepCount', stepCount, 'objectList.lenght', objectList.length)
   requestAnimationFrame(render)
-  // }
-  // else {
-  //   const selectionIndex = sim.selection()
-  //   console.log('selectionIndex', selectionIndex)
-  //   const selectObject = objectList[selectionIndex]
-  //   console.log('selectObject', selectObject)
-  //   sim = new osmos.Simulator()
-  //   requestAnimationFrame(render)
-  // }
-  // console.table(objectList[0].network_output)
 }
 
 render()
