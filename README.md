@@ -30,10 +30,10 @@ yarn dev
 ```
 osmos
 ├── osmos-core # 核心数据结构
-├── osmos-ga   # 遗传算法
 ├── osmos-nn   # 神经网络
 ├── osmos-sim  # 进化模拟器，使用类似 ECS 的模式驱动全局数据
 │   └── src
+│       ├── ga # 遗传算法
 │       └── system
 │           ├── collision.rs # 碰撞系统
 │           ├── movement.rs  # 移动系统

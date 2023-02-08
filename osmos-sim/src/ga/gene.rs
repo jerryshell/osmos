@@ -1,19 +1,15 @@
-impl osmos_ga::Score for crate::object::Object {
-    fn score(&self) -> isize {
-        self.cell.energy as isize
+pub type GeneList = Vec<f32>;
+
+impl crate::object::Object {
+    pub fn get_gene_list(&self) -> GeneList {
+        get_gene_list_from_network(&self.network)
     }
 }
 
-impl osmos_ga::Gene for crate::object::Object {
-    fn get_gene_data_list(&self) -> Vec<f32> {
-        get_gene_data_list_from_network(&self.network)
-    }
-}
-
-fn get_gene_data_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> Vec<f32> {
-    let mut gene_data_list = vec![neuron.bias];
-    gene_data_list.append(&mut neuron.weight_list.clone());
-    gene_data_list
+fn get_gene_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> GeneList {
+    let mut gene_list = vec![neuron.bias];
+    gene_list.append(&mut neuron.weight_list.clone());
+    gene_list
 }
 
 fn build_neuron_from_gene_data_iter(
@@ -23,16 +19,16 @@ fn build_neuron_from_gene_data_iter(
     let bias = gene_data_iter.next().unwrap();
     let weight_list = (0..weight_list_len)
         .map(|_| gene_data_iter.next().unwrap())
-        .collect::<Vec<f32>>();
+        .collect::<GeneList>();
     osmos_nn::neuron::Neuron::new(bias, &weight_list)
 }
 
-fn get_gene_data_list_from_layer(layer: &osmos_nn::layer::Layer) -> Vec<f32> {
+fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> GeneList {
     layer
         .neuron_list
         .iter()
-        .flat_map(get_gene_data_list_from_neuron)
-        .collect::<Vec<f32>>()
+        .flat_map(get_gene_list_from_neuron)
+        .collect::<GeneList>()
 }
 
 fn build_layer_from_gene_data_iter(
@@ -46,19 +42,19 @@ fn build_layer_from_gene_data_iter(
     osmos_nn::layer::Layer::new(neuron_list)
 }
 
-fn get_gene_data_list_from_network(network: &osmos_nn::network::Network) -> Vec<f32> {
+fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> GeneList {
     network
         .layer_list
         .iter()
-        .flat_map(get_gene_data_list_from_layer)
-        .collect::<Vec<f32>>()
+        .flat_map(get_gene_list_from_layer)
+        .collect::<GeneList>()
 }
 
-pub fn build_network_from_gene_data_list(
+pub fn build_network_from_gene_list(
     layer_topology: &[usize],
-    gene_data_list: &[f32],
+    gene_list: &[f32],
 ) -> osmos_nn::network::Network {
-    let mut gene_data_iter = gene_data_list.iter().copied();
+    let mut gene_data_iter = gene_list.iter().copied();
     let layer_list = layer_topology
         .windows(2)
         .map(|window| build_layer_from_gene_data_iter(window[0], window[1], &mut gene_data_iter))
@@ -68,29 +64,28 @@ pub fn build_network_from_gene_data_list(
 
 #[cfg(test)]
 mod tests {
-    mod get_gene_data_list_from_network {
+    mod get_gene_list_from_network {
         #[test]
         fn test() {
             let mut rng = rand::thread_rng();
             let network = osmos_nn::network::Network::random(&mut rng, &[4, 6, 2]);
-            let gene_data_list = crate::object_ga::get_gene_data_list_from_network(&network);
-            assert!(gene_data_list.len() == (4 * 6 + 6) + (6 * 2 + 2));
+            let gene_list = crate::ga::gene::get_gene_list_from_network(&network);
+            assert!(gene_list.len() == (4 * 6 + 6) + (6 * 2 + 2));
         }
     }
 
-    mod build_network_from_gene_data_list {
+    mod build_network_from_gene_list {
         #[test]
         fn test() {
             let mut rng = rand::thread_rng();
             let network = osmos_nn::network::Network::random(&mut rng, &[4, 6, 2]);
-            let gene_data_list = crate::object_ga::get_gene_data_list_from_network(&network);
+            let gene_list = crate::ga::gene::get_gene_list_from_network(&network);
 
-            let network_2 =
-                crate::object_ga::build_network_from_gene_data_list(&[4, 6, 2], &gene_data_list);
+            let network_2 = crate::ga::gene::build_network_from_gene_list(&[4, 6, 2], &gene_list);
 
             assert_eq!(
-                gene_data_list,
-                crate::object_ga::get_gene_data_list_from_network(&network_2)
+                gene_list,
+                crate::ga::gene::get_gene_list_from_network(&network_2)
             );
         }
     }

@@ -1,5 +1,3 @@
-use crate::object_ga;
-
 pub struct Simulator {
     pub rng: rand::rngs::ThreadRng,
     pub object_count: usize,
@@ -41,7 +39,7 @@ impl Simulator {
     }
 
     pub fn selection(&mut self) -> usize {
-        osmos_ga::selection(&mut self.rng, &self.object_list)
+        crate::ga::selection::selection(&mut self.rng, &self.object_list)
     }
 
     fn evolve(&mut self) {
@@ -51,16 +49,19 @@ impl Simulator {
                 let parent_b_index = self.selection();
                 let parent_a = &self.object_list[parent_a_index];
                 let parent_b = &self.object_list[parent_b_index];
+                let parent_a_gene_list = parent_a.get_gene_list();
+                let parent_b_gene_list = parent_b.get_gene_list();
 
-                let mut child_gene_data_list =
-                    osmos_ga::crossover(&mut self.rng, parent_a, parent_b);
-
-                osmos_ga::mutation(&mut self.rng, 0.01, 0.3, &mut child_gene_data_list);
-
-                let child_network = object_ga::build_network_from_gene_data_list(
-                    &[4, 16, 4],
-                    &child_gene_data_list,
+                let mut child_gene_list = crate::ga::crossover::crossover(
+                    &mut self.rng,
+                    &parent_a_gene_list,
+                    &parent_b_gene_list,
                 );
+
+                crate::ga::mutation::mutation(&mut self.rng, 0.01, 0.3, &mut child_gene_list);
+
+                let child_network =
+                    crate::ga::gene::build_network_from_gene_list(&[4, 16, 4], &child_gene_list);
 
                 crate::object::Object::from_network(&mut self.rng, child_network)
             })

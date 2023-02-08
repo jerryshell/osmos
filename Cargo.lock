@@ -162,13 +162,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "osmos-ga"
-version = "0.1.0"
-dependencies = [
- "rand",
-]
-
-[[package]]
 name = "osmos-nn"
 version = "0.1.0"
 dependencies = [
@@ -181,7 +174,6 @@ version = "0.1.0"
 dependencies = [
  "nalgebra",
  "osmos-core",
- "osmos-ga",
  "osmos-nn",
  "rand",
 ]
