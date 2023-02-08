@@ -30,9 +30,27 @@ pub fn crossover<T: Gene>(rng: &mut rand::rngs::ThreadRng, parent_a: &T, parent_
     child_gene_data_list
 }
 
-// pub fn mutation<T: Gene>(object: &T) -> Vec<f32> {
-//     todo!()
-// }
+pub fn mutation<T: Gene>(
+    rng: &mut rand::rngs::ThreadRng,
+    mutate_chance: f64,
+    mutate_coeff: f32,
+    object: &T,
+) -> Vec<f32> {
+    let mut gene_data_list = object.get_gene_data_list();
+    gene_data_list.iter_mut().for_each(|gene| {
+        let mutate_flag = rand::Rng::gen_bool(rng, mutate_chance);
+        if mutate_flag {
+            let sign = if rand::Rng::gen_bool(rng, 0.5) {
+                -1.0
+            } else {
+                1.0
+            };
+
+            *gene += sign * mutate_coeff * rand::Rng::gen::<f32>(rng);
+        }
+    });
+    gene_data_list
+}
 
 // pub fn evole<T: Score + Gene>(object_list: &[T]) {
 //     todo!()
