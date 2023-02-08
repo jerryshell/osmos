@@ -43,8 +43,9 @@ const render = () => {
   for (let i = 0; i < speed; i++) {
     sim.step()
   }
+  const epochCount = sim.getEpochCount()
   const stepCount = sim.getStepCount()
-  console.log('stepCount', stepCount, 'objectList.lenght', objectList.length)
+  console.log('epochCount', epochCount, 'stepCount', stepCount, 'objectList.lenght', objectList.length)
   requestAnimationFrame(render)
 }
 

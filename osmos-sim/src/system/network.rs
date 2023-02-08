@@ -9,7 +9,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
 
         let acc_x = right - left;
         let acc_y = down - up;
-        object.cell.acceleration = nalgebra::Vector2::new(acc_x, acc_y);
+        object.cell.acceleration = nalgebra::Vector2::new(acc_x, acc_y).cap_magnitude(0.0005);
     }
 }
 

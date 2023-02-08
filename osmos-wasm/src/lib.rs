@@ -32,12 +32,13 @@ impl Simulator {
         self.simulator.step_count
     }
 
-    pub fn step(&mut self) {
-        self.simulator.step()
+    #[wasm_bindgen::prelude::wasm_bindgen(js_name = getEpochCount)]
+    pub fn get_epoch_count(&self) -> usize {
+        self.simulator.epoch_count
     }
 
-    pub fn selection(&mut self) -> usize {
-        self.simulator.selection()
+    pub fn step(&mut self) {
+        self.simulator.step()
     }
 }
 

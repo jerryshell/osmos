@@ -140,7 +140,7 @@ mod tests {
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
                     vec![-1.0, 0.0, 0.0, -1.0]
-                )
+                );
             }
         }
         mod danger_ru {
@@ -160,7 +160,7 @@ mod tests {
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
                     vec![-1.0, -1.0, 0.0, 0.0]
-                )
+                );
             }
         }
         mod danger_ld {
@@ -180,7 +180,7 @@ mod tests {
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
                     vec![0.0, 0.0, -1.0, -1.0]
-                )
+                );
             }
         }
         mod food_ld {
@@ -204,7 +204,39 @@ mod tests {
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
                     vec![0.0, 0.0, 1.0, 1.0]
-                )
+                );
+            }
+        }
+        mod normal {
+            #[test]
+            fn test() {
+                let mut rng = rand::thread_rng();
+                let mut object_1 = crate::object::Object::new(&mut rng);
+                object_1.cell.position.x = 0.0;
+                object_1.cell.position.y = 0.0;
+                object_1.cell.energy = 2;
+                let mut object_2 = crate::object::Object::new(&mut rng);
+                object_2.cell.position.x = -0.1;
+                object_2.cell.position.y = 0.1;
+                object_2.cell.energy = 2;
+                let mut object_3 = crate::object::Object::new(&mut rng);
+                object_3.cell.position.x = -0.01;
+                object_3.cell.position.y = 0.01;
+                object_3.cell.energy = 2;
+                let mut object_list = vec![object_1, object_2, object_3];
+                crate::system::sensor::process(&mut object_list);
+                assert_eq!(
+                    object_list[0].cell.sensor.data_list,
+                    vec![0.0, 0.0, 0.0, 0.0]
+                );
+                assert_eq!(
+                    object_list[1].cell.sensor.data_list,
+                    vec![0.0, 0.0, 0.0, 0.0]
+                );
+                assert_eq!(
+                    object_list[2].cell.sensor.data_list,
+                    vec![0.0, 0.0, 0.0, 0.0]
+                );
             }
         }
     }

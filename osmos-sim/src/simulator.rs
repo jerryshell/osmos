@@ -4,6 +4,7 @@ pub struct Simulator {
     pub object_list: Vec<crate::object::Object>,
     pub step_count: usize,
     pub max_step_count_per_epoch: usize,
+    pub epoch_count: usize,
 }
 
 impl Default for Simulator {
@@ -19,6 +20,7 @@ impl Default for Simulator {
             object_list,
             step_count: 0,
             max_step_count_per_epoch: 1000,
+            epoch_count: 0,
         }
     }
 }
@@ -35,6 +37,7 @@ impl Simulator {
         if self.step_count >= self.max_step_count_per_epoch {
             self.evolve();
             self.step_count = 0;
+            self.epoch_count += 1;
         }
     }
 

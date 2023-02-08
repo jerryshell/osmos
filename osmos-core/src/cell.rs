@@ -17,7 +17,7 @@ impl Cell {
             velocity: nalgebra::Vector2::new(0.0, 0.0),
             velocity_max_magnitude: 0.001,
             energy: rand::Rng::gen_range(rng, 1..=2),
-            sensor: crate::sensor::Sensor::new(0.5),
+            sensor: crate::sensor::Sensor::new(0.8),
         }
     }
 }
