@@ -1,5 +1,7 @@
 # Osmos
 
+Demo: [osmos.jerryshell.eu.org](https://osmos.jerryshell.eu.org)
+
 Rust + WASM + 神经网络 + 遗传算法
 
 Bilibili 视频：*TODO*
@@ -51,21 +53,23 @@ osmos
 
 ## Vite WASM Note
 
-1. Install `vite-plugin-wasm`
+1. Install `vite-plugin-wasm` & `vite-plugin-top-level-await`
 
 ```bash
-yarn add -D vite-plugin-wasm
+yarn add -D vite-plugin-wasm vite-plugin-top-level-await 
 ```
 
-2. Edit `vite.config.js` file
+2. Edit `vite.config.js`
 
 ```js
 import { defineConfig } from 'vite'
 import wasm from 'vite-plugin-wasm'
+import topLevelAwait from 'vite-plugin-top-level-await'
 
 export default defineConfig({
     plugins: [
         wasm(),
+        topLevelAwait(),
     ]
 })
 ```
