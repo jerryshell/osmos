@@ -10,11 +10,13 @@
 
 <body>
   <div id="app">
-    <p id="speedText">Speed: 1x</p>
-    <input id="speedInput" type="number" />
+    <div id="info">
+      <span id="speedText">Speed: 1</span>
+      <span id="epochText">Epoch: 0</span>
+    </div>
+    <input id="speedInput" type="number" placeholder="Speed" />
     <button id="setSpeedBtn">Set Speed</button>
     <button id="resetSpeedBtn">Reset Speed</button>
-    <p id="epochText">Epoch: 0</p>
     <br />
     <canvas id="canvas"></canvas>
   </div>

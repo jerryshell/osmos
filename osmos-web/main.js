@@ -7,12 +7,12 @@ const speedInput = document.getElementById('speedInput')
 const setSpeedBtn = document.getElementById('setSpeedBtn')
 setSpeedBtn.onclick = () => {
   speed = speedInput.value
-  speedText.textContent = `Speed: ${speed}x`
+  speedText.textContent = `Speed: ${speed}`
 }
 const resetSpeedBtn = document.getElementById('resetSpeedBtn')
 resetSpeedBtn.onclick = () => {
   speed = 1
-  speedText.textContent = `Speed: ${speed}x`
+  speedText.textContent = `Speed: ${speed}`
 }
 
 const epochText = document.getElementById('epochText')
@@ -32,7 +32,7 @@ const render = () => {
   const objectList = sim.getObjectList()
   for (let object of objectList) {
     ctx.beginPath();
-    ctx.fillStyle = 'rgb(0,255,128)'
+    ctx.fillStyle = '#00A97F'
     // console.table(object)
     ctx.arc(object.x * width, object.y * height, object.energy, 0, 2 * Math.PI);
     ctx.fill();
