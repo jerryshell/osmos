@@ -2,18 +2,20 @@ import './style.css'
 import * as osmos from './osmos-wasm'
 
 let speed = 1
-const speedTextElement = document.getElementById('speedText')
+const speedText = document.getElementById('speedText')
 const speedInput = document.getElementById('speedInput')
 const setSpeedBtn = document.getElementById('setSpeedBtn')
 setSpeedBtn.onclick = () => {
   speed = speedInput.value
-  speedTextElement.textContent = `Speed: ${speed}x`
+  speedText.textContent = `Speed: ${speed}x`
 }
 const resetSpeedBtn = document.getElementById('resetSpeedBtn')
 resetSpeedBtn.onclick = () => {
   speed = 1
-  speedTextElement.textContent = `Speed: ${speed}x`
+  speedText.textContent = `Speed: ${speed}x`
 }
+
+const epochText = document.getElementById('epochText')
 
 let sim = new osmos.Simulator()
 
@@ -41,6 +43,7 @@ const render = () => {
   const epochCount = sim.getEpochCount()
   const stepCount = sim.getStepCount()
   console.log('epochCount', epochCount, 'stepCount', stepCount, 'objectList.lenght', objectList.length)
+  epochText.textContent = `Epoch: ${epochCount}`
   requestAnimationFrame(render)
 }
 
