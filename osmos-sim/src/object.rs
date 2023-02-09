@@ -7,7 +7,7 @@ impl Object {
     pub fn new(rng: &mut rand::rngs::ThreadRng) -> Self {
         Self {
             cell: osmos_core::cell::Cell::random(rng),
-            network: osmos_nn::network::Network::random(rng, &[4, 16, 4]),
+            network: osmos_nn::network::Network::random(rng, &[6, 16, 4]),
         }
     }
 

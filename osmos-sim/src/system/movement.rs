@@ -1,8 +1,8 @@
 pub fn process(object_list: &mut [crate::object::Object]) {
     for object in object_list {
-        if object.cell.energy == 1 {
-            object.cell.acceleration = nalgebra::Vector2::new(0.0, 0.0);
-        }
+        // if object.cell.energy == 1 {
+        //     object.cell.acceleration = nalgebra::Vector2::new(0.0, 0.0);
+        // }
         object.cell.velocity += object.cell.acceleration;
         object.cell.velocity = object
             .cell
