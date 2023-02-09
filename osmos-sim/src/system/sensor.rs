@@ -21,20 +21,6 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             .collect::<Vec<usize>>();
 
         // in_distance_other_object_index_list order by distance desc
-        // old code:
-        // in_distance_other_object_index_list.sort_by(|&a_index, &b_index| {
-        //     let a_distence = nalgebra::distance(
-        //         &object_list[a_index].cell.position,
-        //         &object_list[current_object_index].cell.position,
-        //     );
-        //     let b_distence = nalgebra::distance(
-        //         &object_list[b_index].cell.position,
-        //         &object_list[current_object_index].cell.position,
-        //     );
-        //     b_distence.partial_cmp(&a_distence).unwrap()
-        // });
-        // ---
-        // use sort_by_cached_key() optimize
         in_distance_other_object_index_list.sort_by_cached_key(|&other_object_index| {
             let distance = nalgebra::distance(
                 &object_list[other_object_index].cell.position,
@@ -44,60 +30,52 @@ pub fn process(object_list: &mut [crate::object::Object]) {
         });
 
         // set sensor_data_list by energy and position
-        // danger -1
-        // equal  -0.5
-        // normal 0
-        // food   1
+        // danger: -1.0 * other_object_energy / distance
+        // equal:  -0.5 * other_object_energy / distance
+        // normal:  0.0
+        // food:    1.0 * other_object_energy / distance
         // [up, right, down, left]
         let mut sensor_data_list = vec![0.0, 0.0, 0.0, 0.0];
         in_distance_other_object_index_list
             .iter()
             .for_each(|&other_object_index| {
-                let status = match other_object_index {
-                    other_object_index
-                        if object_list[other_object_index].cell.energy
-                            > object_list[current_object_index].cell.energy =>
-                    {
-                        -1.0
-                    }
-                    other_object_index
-                        if object_list[other_object_index].cell.energy
-                            == object_list[current_object_index].cell.energy =>
-                    {
-                        -0.5
-                    }
-                    other_object_index
-                        if object_list[other_object_index].cell.energy
-                            < object_list[current_object_index].cell.energy =>
-                    {
-                        1.0
-                    }
+                let distance = nalgebra::distance(
+                    &object_list[other_object_index].cell.position,
+                    &object_list[current_object_index].cell.position,
+                );
+
+                let current_object_energy = object_list[current_object_index].cell.energy;
+                let other_object_energy = object_list[other_object_index].cell.energy;
+
+                let status = match current_object_energy {
+                    _ if other_object_energy > current_object_energy => -1.0,
+                    _ if other_object_energy == current_object_energy => -0.5,
+                    _ if other_object_energy < current_object_energy => 1.0,
                     _ => 0.0,
-                };
-                if object_list[other_object_index].cell.position.y
-                    < object_list[current_object_index].cell.position.y
-                {
-                    // up
+                } * other_object_energy as f64
+                    / distance;
+                // let status = (current_object_energy - other_object_energy) as f64;
+
+                let current_object_position = object_list[current_object_index].cell.position;
+                let other_object_position = object_list[other_object_index].cell.position;
+
+                // up
+                if other_object_position.y < current_object_position.y {
                     sensor_data_list[0] = status;
                 }
-                if object_list[other_object_index].cell.position.x
-                    > object_list[current_object_index].cell.position.x
-                {
-                    // right
+                // right
+                if other_object_position.x > current_object_position.x {
                     sensor_data_list[1] = status;
                 }
-                if object_list[other_object_index].cell.position.y
-                    > object_list[current_object_index].cell.position.y
-                {
-                    // down
+                // down
+                if other_object_position.y > current_object_position.y {
                     sensor_data_list[2] = status;
                 }
-                if object_list[other_object_index].cell.position.x
-                    < object_list[current_object_index].cell.position.x
-                {
-                    // left
+                // left
+                if other_object_position.x < current_object_position.x {
                     sensor_data_list[3] = status;
                 }
+
                 object_list[current_object_index].cell.sensor.data_list = sensor_data_list.clone();
             });
     }
@@ -122,7 +100,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, -1.0, -1.0, 0.0]
+                    vec![0.0, -2.0, -2.0, 0.0]
                 );
                 assert_eq!(
                     object_list[1].cell.sensor.data_list,
@@ -146,7 +124,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![-1.0, 0.0, 0.0, -1.0]
+                    vec![-2.0, 0.0, 0.0, -2.0]
                 );
             }
         }
@@ -166,7 +144,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![-1.0, -1.0, 0.0, 0.0]
+                    vec![-2.0, -2.0, 0.0, 0.0]
                 );
             }
         }
@@ -186,7 +164,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, 0.0, -1.0, -1.0]
+                    vec![0.0, 0.0, -2.0, -2.0]
                 );
             }
         }
@@ -234,15 +212,15 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, 0.0, -0.5, -0.5]
+                    vec![0.0, 0.0, -1.0, -1.0]
                 );
                 assert_eq!(
                     object_list[1].cell.sensor.data_list,
-                    vec![-0.5, -0.5, 0.0, 0.0]
+                    vec![-1.0, -1.0, 0.0, 0.0]
                 );
                 assert_eq!(
                     object_list[2].cell.sensor.data_list,
-                    vec![-0.5, -0.5, -0.5, -0.5]
+                    vec![-1.0, -1.0, -1.0, -1.0]
                 );
             }
         }
