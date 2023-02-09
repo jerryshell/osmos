@@ -35,41 +35,10 @@ impl Simulator {
         crate::system::collision::process(&mut self.object_list);
 
         if self.step_count >= self.max_step_count_per_epoch {
-            self.evolve();
+            crate::ga::evolve::evolve(self);
             self.step_count = 0;
             self.epoch_count += 1;
         }
-    }
-
-    pub fn selection(&mut self) -> usize {
-        crate::ga::selection::selection(&mut self.rng, &self.object_list)
-    }
-
-    fn evolve(&mut self) {
-        let new_object_list = (0..self.object_count)
-            .map(|_| {
-                let parent_a_index = self.selection();
-                let parent_b_index = self.selection();
-                let parent_a = &self.object_list[parent_a_index];
-                let parent_b = &self.object_list[parent_b_index];
-                let parent_a_gene_list = parent_a.get_gene_list();
-                let parent_b_gene_list = parent_b.get_gene_list();
-
-                let mut child_gene_list = crate::ga::crossover::crossover(
-                    &mut self.rng,
-                    &parent_a_gene_list,
-                    &parent_b_gene_list,
-                );
-
-                crate::ga::mutation::mutation(&mut self.rng, 0.01, 0.3, &mut child_gene_list);
-
-                let child_network =
-                    crate::ga::gene::build_network_from_gene_list(&[6, 16, 4], &child_gene_list);
-
-                crate::object::Object::from_network(&mut self.rng, child_network)
-            })
-            .collect::<Vec<crate::object::Object>>();
-        self.object_list = new_object_list;
     }
 }
 
@@ -81,7 +50,7 @@ mod tests {
             let mut sim = crate::simulator::Simulator::default();
             for _ in 0..5 {
                 sim.step();
-                sim.selection();
+                crate::ga::evolve::evolve(&mut sim);
             }
         }
     }
