@@ -51,7 +51,7 @@ osmos
 └── osmos-web  # Web UI，通过导入 WASM 启动模拟器，并将模拟器的数据渲染到 Canvas 中
 ```
 
-## Vite WASM Note
+## Vite WASM
 
 1. Install `vite-plugin-wasm` & `vite-plugin-top-level-await`
 
@@ -73,6 +73,14 @@ export default defineConfig({
     ]
 })
 ```
+
+## ⚠️ Rust WASM Warning
+
+Don't use [wee_alloc](https://github.com/rustwasm/wee_alloc) in production code.
+
+* [r/rust: dont_use_wee_alloc_in_production_code_targeting](https://www.reddit.com/r/rust/comments/x1cle0/dont_use_wee_alloc_in_production_code_targeting)
+* [wee_alloc/issues: #106 Unbounded Memory Leak](https://github.com/rustwasm/wee_alloc/issues/106)
+* [wee_alloc/issues: #107 Is this repo still maintained?](https://github.com/rustwasm/wee_alloc/issues/107)
 
 ## License
 
