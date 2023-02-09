@@ -45,6 +45,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
 
         // set sensor_data_list by energy and position
         // danger -1
+        // equal  -0.5
         // normal 0
         // food   1
         // [up, right, down, left]
@@ -58,6 +59,12 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                             > object_list[current_object_index].cell.energy =>
                     {
                         -1.0
+                    }
+                    other_object_index
+                        if object_list[other_object_index].cell.energy
+                            == object_list[current_object_index].cell.energy =>
+                    {
+                        -0.5
                     }
                     other_object_index
                         if object_list[other_object_index].cell.energy
@@ -207,7 +214,7 @@ mod tests {
                 );
             }
         }
-        mod normal {
+        mod equal_rd {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
@@ -227,15 +234,15 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, 0.0, 0.0, 0.0]
+                    vec![0.0, 0.0, -0.5, -0.5]
                 );
                 assert_eq!(
                     object_list[1].cell.sensor.data_list,
-                    vec![0.0, 0.0, 0.0, 0.0]
+                    vec![-0.5, -0.5, 0.0, 0.0]
                 );
                 assert_eq!(
                     object_list[2].cell.sensor.data_list,
-                    vec![0.0, 0.0, 0.0, 0.0]
+                    vec![-0.5, -0.5, -0.5, -0.5]
                 );
             }
         }
