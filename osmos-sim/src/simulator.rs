@@ -9,7 +9,7 @@ pub struct Simulator {
 
 impl Default for Simulator {
     fn default() -> Self {
-        let object_count = 400;
+        let object_count = 500;
         let mut rng = rand::thread_rng();
         let object_list = (0..object_count)
             .map(|_| crate::object::Object::new(&mut rng))
@@ -34,7 +34,7 @@ impl Simulator {
         crate::system::movement::process(&mut self.rng, &mut self.object_list);
         crate::system::collision::process(&mut self.object_list);
 
-        if self.step_count >= self.max_step_count_per_epoch {
+        if self.step_count >= self.max_step_count_per_epoch || self.object_list.len() <= 100 {
             crate::ga::evolve::evolve(self);
             self.step_count = 0;
             self.epoch_count += 1;
