@@ -32,7 +32,7 @@ const render = () => {
   const objectList = sim.getObjectList()
   for (let object of objectList) {
     ctx.beginPath();
-    ctx.fillStyle = '#00A97F'
+    ctx.fillStyle = '#F47C7C'
     // console.table(object)
     ctx.arc(object.x * width, object.y * height, object.energy, 0, 2 * Math.PI);
     ctx.fill();

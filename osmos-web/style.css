@@ -13,20 +13,31 @@ body {
   text-align: center;
 }
 
-#info {
-  padding: 10px;
+#info,
+#footer {
+  margin: 10px;
   font-size: 1.2rem;
   color: #17C3B2;
 }
 
+a {
+  color: #17C3B2;
+}
+
+canvas {
+  border: #17C3B2 solid;
+  margin: 5px;
+}
+
 input {
-  height: 46px;
-  padding: 0 16px;
-  background: transparent;
-  border-radius: 4px;
-  border: 1px solid #17C3B2;
-  color: #f9f9f9;
-  animation: shake_541 0.14s 3;
+  padding: 0.8em 1.8em;
+  border: 2px solid #17C3B2;
+  position: relative;
+  overflow: hidden;
+  background-color: transparent;
+  text-transform: uppercase;
+  font-size: 16px;
+  color: #17C3B2;
 }
 
 button {
@@ -40,7 +51,6 @@ button {
   font-size: 16px;
   transition: .3s;
   z-index: 1;
-  font-family: inherit;
   color: #17C3B2;
 }
 
@@ -63,5 +73,5 @@ button:hover::before {
 }
 
 button:hover {
-  color: #111;
+  color: #242424;
 }
