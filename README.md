@@ -27,7 +27,7 @@ yarn
 yarn dev
 ```
 
-## 目录简介
+## 项目结构简介
 
 ```
 osmos
@@ -81,6 +81,7 @@ Don't use [wee_alloc](https://github.com/rustwasm/wee_alloc) in production code.
 * [r/rust: dont_use_wee_alloc_in_production_code_targeting](https://www.reddit.com/r/rust/comments/x1cle0/dont_use_wee_alloc_in_production_code_targeting)
 * [wee_alloc/issues: #106 Unbounded Memory Leak](https://github.com/rustwasm/wee_alloc/issues/106)
 * [wee_alloc/issues: #107 Is this repo still maintained?](https://github.com/rustwasm/wee_alloc/issues/107)
+* [RUSTSEC-2022-0054: wee_alloc is Unmaintained](https://rustsec.org/advisories/RUSTSEC-2022-0054.html)
 
 ## License
 

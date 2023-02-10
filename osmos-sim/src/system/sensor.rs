@@ -7,8 +7,9 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             .map(|(index, _)| index)
             .filter(|&index| index != current_object_index)
             .collect::<Vec<usize>>();
+
         // get in distance other object index
-        let mut in_distance_other_object_index_list = other_object_index_list
+        let in_distance_other_object_index_list = other_object_index_list
             .iter()
             .filter(|&&other_object_index| {
                 let distance = nalgebra::distance(
@@ -20,14 +21,14 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             .copied()
             .collect::<Vec<usize>>();
 
-        // in_distance_other_object_index_list order by distance desc
-        in_distance_other_object_index_list.sort_by_cached_key(|&other_object_index| {
-            let distance = nalgebra::distance(
-                &object_list[other_object_index].cell.position,
-                &object_list[current_object_index].cell.position,
-            );
-            -(distance * 1000.0) as isize
-        });
+        // // in_distance_other_object_index_list order by distance desc
+        // in_distance_other_object_index_list.sort_by_cached_key(|&other_object_index| {
+        //     let distance = nalgebra::distance(
+        //         &object_list[other_object_index].cell.position,
+        //         &object_list[current_object_index].cell.position,
+        //     );
+        //     -(distance * 1000.0) as isize
+        // });
 
         // set sensor_data_list by energy and position
         // danger: -1.0 * other_object_energy / distance

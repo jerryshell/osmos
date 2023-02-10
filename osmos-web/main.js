@@ -7,15 +7,17 @@ const speedInput = document.getElementById('speedInput')
 const setSpeedBtn = document.getElementById('setSpeedBtn')
 setSpeedBtn.onclick = () => {
   speed = speedInput.value
-  speedText.textContent = `Speed: ${speed}`
+  speedText.textContent = `🚀 Speed: ${speed}`
 }
 const resetSpeedBtn = document.getElementById('resetSpeedBtn')
 resetSpeedBtn.onclick = () => {
   speed = 1
-  speedText.textContent = `Speed: ${speed}`
+  speedText.textContent = `🚀 Speed: ${speed}`
 }
 
 const epochText = document.getElementById('epochText')
+const stepText = document.getElementById('stepText')
+const populationText = document.getElementById('populationText')
 
 let sim = new osmos.Simulator()
 
@@ -29,21 +31,22 @@ const ctx = canvasElement.getContext('2d')
 
 const render = () => {
   ctx.clearRect(0, 0, width, height)
+
   const objectList = sim.getObjectList()
   for (let object of objectList) {
     ctx.beginPath();
     ctx.fillStyle = '#F47C7C'
-    // console.table(object)
     ctx.arc(object.x * width, object.y * height, object.energy, 0, 2 * Math.PI);
     ctx.fill();
   }
   for (let i = 0; i < speed; i++) {
     sim.step()
   }
-  const epochCount = sim.getEpochCount()
-  const stepCount = sim.getStepCount()
-  console.log('epochCount', epochCount, 'stepCount', stepCount, 'objectList.lenght', objectList.length)
-  epochText.textContent = `Epoch: ${epochCount}`
+
+  epochText.textContent = `🧬 Epoch: ${sim.getEpochCount()}`
+  stepText.textContent = `🎮 Step: ${sim.getStepCount()}`
+  populationText.textContent = `👾 Population: ${objectList.length}`
+
   requestAnimationFrame(render)
 }
 

@@ -19,7 +19,7 @@ impl Default for Simulator {
             object_count,
             object_list,
             step_count: 0,
-            max_step_count_per_epoch: 1000,
+            max_step_count_per_epoch: 2000,
             epoch_count: 0,
         }
     }
