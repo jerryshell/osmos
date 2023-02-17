@@ -1,10 +1,10 @@
 # Osmos
 
-Demo: [osmos.jerryshell.eu.org](https://osmos.jerryshell.eu.org)
+[osmos.jerryshell.eu.org](https://osmos.jerryshell.eu.org)
 
-Rust + WASM + 神经网络 + 遗传算法
+Rust + WASM + Vite + 神经网络 + 遗传算法
 
-Bilibili 视频：*TODO*
+Bilibili 视频：[https://www.bilibili.com/video/BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 
 ## 如何运行
 
