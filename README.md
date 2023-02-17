@@ -36,7 +36,7 @@ osmos
 ├── osmos-sim  # 进化模拟器，使用类似 ECS 的模式驱动全局数据
 │   └── src
 │       ├── ga # 遗传算法
-│       │   ├── crossover.rs # 杂交
+│       │   ├── crossover.rs # 交叉
 │       │   ├── evolve.rs    # 进化
 │       │   ├── fitness.rs   # 适应度
 │       │   ├── gene.rs      # 基因
