@@ -1,3 +1,5 @@
+// Randomly return an Object index.
+// The greater the energy of Object, the greater the probability of being selected.
 pub fn selection(rng: &mut rand::rngs::ThreadRng, object_list: &[crate::object::Object]) -> usize {
     let total_fitness = object_list.iter().map(|o| o.fitness()).sum::<isize>();
     loop {

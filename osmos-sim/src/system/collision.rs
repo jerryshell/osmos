@@ -24,7 +24,7 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 continue;
             }
 
-            match current_object_energy {
+            match () {
                 _ if current_object_energy > other_object_energy => {
                     object_list[current_object_index].cell.energy += 1;
                     object_list[other_object_index].cell.energy -= 1;
@@ -35,21 +35,21 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 }
                 _ => {
                     // energy equal
-                    let mut current_object_velocity = nalgebra::Vector2::new(
+                    let current_object_velocity = nalgebra::Vector2::new(
                         current_object_position.x - other_object_position.x,
                         current_object_position.y - other_object_position.y,
-                    );
-                    current_object_velocity.set_magnitude(
+                    )
+                    .cap_magnitude(
                         object_list[current_object_index]
                             .cell
                             .get_velocity_max_magnitude(),
                     );
 
-                    let mut other_object_velocity = nalgebra::Vector2::new(
+                    let other_object_velocity = nalgebra::Vector2::new(
                         other_object_position.x - current_object_position.x,
                         other_object_position.y - current_object_position.y,
-                    );
-                    other_object_velocity.set_magnitude(
+                    )
+                    .cap_magnitude(
                         object_list[other_object_index]
                             .cell
                             .get_velocity_max_magnitude(),
