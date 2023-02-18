@@ -15,12 +15,14 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 continue;
             }
 
+            // check collide
             let current_object_position = &object_list[current_object_index].cell.position;
             let other_object_position = &object_list[other_object_index].cell.position;
             let distance = nalgebra::distance(current_object_position, other_object_position);
             let energy_sum = current_object_energy + other_object_energy;
             let r_sum = energy_sum as f64 / 1000.0;
             if distance >= r_sum {
+                // current_object and other_object did not collide
                 continue;
             }
 
@@ -35,6 +37,7 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 }
                 _ => {
                     // energy equal
+                    // pull two Object apart using the opposite force
                     let current_object_velocity = nalgebra::Vector2::new(
                         current_object_position.x - other_object_position.x,
                         current_object_position.y - other_object_position.y,
@@ -61,5 +64,6 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
             }
         }
     }
+    // delete Object with energy <= 0
     object_list.retain(|object| object.cell.energy > 0);
 }
