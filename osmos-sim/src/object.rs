@@ -5,9 +5,10 @@ pub struct Object {
 
 impl Object {
     pub fn new(rng: &mut rand::rngs::ThreadRng) -> Self {
+        let network_layer_topology = vec![6, 16, 4];
         Self {
             cell: osmos_core::cell::Cell::random(rng),
-            network: osmos_nn::network::Network::random(rng, &[6, 16, 4]),
+            network: osmos_nn::network::Network::random(rng, &network_layer_topology),
         }
     }
 

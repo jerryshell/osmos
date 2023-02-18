@@ -1,10 +1,19 @@
 pub struct Network {
+    pub layer_topology: Vec<usize>,
     pub layer_list: Vec<crate::layer::Layer>,
 }
 
 impl Network {
     pub fn new(layer_list: Vec<crate::layer::Layer>) -> Self {
-        Self { layer_list }
+        let mut layer_topology = layer_list
+            .iter()
+            .map(|layer| layer.neuron_list.len())
+            .collect::<Vec<usize>>();
+        layer_topology.insert(0, layer_list[0].neuron_list[0].weight_list.len());
+        Self {
+            layer_topology,
+            layer_list,
+        }
     }
 
     pub fn random(rng: &mut rand::rngs::ThreadRng, layer_topology: &[usize]) -> Self {
@@ -12,7 +21,10 @@ impl Network {
             .windows(2)
             .map(|window| crate::layer::Layer::random(rng, window[0], window[1]))
             .collect();
-        Self { layer_list }
+        Self {
+            layer_topology: layer_topology.to_vec(),
+            layer_list,
+        }
     }
 
     pub fn feed(&self, input_list: &[f64]) -> Vec<f64> {
@@ -33,15 +45,18 @@ mod tests {
             let mut rng = rand::thread_rng();
             let layer_topology = vec![4, 8, 6];
             let network = crate::network::Network::random(&mut rng, &layer_topology);
-            assert!(network.layer_list[0].neuron_list.len() == 8);
-            assert!(network.layer_list[0].neuron_list[0].weight_list.len() == 4);
-            let result = layer_topology.windows(2).zip(network.layer_list).all(
+            assert_eq!(layer_topology, network.layer_topology);
+            assert_eq!(network.layer_list[0].neuron_list.len(), layer_topology[1]);
+            assert_eq!(
+                network.layer_list[0].neuron_list[0].weight_list.len(),
+                layer_topology[0]
+            );
+            assert!(layer_topology.windows(2).zip(network.layer_list).all(
                 |(layer_topology_window, layer)| {
                     layer_topology_window[1] == layer.neuron_list.len()
                         && layer_topology_window[0] == layer.neuron_list[0].weight_list.len()
                 },
-            );
-            assert!(result)
+            ));
         }
     }
 
@@ -61,6 +76,7 @@ mod tests {
             let input_list = vec![2.0, 2.0, 2.0];
             let output_list = network.feed(&input_list);
             assert_eq!(output_list, vec![96.0, 96.0]);
+            assert_eq!(vec![3, 2, 2], network.layer_topology);
         }
     }
 }

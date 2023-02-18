@@ -18,8 +18,10 @@ pub fn evolve(simulator: &mut crate::simulator::Simulator) {
 
             crate::ga::mutation::mutation(&mut simulator.rng, 0.01, 0.3, &mut child_gene_list);
 
-            let child_network =
-                crate::ga::gene::build_network_from_gene_list(&[6, 16, 4], &child_gene_list);
+            let child_network = crate::ga::gene::build_network_from_gene_list(
+                &parent_a.network.layer_topology,
+                &child_gene_list,
+            );
 
             crate::object::Object::from_network(&mut simulator.rng, child_network)
         })
