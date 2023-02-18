@@ -27,7 +27,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
         // normal:  0.0
         // food:    1.0 * other_object_energy / distance
         // [up, right, down, left]
-        let mut sensor_data_list = vec![0.0, 0.0, 0.0, 0.0];
+        let mut sensor_data_list = [0.0; 4];
         in_distance_other_object_index_list
             .iter()
             .for_each(|&other_object_index| {
@@ -67,7 +67,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                     sensor_data_list[3] += status;
                 }
 
-                object_list[current_object_index].cell.sensor.data_list = sensor_data_list.clone();
+                object_list[current_object_index].cell.sensor.data_list = sensor_data_list;
             });
     }
 }
@@ -91,11 +91,11 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, -14.142135623730947, -14.142135623730947, 0.0]
+                    [0.0, -14.142135623730947, -14.142135623730947, 0.0]
                 );
                 assert_eq!(
                     object_list[1].cell.sensor.data_list,
-                    vec![7.071067811865474, 0.0, 0.0, 7.071067811865474]
+                    [7.071067811865474, 0.0, 0.0, 7.071067811865474]
                 );
             }
         }
@@ -115,7 +115,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![-14.142135623730947, 0.0, 0.0, -14.142135623730947]
+                    [-14.142135623730947, 0.0, 0.0, -14.142135623730947]
                 );
             }
         }
@@ -135,7 +135,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![-14.142135623730947, -14.142135623730947, 0.0, 0.0]
+                    [-14.142135623730947, -14.142135623730947, 0.0, 0.0]
                 );
             }
         }
@@ -155,7 +155,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, 0.0, -4.714045207910317, -4.714045207910317]
+                    [0.0, 0.0, -4.714045207910317, -4.714045207910317]
                 );
             }
         }
@@ -179,7 +179,7 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, 0.0, 49.49747468305833, 49.49747468305833]
+                    [0.0, 0.0, 49.49747468305833, 49.49747468305833]
                 );
             }
         }
@@ -203,15 +203,15 @@ mod tests {
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
-                    vec![0.0, 0.0, -77.78174593052023, -77.78174593052023]
+                    [0.0, 0.0, -77.78174593052023, -77.78174593052023]
                 );
                 assert_eq!(
                     object_list[1].cell.sensor.data_list,
-                    vec![-14.927809825049334, -14.927809825049334, 0.0, 0.0]
+                    [-14.927809825049334, -14.927809825049334, 0.0, 0.0]
                 );
                 assert_eq!(
                     object_list[2].cell.sensor.data_list,
-                    vec![
+                    [
                         -70.71067811865476,
                         -70.71067811865476,
                         -7.85674201318386,

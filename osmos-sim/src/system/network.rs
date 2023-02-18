@@ -1,9 +1,15 @@
 pub fn process(object_list: &mut [crate::object::Object]) {
     for object in object_list {
-        let mut nn_input = vec![object.cell.velocity.x, object.cell.velocity.y];
-        nn_input.append(&mut object.cell.sensor.data_list.clone());
+        let mut nn_input = vec![
+            object.cell.energy as f64,
+            object.cell.velocity.x,
+            object.cell.velocity.y,
+        ];
+        nn_input.extend(object.cell.sensor.data_list);
+        assert_eq!(nn_input.len(), object.network.layer_topology[0]);
 
         let nn_output = object.network.feed(&nn_input);
+        assert_eq!(nn_output.len(), 4);
 
         let up = nn_output[0];
         let right = nn_output[1];
