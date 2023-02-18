@@ -21,15 +21,6 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             .copied()
             .collect::<Vec<usize>>();
 
-        // // in_distance_other_object_index_list order by distance desc
-        // in_distance_other_object_index_list.sort_by_cached_key(|&other_object_index| {
-        //     let distance = nalgebra::distance(
-        //         &object_list[other_object_index].cell.position,
-        //         &object_list[current_object_index].cell.position,
-        //     );
-        //     -(distance * 1000.0) as isize
-        // });
-
         // set sensor_data_list by energy and position
         // danger: -1.0 * other_object_energy / distance
         // equal:  -0.5 * other_object_energy / distance
@@ -55,7 +46,6 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                     _ => 0.0,
                 } * other_object_energy as f64
                     / distance;
-                // let status = (current_object_energy - other_object_energy) as f64;
 
                 let current_object_position = object_list[current_object_index].cell.position;
                 let other_object_position = object_list[other_object_index].cell.position;

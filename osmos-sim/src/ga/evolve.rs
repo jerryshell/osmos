@@ -23,6 +23,6 @@ pub fn evolve(simulator: &mut crate::simulator::Simulator) {
 
             crate::object::Object::from_network(&mut simulator.rng, child_network)
         })
-        .collect::<Vec<crate::object::Object>>();
+        .collect();
     simulator.object_list = new_object_list;
 }

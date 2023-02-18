@@ -15,7 +15,7 @@ impl Neuron {
         let bias = rand::Rng::gen_range(rng, -1.0..=1.0);
         let weight_list = (0..weight_list_len)
             .map(|_| rand::Rng::gen_range(rng, -1.0..=1.0))
-            .collect::<Vec<f64>>();
+            .collect();
         Self { bias, weight_list }
     }
 

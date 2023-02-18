@@ -14,7 +14,7 @@ impl Layer {
     ) -> Self {
         let neuron_list = (0..neuron_count)
             .map(|_| crate::neuron::Neuron::random(rng, weight_list_len_per_neuron))
-            .collect::<Vec<crate::neuron::Neuron>>();
+            .collect();
         Self { neuron_list }
     }
 

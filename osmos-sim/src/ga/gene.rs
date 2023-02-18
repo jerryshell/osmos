@@ -16,9 +16,15 @@ fn build_neuron_from_gene_data_iter(
     weight_list_len: usize,
     gene_data_iter: &mut impl Iterator<Item = f64>,
 ) -> osmos_nn::neuron::Neuron {
-    let bias = gene_data_iter.next().unwrap();
+    let bias = gene_data_iter
+        .next()
+        .expect("build neuron from gene_data_iter failed");
     let weight_list = (0..weight_list_len)
-        .map(|_| gene_data_iter.next().unwrap())
+        .map(|_| {
+            gene_data_iter
+                .next()
+                .expect("build neuron from gene_data_iter failed")
+        })
         .collect::<GeneList>();
     osmos_nn::neuron::Neuron::new(bias, &weight_list)
 }
@@ -28,7 +34,7 @@ fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> GeneList {
         .neuron_list
         .iter()
         .flat_map(get_gene_list_from_neuron)
-        .collect::<GeneList>()
+        .collect()
 }
 
 fn build_layer_from_gene_data_iter(
@@ -38,7 +44,7 @@ fn build_layer_from_gene_data_iter(
 ) -> osmos_nn::layer::Layer {
     let neuron_list = (0..neuron_count)
         .map(|_| build_neuron_from_gene_data_iter(weight_list_len_per_neuron, gene_data_iter))
-        .collect::<Vec<osmos_nn::neuron::Neuron>>();
+        .collect();
     osmos_nn::layer::Layer::new(neuron_list)
 }
 
@@ -47,7 +53,7 @@ fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> GeneList 
         .layer_list
         .iter()
         .flat_map(get_gene_list_from_layer)
-        .collect::<GeneList>()
+        .collect()
 }
 
 pub fn build_network_from_gene_list(
