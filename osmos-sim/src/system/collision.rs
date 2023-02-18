@@ -15,12 +15,12 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 continue;
             }
 
+            let current_object_position = &object_list[current_object_index].cell.position;
+            let other_object_position = &object_list[other_object_index].cell.position;
+            let distance = nalgebra::distance(current_object_position, other_object_position);
             let energy_sum = current_object_energy + other_object_energy;
-            let distance = nalgebra::distance(
-                &object_list[current_object_index].cell.position,
-                &object_list[other_object_index].cell.position,
-            );
-            if distance >= energy_sum as f64 / 1000.0 {
+            let r_sum = energy_sum as f64 / 1000.0;
+            if distance >= r_sum {
                 continue;
             }
 
@@ -35,22 +35,25 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 }
                 _ => {
                     // energy equal
-                    let current_object = &object_list[current_object_index];
-                    let other_object = &object_list[other_object_index];
-
                     let mut current_object_velocity = nalgebra::Vector2::new(
-                        current_object.cell.position.x - other_object.cell.position.x,
-                        current_object.cell.position.y - other_object.cell.position.y,
+                        current_object_position.x - other_object_position.x,
+                        current_object_position.y - other_object_position.y,
                     );
-                    current_object_velocity = current_object_velocity
-                        .cap_magnitude(current_object.cell.get_velocity_max_magnitude());
+                    current_object_velocity.set_magnitude(
+                        object_list[current_object_index]
+                            .cell
+                            .get_velocity_max_magnitude(),
+                    );
 
                     let mut other_object_velocity = nalgebra::Vector2::new(
-                        other_object.cell.position.x - current_object.cell.position.x,
-                        other_object.cell.position.y - current_object.cell.position.y,
+                        other_object_position.x - current_object_position.x,
+                        other_object_position.y - current_object_position.y,
                     );
-                    other_object_velocity = other_object_velocity
-                        .cap_magnitude(other_object.cell.get_velocity_max_magnitude());
+                    other_object_velocity.set_magnitude(
+                        object_list[other_object_index]
+                            .cell
+                            .get_velocity_max_magnitude(),
+                    );
 
                     object_list[current_object_index].cell.velocity = current_object_velocity;
                     object_list[other_object_index].cell.velocity = other_object_velocity;
