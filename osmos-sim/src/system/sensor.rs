@@ -1,6 +1,6 @@
 pub fn process(object_list: &mut [crate::object::Object]) {
     for current_object_index in 0..object_list.len() {
-        // get oter object index
+        // get other object index list
         let other_object_index_list = object_list
             .iter()
             .enumerate()
@@ -8,8 +8,8 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             .filter(|&index| index != current_object_index)
             .collect::<Vec<usize>>();
 
-        // get in distance other object index
-        let in_distance_other_object_index_list = other_object_index_list
+        // get in sensor range other object index list
+        let in_sensor_range_other_object_index_list = other_object_index_list
             .iter()
             .filter(|&&other_object_index| {
                 let distance = nalgebra::distance(
@@ -28,7 +28,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
         // food:    1.0 * other_object_energy / distance
         // [up, right, down, left]
         let mut sensor_data_list = [0.0; 4];
-        in_distance_other_object_index_list
+        in_sensor_range_other_object_index_list
             .iter()
             .for_each(|&other_object_index| {
                 let distance = nalgebra::distance(
@@ -66,9 +66,8 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                 if other_object_position.x < current_object_position.x {
                     sensor_data_list[3] += status;
                 }
-
-                object_list[current_object_index].cell.sensor.data_list = sensor_data_list;
             });
+        object_list[current_object_index].cell.sensor.data_list = sensor_data_list;
     }
 }
 

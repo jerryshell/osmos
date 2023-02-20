@@ -1,8 +1,3 @@
-#[wasm_bindgen::prelude::wasm_bindgen]
-pub fn hello() -> String {
-    "devzero".to_string()
-}
-
 #[derive(Default)]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub struct Simulator {
