@@ -44,14 +44,12 @@ impl Simulator {
 
 #[cfg(test)]
 mod tests {
-    mod selection {
-        #[test]
-        fn test() {
-            let mut sim = crate::simulator::Simulator::default();
-            for _ in 0..5 {
-                sim.step();
-                crate::ga::evolve::evolve(&mut sim);
-            }
+    #[test]
+    fn test() {
+        let mut sim = crate::simulator::Simulator::default();
+        for _ in 0..5 {
+            sim.step();
+            crate::ga::evolve::evolve(&mut sim);
         }
     }
 }

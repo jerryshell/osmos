@@ -5,11 +5,13 @@ pub struct Network {
 
 impl Network {
     pub fn new(layer_list: Vec<crate::layer::Layer>) -> Self {
-        let mut layer_topology = layer_list
-            .iter()
-            .map(|layer| layer.neuron_list.len())
-            .collect::<Vec<usize>>();
-        layer_topology.insert(0, layer_list[0].neuron_list[0].weight_list.len());
+        let mut layer_topology = vec![layer_list[0].neuron_list[0].weight_list.len()];
+        layer_topology.append(
+            &mut layer_list
+                .iter()
+                .map(|layer| layer.neuron_list.len())
+                .collect::<Vec<usize>>(),
+        );
         Self {
             layer_topology,
             layer_list,

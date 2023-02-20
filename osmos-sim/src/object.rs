@@ -6,6 +6,7 @@ pub struct Object {
 impl Object {
     pub fn new(rng: &mut rand::rngs::ThreadRng) -> Self {
         // 7 = cell.energy(1) + cell.velocity.x(1) + cell.velocity.y(1) + cell.sensor.data_list(4)
+        // 4 = [up, right, down, left]
         let network_layer_topology = vec![7, 16, 4];
         Self {
             cell: osmos_core::cell::Cell::random(rng),

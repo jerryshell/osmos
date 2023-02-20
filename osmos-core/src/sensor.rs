@@ -1,5 +1,6 @@
 pub struct Sensor {
     pub range: f64,
+    // [up, right, down, left]
     pub data_list: [f64; 4],
 }
 

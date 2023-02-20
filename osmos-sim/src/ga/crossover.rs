@@ -3,7 +3,7 @@ pub fn crossover(
     parent_a_gene_list: &crate::ga::gene::GeneList,
     parent_b_gene_list: &crate::ga::gene::GeneList,
 ) -> crate::ga::gene::GeneList {
-    let child_gene_list = parent_a_gene_list
+    parent_a_gene_list
         .iter()
         .zip(parent_b_gene_list)
         .map(|(a, b)| {
@@ -13,6 +13,5 @@ pub fn crossover(
                 *b
             }
         })
-        .collect::<crate::ga::gene::GeneList>();
-    child_gene_list
+        .collect()
 }
