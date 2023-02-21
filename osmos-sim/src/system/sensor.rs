@@ -78,11 +78,11 @@ mod tests {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
-                let mut object_1 = crate::object::Object::new(&mut rng);
+                let mut object_1 = crate::object::Object::new(&mut rng, 1);
                 object_1.cell.position.x = 0.0;
                 object_1.cell.position.y = 0.0;
                 object_1.cell.energy = 1;
-                let mut object_2 = crate::object::Object::new(&mut rng);
+                let mut object_2 = crate::object::Object::new(&mut rng, 2);
                 object_2.cell.position.x = 0.1;
                 object_2.cell.position.y = 0.1;
                 object_2.cell.energy = 2;
@@ -102,11 +102,11 @@ mod tests {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
-                let mut object_1 = crate::object::Object::new(&mut rng);
+                let mut object_1 = crate::object::Object::new(&mut rng, 1);
                 object_1.cell.position.x = 0.0;
                 object_1.cell.position.y = 0.0;
                 object_1.cell.energy = 1;
-                let mut object_2 = crate::object::Object::new(&mut rng);
+                let mut object_2 = crate::object::Object::new(&mut rng, 2);
                 object_2.cell.position.x = -0.1;
                 object_2.cell.position.y = -0.1;
                 object_2.cell.energy = 2;
@@ -122,11 +122,11 @@ mod tests {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
-                let mut object_1 = crate::object::Object::new(&mut rng);
+                let mut object_1 = crate::object::Object::new(&mut rng, 1);
                 object_1.cell.position.x = 0.0;
                 object_1.cell.position.y = 0.0;
                 object_1.cell.energy = 1;
-                let mut object_2 = crate::object::Object::new(&mut rng);
+                let mut object_2 = crate::object::Object::new(&mut rng, 2);
                 object_2.cell.position.x = 0.1;
                 object_2.cell.position.y = -0.1;
                 object_2.cell.energy = 2;
@@ -142,11 +142,11 @@ mod tests {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
-                let mut object_1 = crate::object::Object::new(&mut rng);
+                let mut object_1 = crate::object::Object::new(&mut rng, 1);
                 object_1.cell.position.x = 0.0;
                 object_1.cell.position.y = 0.0;
                 object_1.cell.energy = 1;
-                let mut object_2 = crate::object::Object::new(&mut rng);
+                let mut object_2 = crate::object::Object::new(&mut rng, 2);
                 object_2.cell.position.x = -0.3;
                 object_2.cell.position.y = 0.3;
                 object_2.cell.energy = 2;
@@ -162,15 +162,15 @@ mod tests {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
-                let mut object_1 = crate::object::Object::new(&mut rng);
+                let mut object_1 = crate::object::Object::new(&mut rng, 1);
                 object_1.cell.position.x = 0.0;
                 object_1.cell.position.y = 0.0;
                 object_1.cell.energy = 2;
-                let mut object_2 = crate::object::Object::new(&mut rng);
+                let mut object_2 = crate::object::Object::new(&mut rng, 2);
                 object_2.cell.position.x = -0.1;
                 object_2.cell.position.y = 0.1;
                 object_2.cell.energy = 3;
-                let mut object_3 = crate::object::Object::new(&mut rng);
+                let mut object_3 = crate::object::Object::new(&mut rng, 3);
                 object_3.cell.position.x = -0.01;
                 object_3.cell.position.y = 0.01;
                 object_3.cell.energy = 1;
@@ -186,15 +186,15 @@ mod tests {
             #[test]
             fn test() {
                 let mut rng = rand::thread_rng();
-                let mut object_1 = crate::object::Object::new(&mut rng);
+                let mut object_1 = crate::object::Object::new(&mut rng, 1);
                 object_1.cell.position.x = 0.0;
                 object_1.cell.position.y = 0.0;
                 object_1.cell.energy = 2;
-                let mut object_2 = crate::object::Object::new(&mut rng);
+                let mut object_2 = crate::object::Object::new(&mut rng, 2);
                 object_2.cell.position.x = -0.1;
                 object_2.cell.position.y = 0.1;
                 object_2.cell.energy = 2;
-                let mut object_3 = crate::object::Object::new(&mut rng);
+                let mut object_3 = crate::object::Object::new(&mut rng, 3);
                 object_3.cell.position.x = -0.01;
                 object_3.cell.position.y = 0.01;
                 object_3.cell.energy = 2;

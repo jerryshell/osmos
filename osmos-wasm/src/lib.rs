@@ -39,6 +39,7 @@ impl Simulator {
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Object {
+    pub id: usize,
     pub x: f64,
     pub y: f64,
     pub energy: usize,
@@ -47,6 +48,7 @@ pub struct Object {
 impl From<&osmos_sim::object::Object> for Object {
     fn from(sim_object: &osmos_sim::object::Object) -> Self {
         Self {
+            id: sim_object.id,
             x: sim_object.cell.position.x,
             y: sim_object.cell.position.y,
             energy: sim_object.cell.energy,

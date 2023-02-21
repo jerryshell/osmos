@@ -1,6 +1,19 @@
 import './style.css'
 import * as osmos from './osmos-wasm'
 
+const colorList = [
+  '#FFF1DC',
+  '#E8D5C4',
+  '#EEEEEE',
+  '#F7C8E0',
+  '#DFFFD8',
+  '#B4E4FF',
+  '#95BDFF',
+  '#F47C7C',
+  '#7DB9B6',
+  '#F0A04B',
+]
+
 let speed = 1
 const speedText = document.getElementById('speedText')
 const speedInput = document.getElementById('speedInput')
@@ -36,7 +49,7 @@ const render = () => {
   const objectList = sim.getObjectList()
   for (let object of objectList) {
     ctx.beginPath()
-    ctx.fillStyle = '#F47C7C'
+    ctx.fillStyle = colorList[object.id % colorList.length]
     ctx.arc(object.x * width, object.y * height, object.energy, 0, 2 * Math.PI)
     ctx.fill()
   }

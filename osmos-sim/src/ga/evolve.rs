@@ -1,6 +1,6 @@
 pub fn evolve(simulator: &mut crate::simulator::Simulator) {
     simulator.object_list = (0..simulator.object_count)
-        .map(|_| {
+        .map(|id| {
             // select parent_a and parent_b
             let parent_a_index =
                 crate::ga::selection::selection(&mut simulator.rng, &simulator.object_list);
@@ -30,7 +30,7 @@ pub fn evolve(simulator: &mut crate::simulator::Simulator) {
             );
 
             // build new object from child_network
-            crate::object::Object::from_network(&mut simulator.rng, child_network)
+            crate::object::Object::from_network(&mut simulator.rng, child_network, id)
         })
         .collect();
 }

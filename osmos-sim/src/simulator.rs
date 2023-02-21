@@ -12,7 +12,7 @@ impl Default for Simulator {
         let object_count = 300;
         let mut rng = rand::thread_rng();
         let object_list = (0..object_count)
-            .map(|_| crate::object::Object::new(&mut rng))
+            .map(|id| crate::object::Object::new(&mut rng, id))
             .collect();
         Self {
             rng,
