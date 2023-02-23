@@ -1,5 +1,5 @@
 pub fn process(object_list: &mut [crate::object::Object]) {
-    for object in object_list {
+    object_list.iter_mut().for_each(|object| {
         let mut nn_input = vec![
             object.cell.energy as f64,
             object.cell.velocity.x,
@@ -18,8 +18,9 @@ pub fn process(object_list: &mut [crate::object::Object]) {
 
         let acc_x = right - left;
         let acc_y = down - up;
-        object.cell.acceleration = nalgebra::Vector2::new(acc_x, acc_y).cap_magnitude(0.0005);
-    }
+        object.cell.acceleration = nalgebra::Vector2::new(acc_x, acc_y)
+            .cap_magnitude(object.cell.get_max_velocity_magnitude() / 2.0);
+    });
 }
 
 // fn sigmoid(x: f64) -> f64 {

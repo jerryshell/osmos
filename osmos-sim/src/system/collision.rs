@@ -45,7 +45,7 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                     .cap_magnitude(
                         object_list[current_object_index]
                             .cell
-                            .get_velocity_max_magnitude(),
+                            .get_max_velocity_magnitude(),
                     );
 
                     let other_object_velocity = nalgebra::Vector2::new(
@@ -55,7 +55,7 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                     .cap_magnitude(
                         object_list[other_object_index]
                             .cell
-                            .get_velocity_max_magnitude(),
+                            .get_max_velocity_magnitude(),
                     );
 
                     object_list[current_object_index].cell.velocity = current_object_velocity;
