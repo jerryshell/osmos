@@ -36,27 +36,20 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                     object_list[other_object_index].cell.energy += 1;
                 }
                 _ => {
-                    // energy equal
-                    // pull two Object apart using the opposite force
-                    let current_object_velocity = nalgebra::Vector2::new(
-                        current_object_position.x - other_object_position.x,
-                        current_object_position.y - other_object_position.y,
-                    )
-                    .cap_magnitude(
-                        object_list[current_object_index]
-                            .cell
-                            .get_max_velocity_magnitude(),
-                    );
+                    // energy equal, pull two Object apart using the opposite force
+                    let current_object_velocity = (current_object_position - other_object_position)
+                        .cap_magnitude(
+                            object_list[current_object_index]
+                                .cell
+                                .get_max_velocity_magnitude(),
+                        );
 
-                    let other_object_velocity = nalgebra::Vector2::new(
-                        other_object_position.x - current_object_position.x,
-                        other_object_position.y - current_object_position.y,
-                    )
-                    .cap_magnitude(
-                        object_list[other_object_index]
-                            .cell
-                            .get_max_velocity_magnitude(),
-                    );
+                    let other_object_velocity = (other_object_position - current_object_position)
+                        .cap_magnitude(
+                            object_list[other_object_index]
+                                .cell
+                                .get_max_velocity_magnitude(),
+                        );
 
                     object_list[current_object_index].cell.velocity = current_object_velocity;
                     object_list[other_object_index].cell.velocity = other_object_velocity;

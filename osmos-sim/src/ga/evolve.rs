@@ -30,7 +30,13 @@ pub fn evolve(simulator: &mut crate::simulator::Simulator) {
             );
 
             // build new object from child_network
-            crate::object::Object::from_network(&mut simulator.rng, child_network, id)
+            crate::object::Object::from_network(
+                &mut simulator.rng,
+                child_network,
+                id,
+                simulator.max_x,
+                simulator.max_y,
+            )
         })
         .collect();
 }
