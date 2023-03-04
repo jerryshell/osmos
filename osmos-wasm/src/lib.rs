@@ -1,4 +1,3 @@
-#[derive(Default)]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub struct Simulator {
     simulator: osmos_sim::simulator::Simulator,
@@ -7,8 +6,10 @@ pub struct Simulator {
 #[wasm_bindgen::prelude::wasm_bindgen]
 impl Simulator {
     #[wasm_bindgen::prelude::wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(max_x: f64, max_y: f64) -> Self {
+        Self {
+            simulator: osmos_sim::simulator::Simulator::new(max_x, max_y),
+        }
     }
 
     #[wasm_bindgen::prelude::wasm_bindgen(js_name = getObjectList)]

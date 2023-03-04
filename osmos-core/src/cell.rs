@@ -10,6 +10,7 @@ pub struct Cell {
 
 impl Cell {
     pub fn random(rng: &mut rand::rngs::ThreadRng, max_x: f64, max_y: f64) -> Self {
+        let sensor_range = nalgebra::Vector2::new(max_x, max_y).magnitude() * 0.5;
         let mut cell = Self {
             max_x,
             max_y,
@@ -17,7 +18,7 @@ impl Cell {
             acceleration: nalgebra::Vector2::new(0.0, 0.0),
             velocity: nalgebra::Vector2::new(0.0, 0.0),
             energy: rand::Rng::gen_range(rng, 1..=2),
-            sensor: crate::sensor::Sensor::new(0.5),
+            sensor: crate::sensor::Sensor::new(sensor_range),
         };
         cell.random_position(rng);
         cell
@@ -32,6 +33,6 @@ impl Cell {
 
     pub fn get_max_velocity_magnitude(&self) -> f64 {
         let max_point_magnitude = nalgebra::Vector2::new(self.max_x, self.max_y).magnitude();
-        max_point_magnitude / 1000.0 + (1.0 / self.energy as f64) * (max_point_magnitude / 2000.0)
+        max_point_magnitude * 0.0005 + (1.0 / self.energy as f64) * (max_point_magnitude * 0.001)
     }
 }

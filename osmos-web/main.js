@@ -32,16 +32,16 @@ const epochText = document.getElementById('epochText')
 const stepText = document.getElementById('stepText')
 const populationText = document.getElementById('populationText')
 
-const sim = new osmos.Simulator()
-
-const width = 1000
-const height = 1000
+const width = 1200
+const height = 600
 
 const canvasElement = document.getElementById('canvas')
 canvasElement.width = width
 canvasElement.height = height
 
 const ctx = canvasElement.getContext('2d')
+
+const sim = new osmos.Simulator(width, height)
 
 const render = () => {
   ctx.clearRect(0, 0, width, height)
@@ -50,7 +50,7 @@ const render = () => {
   for (let object of objectList) {
     ctx.beginPath()
     ctx.fillStyle = colorList[object.id % colorList.length]
-    ctx.arc(object.x * width, object.y * height, object.energy, 0, 2 * Math.PI)
+    ctx.arc(object.x, object.y, object.energy, 0, 2 * Math.PI)
     ctx.fill()
   }
   for (let i = 0; i < speed; i++) {

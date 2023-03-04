@@ -17,16 +17,43 @@ pub fn process(object_list: &mut [crate::object::Object]) {
         .collect::<Vec<f64>>();
     let velocity_y_array_zscore = crate::statistics::array_zscore(&velocity_y_array);
 
+    let sensor_up_array = object_list
+        .iter()
+        .map(|item| item.cell.sensor.data_list[0])
+        .collect::<Vec<f64>>();
+    let sensor_up_array_zscore = crate::statistics::array_zscore(&sensor_up_array);
+
+    let sensor_right_array = object_list
+        .iter()
+        .map(|item| item.cell.sensor.data_list[1])
+        .collect::<Vec<f64>>();
+    let sensor_right_array_zscore = crate::statistics::array_zscore(&sensor_right_array);
+
+    let sensor_down_array = object_list
+        .iter()
+        .map(|item| item.cell.sensor.data_list[2])
+        .collect::<Vec<f64>>();
+    let sensor_down_array_zscore = crate::statistics::array_zscore(&sensor_down_array);
+
+    let sensor_left_array = object_list
+        .iter()
+        .map(|item| item.cell.sensor.data_list[3])
+        .collect::<Vec<f64>>();
+    let sensor_left_array_zscore = crate::statistics::array_zscore(&sensor_left_array);
+
     object_list
         .iter_mut()
         .enumerate()
         .for_each(|(index, object)| {
-            let mut nn_input = vec![
+            let nn_input = vec![
                 energy_array_zscore[index],
                 velocity_x_array_zscore[index],
                 velocity_y_array_zscore[index],
+                sensor_up_array_zscore[index],
+                sensor_right_array_zscore[index],
+                sensor_down_array_zscore[index],
+                sensor_left_array_zscore[index],
             ];
-            nn_input.extend(object.cell.sensor.data_list);
             assert_eq!(nn_input.len(), object.network.layer_topology[0]);
 
             let nn_output = object.network.feed(&nn_input);
@@ -40,8 +67,8 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             let cell_max_velocity_magnitude = object.cell.get_max_velocity_magnitude();
             let acc_x = if left > right { -1.0 } else { 1.0 } * cell_max_velocity_magnitude;
             let acc_y = if up > down { -1.0 } else { 1.0 } * cell_max_velocity_magnitude;
-            object.cell.acceleration = nalgebra::Vector2::new(acc_x, acc_y)
-                .cap_magnitude(cell_max_velocity_magnitude / 2.0);
+            object.cell.acceleration =
+                nalgebra::Vector2::new(acc_x, acc_y).cap_magnitude(cell_max_velocity_magnitude);
         });
 }
 

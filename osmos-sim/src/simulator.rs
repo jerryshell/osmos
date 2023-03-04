@@ -9,10 +9,8 @@ pub struct Simulator {
     pub epoch_count: usize,
 }
 
-impl Default for Simulator {
-    fn default() -> Self {
-        let max_x = 1.0;
-        let max_y = 1.0;
+impl Simulator {
+    pub fn new(max_x: f64, max_y: f64) -> Self {
         let object_count = 300;
         let mut rng = rand::thread_rng();
         let object_list = (0..object_count)
@@ -29,9 +27,7 @@ impl Default for Simulator {
             epoch_count: 0,
         }
     }
-}
 
-impl Simulator {
     pub fn step(&mut self) {
         self.step_count += 1;
 
@@ -52,7 +48,7 @@ impl Simulator {
 mod tests {
     #[test]
     fn test() {
-        let mut sim = crate::simulator::Simulator::default();
+        let mut sim = crate::simulator::Simulator::new(1.0, 1.0);
         for _ in 0..5 {
             sim.step();
             crate::ga::evolve::evolve(&mut sim);
