@@ -1,12 +1,12 @@
 pub fn process(object_list: &mut Vec<crate::object::Object>) {
     for current_object_index in 0..object_list.len() {
-        let current_object_energy = object_list[current_object_index].cell.energy;
-        if current_object_energy == 0 {
-            continue;
-        }
-
         for other_object_index in 0..object_list.len() {
             if current_object_index == other_object_index {
+                continue;
+            }
+
+            let current_object_energy = object_list[current_object_index].cell.energy;
+            if current_object_energy == 0 {
                 continue;
             }
 
