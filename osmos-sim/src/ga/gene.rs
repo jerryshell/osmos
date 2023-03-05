@@ -7,7 +7,8 @@ impl crate::object::Object {
 }
 
 fn get_gene_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> GeneList {
-    let mut gene_list = vec![neuron.bias];
+    let mut gene_list = Vec::with_capacity(neuron.weight_list.len() + 1);
+    gene_list.push(neuron.bias);
     gene_list.append(&mut neuron.weight_list.clone());
     gene_list
 }

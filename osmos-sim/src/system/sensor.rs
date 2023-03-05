@@ -86,7 +86,7 @@ mod tests {
                 object_2.cell.position.x = 0.1;
                 object_2.cell.position.y = 0.1;
                 object_2.cell.energy = 2;
-                let mut object_list = vec![object_1, object_2];
+                let mut object_list = [object_1, object_2];
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
@@ -110,7 +110,7 @@ mod tests {
                 object_2.cell.position.x = -0.1;
                 object_2.cell.position.y = -0.1;
                 object_2.cell.energy = 2;
-                let mut object_list = vec![object_1, object_2];
+                let mut object_list = [object_1, object_2];
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
@@ -130,7 +130,7 @@ mod tests {
                 object_2.cell.position.x = 0.1;
                 object_2.cell.position.y = -0.1;
                 object_2.cell.energy = 2;
-                let mut object_list = vec![object_1, object_2];
+                let mut object_list = [object_1, object_2];
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
@@ -150,7 +150,7 @@ mod tests {
                 object_2.cell.position.x = -0.3;
                 object_2.cell.position.y = 0.3;
                 object_2.cell.energy = 2;
-                let mut object_list = vec![object_1, object_2];
+                let mut object_list = [object_1, object_2];
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
@@ -174,7 +174,7 @@ mod tests {
                 object_3.cell.position.x = -0.01;
                 object_3.cell.position.y = 0.01;
                 object_3.cell.energy = 1;
-                let mut object_list = vec![object_1, object_2, object_3];
+                let mut object_list = [object_1, object_2, object_3];
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,
@@ -198,7 +198,7 @@ mod tests {
                 object_3.cell.position.x = -0.01;
                 object_3.cell.position.y = 0.01;
                 object_3.cell.energy = 2;
-                let mut object_list = vec![object_1, object_2, object_3];
+                let mut object_list = [object_1, object_2, object_3];
                 crate::system::sensor::process(&mut object_list);
                 assert_eq!(
                     object_list[0].cell.sensor.data_list,

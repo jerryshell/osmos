@@ -45,7 +45,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
         .iter_mut()
         .enumerate()
         .for_each(|(index, object)| {
-            let nn_input = vec![
+            let nn_input = [
                 energy_array_zscore[index],
                 velocity_x_array_zscore[index],
                 velocity_y_array_zscore[index],

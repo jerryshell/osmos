@@ -49,7 +49,7 @@ mod tests {
         #[test]
         fn test() {
             let neuron = crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]);
-            let input_list = vec![2.0, 2.0, 2.0];
+            let input_list = [2.0, 2.0, 2.0];
             let output = neuron.feed(&input_list);
             assert!(output == 19.0);
         }

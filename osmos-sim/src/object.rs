@@ -8,7 +8,7 @@ impl Object {
     pub fn new(rng: &mut rand::rngs::ThreadRng, id: usize, max_x: f64, max_y: f64) -> Self {
         // 7 = cell.energy(1) + cell.velocity.x(1) + cell.velocity.y(1) + cell.sensor.data_list(4)
         // 4 = [up, right, down, left]
-        let network_layer_topology = vec![7, 16, 4];
+        let network_layer_topology = [7, 16, 4];
         Self {
             id,
             cell: osmos_core::cell::Cell::random(rng, max_x, max_y),

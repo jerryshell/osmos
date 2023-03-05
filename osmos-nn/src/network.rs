@@ -5,7 +5,8 @@ pub struct Network {
 
 impl Network {
     pub fn new(layer_list: Vec<crate::layer::Layer>) -> Self {
-        let mut layer_topology = vec![layer_list[0].neuron_list[0].weight_list.len()];
+        let mut layer_topology = Vec::with_capacity(layer_list.len() + 1);
+        layer_topology.push(layer_list[0].neuron_list[0].weight_list.len());
         layer_topology.append(
             &mut layer_list
                 .iter()
@@ -45,9 +46,9 @@ mod tests {
         #[test]
         fn test() {
             let mut rng = rand::thread_rng();
-            let layer_topology = vec![4, 8, 6];
+            let layer_topology = [4, 8, 6];
             let network = crate::network::Network::random(&mut rng, &layer_topology);
-            assert_eq!(layer_topology, network.layer_topology);
+            assert_eq!(layer_topology, network.layer_topology[..]);
             assert_eq!(network.layer_list[0].neuron_list.len(), layer_topology[1]);
             assert_eq!(
                 network.layer_list[0].neuron_list[0].weight_list.len(),
@@ -75,10 +76,10 @@ mod tests {
             ]);
             let layer_list = vec![layer_1, layer_2];
             let network = crate::network::Network::new(layer_list);
-            let input_list = vec![2.0, 2.0, 2.0];
+            let input_list = [2.0, 2.0, 2.0];
             let output_list = network.feed(&input_list);
-            assert_eq!(output_list, vec![96.0, 96.0]);
-            assert_eq!(vec![3, 2, 2], network.layer_topology);
+            assert_eq!(output_list, [96.0, 96.0]);
+            assert_eq!([3, 2, 2], network.layer_topology[..]);
         }
     }
 }

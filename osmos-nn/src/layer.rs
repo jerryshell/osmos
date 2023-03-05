@@ -54,7 +54,7 @@ mod tests {
                 crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]),
             ];
             let layer = crate::layer::Layer::new(neuron_list);
-            let input_list = vec![2.0, 2.0, 2.0];
+            let input_list = [2.0, 2.0, 2.0];
             let output_list = layer.feed(&input_list);
             assert_eq!(output_list, &[19.0, 19.0]);
         }
