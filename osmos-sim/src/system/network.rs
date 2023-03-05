@@ -17,6 +17,18 @@ pub fn process(object_list: &mut [crate::object::Object]) {
         .collect::<Vec<f64>>();
     let velocity_y_array_zscore = crate::statistics::array_zscore(&velocity_y_array);
 
+    let position_x_array = object_list
+        .iter()
+        .map(|item| item.cell.position.x)
+        .collect::<Vec<f64>>();
+    let position_x_array_zscore = crate::statistics::array_zscore(&position_x_array);
+
+    let position_y_array = object_list
+        .iter()
+        .map(|item| item.cell.position.y)
+        .collect::<Vec<f64>>();
+    let position_y_array_zscore = crate::statistics::array_zscore(&position_y_array);
+
     let sensor_up_array = object_list
         .iter()
         .map(|item| item.cell.sensor.data_list[0])
@@ -49,6 +61,8 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                 energy_array_zscore[index],
                 velocity_x_array_zscore[index],
                 velocity_y_array_zscore[index],
+                position_x_array_zscore[index],
+                position_y_array_zscore[index],
                 sensor_up_array_zscore[index],
                 sensor_right_array_zscore[index],
                 sensor_down_array_zscore[index],
