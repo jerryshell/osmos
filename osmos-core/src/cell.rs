@@ -6,6 +6,7 @@ pub struct Cell {
     pub velocity: nalgebra::Vector2<f64>,
     pub energy: usize,
     pub sensor: crate::sensor::Sensor,
+    pub max_position_magnitude: f64,
 }
 
 impl Cell {
@@ -19,6 +20,7 @@ impl Cell {
             velocity: nalgebra::Vector2::new(0.0, 0.0),
             energy: rand::Rng::gen_range(rng, 1..=2),
             sensor: crate::sensor::Sensor::new(sensor_range),
+            max_position_magnitude: nalgebra::Vector2::new(max_x, max_y).magnitude(),
         };
         cell.random_position(rng);
         cell
@@ -32,7 +34,7 @@ impl Cell {
     }
 
     pub fn get_max_velocity_magnitude(&self) -> f64 {
-        let max_point_magnitude = nalgebra::Vector2::new(self.max_x, self.max_y).magnitude();
-        max_point_magnitude * 0.0005 + (1.0 / self.energy as f64) * (max_point_magnitude * 0.001)
+        self.max_position_magnitude * 0.0005
+            + (1.0 / self.energy as f64) * (self.max_position_magnitude * 0.001)
     }
 }
