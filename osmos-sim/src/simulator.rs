@@ -29,18 +29,11 @@ impl Simulator {
     }
 
     pub fn step(&mut self) {
-        self.step_count += 1;
-
         crate::system::sensor::process(&mut self.object_list);
         crate::system::network::process(&mut self.object_list);
         crate::system::movement::process(&mut self.rng, &mut self.object_list);
         crate::system::collision::process(&mut self.object_list);
-
-        if self.step_count >= self.max_step_count_per_epoch || self.object_list.len() <= 100 {
-            crate::ga::evolve::evolve(self);
-            self.step_count = 0;
-            self.epoch_count += 1;
-        }
+        crate::system::epoch::process(self);
     }
 }
 
