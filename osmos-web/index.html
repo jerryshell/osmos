@@ -2,40 +2,17 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
   <title>Osmos: 🦀️ WASM NN GA</title>
 </head>
 
 <body>
-  <div id="app">
-
-    <div id="header">
-      <div id="info">
-        <span id="speedText">🚀 Speed: 1</span>
-        <span>·</span>
-        <span id="epochText">🧬 Epoch: 0</span>
-        <span>·</span>
-        <span id="stepText">🎮 Step: 0</span>
-        <span>·</span>
-        <span id="populationText">👾 Population: 0</span>
-      </div>
-      <input id="speedInput" type="number" placeholder="Speed" />
-      <button id="setSpeedBtn">Set Speed</button>
-      <button id="resetSpeedBtn">Reset Speed</button>
-      <br />
-    </div>
-
-    <canvas id="canvas"></canvas>
-
-    <div id="footer">
-      <span>Author: </span>
-      <a href="https://github.com/jerryshell" target="_blank">@jerryshell</a>
-    </div>
-
-  </div>
-  <script type="module" src="/main.js"></script>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <script src="/src/index.tsx" type="module"></script>
 </body>
 
 </html>
