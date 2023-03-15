@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub struct Simulator {
     simulator: osmos_sim::simulator::Simulator,
@@ -17,7 +19,7 @@ impl Simulator {
         let object_list = self
             .simulator
             .object_list
-            .iter()
+            .par_iter()
             .map(Object::from)
             .collect::<Vec<Object>>();
         serde_wasm_bindgen::to_value(&object_list).unwrap()

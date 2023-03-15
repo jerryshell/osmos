@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 pub struct Neuron {
     pub bias: f64,
     pub weight_list: Vec<f64>,
@@ -21,7 +23,7 @@ impl Neuron {
 
     pub fn feed(&self, input_list: &[f64]) -> f64 {
         let sum = input_list
-            .iter()
+            .par_iter()
             .zip(&self.weight_list)
             .map(|(input, weight)| input * weight)
             .sum::<f64>();

@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 pub type GeneList = Vec<f64>;
 
 impl crate::object::Object {
@@ -33,7 +35,7 @@ fn build_neuron_from_gene_data_iter(
 fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> GeneList {
     layer
         .neuron_list
-        .iter()
+        .par_iter()
         .flat_map(get_gene_list_from_neuron)
         .collect()
 }
@@ -52,7 +54,7 @@ fn build_layer_from_gene_data_iter(
 fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> GeneList {
     network
         .layer_list
-        .iter()
+        .par_iter()
         .flat_map(get_gene_list_from_layer)
         .collect()
 }

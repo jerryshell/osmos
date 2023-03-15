@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 pub struct Network {
     pub layer_topology: Vec<usize>,
     pub layer_list: Vec<crate::layer::Layer>,
@@ -9,7 +11,7 @@ impl Network {
         layer_topology.push(layer_list[0].neuron_list[0].weight_list.len());
         layer_topology.append(
             &mut layer_list
-                .iter()
+                .par_iter()
                 .map(|layer| layer.neuron_list.len())
                 .collect::<Vec<usize>>(),
         );

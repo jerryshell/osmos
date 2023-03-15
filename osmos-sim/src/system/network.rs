@@ -1,54 +1,56 @@
+use rayon::prelude::*;
+
 pub fn process(object_list: &mut [crate::object::Object]) {
     let energy_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.energy as f64)
         .collect::<Vec<f64>>();
     let energy_array_zscore = crate::statistics::array_zscore(&energy_array);
 
     let velocity_x_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.position.x)
         .collect::<Vec<f64>>();
     let velocity_x_array_zscore = crate::statistics::array_zscore(&velocity_x_array);
 
     let velocity_y_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.position.y)
         .collect::<Vec<f64>>();
     let velocity_y_array_zscore = crate::statistics::array_zscore(&velocity_y_array);
 
     let position_x_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.position.x)
         .collect::<Vec<f64>>();
     let position_x_array_zscore = crate::statistics::array_zscore(&position_x_array);
 
     let position_y_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.position.y)
         .collect::<Vec<f64>>();
     let position_y_array_zscore = crate::statistics::array_zscore(&position_y_array);
 
     let sensor_up_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.sensor.data_list[0])
         .collect::<Vec<f64>>();
     let sensor_up_array_zscore = crate::statistics::array_zscore(&sensor_up_array);
 
     let sensor_right_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.sensor.data_list[1])
         .collect::<Vec<f64>>();
     let sensor_right_array_zscore = crate::statistics::array_zscore(&sensor_right_array);
 
     let sensor_down_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.sensor.data_list[2])
         .collect::<Vec<f64>>();
     let sensor_down_array_zscore = crate::statistics::array_zscore(&sensor_down_array);
 
     let sensor_left_array = object_list
-        .iter()
+        .par_iter()
         .map(|item| item.cell.sensor.data_list[3])
         .collect::<Vec<f64>>();
     let sensor_left_array_zscore = crate::statistics::array_zscore(&sensor_left_array);

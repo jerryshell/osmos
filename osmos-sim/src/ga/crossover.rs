@@ -6,12 +6,6 @@ pub fn crossover(
     parent_a_gene_list
         .iter()
         .zip(parent_b_gene_list)
-        .map(|(a, b)| {
-            if rand::Rng::gen_bool(rng, 0.5) {
-                *a
-            } else {
-                *b
-            }
-        })
+        .map(|(&a, &b)| if rand::Rng::gen_bool(rng, 0.5) { a } else { b })
         .collect()
 }

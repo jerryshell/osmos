@@ -1,8 +1,10 @@
+use rayon::prelude::*;
+
 pub fn process(object_list: &mut [crate::object::Object]) {
     for current_object_index in 0..object_list.len() {
         // get other object index list
         let other_object_index_list = object_list
-            .iter()
+            .par_iter()
             .enumerate()
             .map(|(index, _)| index)
             .filter(|&index| index != current_object_index)
@@ -10,7 +12,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
 
         // get in sensor range other object index list
         let in_sensor_range_other_object_index_list = other_object_index_list
-            .iter()
+            .par_iter()
             .filter(|&&other_object_index| {
                 let distance = nalgebra::distance(
                     &object_list[current_object_index].cell.position,

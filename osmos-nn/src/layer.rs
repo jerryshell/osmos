@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 pub struct Layer {
     pub neuron_list: Vec<crate::neuron::Neuron>,
 }
@@ -20,7 +22,7 @@ impl Layer {
 
     pub fn feed(&self, input_list: &[f64]) -> Vec<f64> {
         self.neuron_list
-            .iter()
+            .par_iter()
             .map(|neuron| neuron.feed(input_list))
             .map(relu)
             .collect()
