@@ -1,5 +1,5 @@
 import { createSignal, onCleanup, onMount } from "solid-js";
-import *  as osmos from "./osmos-wasm";
+import *  as osmos from "../osmos-wasm";
 
 const width = 1200;
 const height = 600;
