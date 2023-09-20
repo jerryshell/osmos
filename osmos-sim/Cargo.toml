@@ -6,6 +6,6 @@ edition = "2021"
 [dependencies]
 osmos-core = { path = "../osmos-core" }
 osmos-nn = { path = "../osmos-nn" }
-nalgebra = "0.32.2"
-rand = "0.8.5"
-rayon = "1.7.0"
+nalgebra = "*"
+rand = "*"
+rayon = "*"
