@@ -12,4 +12,3 @@ osmos-sim = { path = "../osmos-sim" }
 getrandom = { version = "*", features = ["js"] }
 serde = { version = "*", features = ["derive"] }
 serde-wasm-bindgen = "*"
-rayon = "*"

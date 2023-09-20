@@ -1,7 +1,5 @@
-use rayon::prelude::*;
-
 pub fn mean(data: &[f64]) -> Option<f64> {
-    let sum = data.par_iter().sum::<f64>();
+    let sum = data.iter().sum::<f64>();
     let count = data.len();
 
     match count {
@@ -14,7 +12,7 @@ pub fn std_deviation(data: &[f64]) -> Option<f64> {
     match (mean(data), data.len()) {
         (Some(data_mean), count) if count > 0 => {
             let variance = data
-                .par_iter()
+                .iter()
                 .map(|value| {
                     let diff = data_mean - *value;
 
@@ -37,7 +35,7 @@ pub fn zscore(data: f64, data_mean: f64, data_std_deviation: f64) -> f64 {
 pub fn array_zscore(data: &[f64]) -> Vec<f64> {
     let data_mean = crate::statistics::mean(data).expect("mean error");
     let data_std_deviation = crate::statistics::std_deviation(data).expect("std_deviation error");
-    data.par_iter()
+    data.iter()
         .map(|&item| zscore(item, data_mean, data_std_deviation))
         .collect()
 }
