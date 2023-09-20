@@ -78,11 +78,9 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             let down = nn_output[2];
             let left = nn_output[3];
 
-            let cell_max_velocity_magnitude = object.cell.get_max_velocity_magnitude();
-            let acc_x = if left > right { -1.0 } else { 1.0 } * cell_max_velocity_magnitude;
-            let acc_y = if up > down { -1.0 } else { 1.0 } * cell_max_velocity_magnitude;
-            object.cell.acceleration =
-                nalgebra::Vector2::new(acc_x, acc_y).cap_magnitude(cell_max_velocity_magnitude);
+            let acc_x = left - right;
+            let acc_y = up - down;
+            object.cell.acceleration = nalgebra::Vector2::new(acc_x, acc_y);
         });
 }
 

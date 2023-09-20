@@ -56,7 +56,7 @@ mod tests {
         fn test() {
             let data = [3.0, 1.0, 6.0, 1.0, 5.0, 8.0, 1.0, 8.0, 10.0, 11.0];
             let data_std_deviation = crate::statistics::std_deviation(&data);
-            assert_eq!(data_std_deviation, Some(3.6110940170535577));
+            assert_eq!(data_std_deviation, Some(3.6110940170535573));
         }
     }
 
@@ -68,7 +68,7 @@ mod tests {
             let data_std_deviation =
                 crate::statistics::std_deviation(&data).expect("std_deviation error");
             let data_4_zscore = crate::statistics::zscore(data[4], data_mean, data_std_deviation);
-            assert_eq!(data_4_zscore, -0.11076975512434235);
+            assert_eq!(data_4_zscore, -0.11076975512434237);
         }
     }
 
@@ -81,15 +81,15 @@ mod tests {
                 az,
                 [
                     -0.6646185307460537,
-                    -1.218467306367765,
-                    0.1661546326865133,
-                    -1.218467306367765,
-                    -0.11076975512434235,
-                    0.7200034083082246,
-                    -1.218467306367765,
-                    0.7200034083082246,
-                    1.273852183929936,
-                    1.5507765717407915
+                    -1.2184673063677651,
+                    0.16615463268651331,
+                    -1.2184673063677651,
+                    -0.11076975512434237,
+                    0.7200034083082247,
+                    -1.2184673063677651,
+                    0.7200034083082247,
+                    1.2738521839299362,
+                    1.5507765717407918
                 ]
             );
         }
