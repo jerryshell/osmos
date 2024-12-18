@@ -1,30 +1,30 @@
 # Osmos
 
-[osmos.jerryshell.eu.org](https://osmos.jerryshell.eu.org)
-
 Rust + WASM + Vite + 神经网络 + 遗传算法
 
-Bilibili 视频：[https://www.bilibili.com/video/BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
+立刻体验：[https://osmos.jerryshell.eu.org](https://osmos.jerryshell.eu.org)
+
+Bilibili 视频：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 
 ## 如何运行
 
-第 0 步，安装 `wasm-pack`
+1. 安装 `wasm-pack`
 
 [https://rustwasm.github.io/wasm-pack](https://rustwasm.github.io/wasm-pack)
 
-第 1 步，编译 `osmos-wasm`
+2. 编译 `osmos-wasm`
 
 ```bash
 cd osmos-wasm
 wasm-pack build --out-dir ../osmos-web/osmos-wasm
 ```
 
-第 2 步，进入 `osmos-web` 安装依赖并运行
+3. 进入 `osmos-web` 安装依赖并运行
 
 ```bash
 cd osmos-web
-yarn
-yarn dev
+npm install
+npm run dev
 ```
 
 ## 项目结构简介
@@ -52,38 +52,6 @@ osmos
 └── osmos-web  # Web UI，通过导入 WASM 启动模拟器，并将模拟器的数据渲染到 Canvas 中
 ```
 
-## Vite WASM
+## 开源协议
 
-1. Install `vite-plugin-wasm` & `vite-plugin-top-level-await`
-
-```bash
-yarn add -D vite-plugin-wasm vite-plugin-top-level-await 
-```
-
-2. Edit `vite.config.js`
-
-```js
-import { defineConfig } from 'vite'
-import wasm from 'vite-plugin-wasm'
-import topLevelAwait from 'vite-plugin-top-level-await'
-
-export default defineConfig({
-    plugins: [
-        wasm(),
-        topLevelAwait(),
-    ]
-})
-```
-
-## ⚠️ Rust WASM Warning
-
-Don't use [wee_alloc](https://github.com/rustwasm/wee_alloc) in production code.
-
-* [r/rust: dont_use_wee_alloc_in_production_code_targeting](https://www.reddit.com/r/rust/comments/x1cle0/dont_use_wee_alloc_in_production_code_targeting)
-* [wee_alloc/issues: #106 Unbounded Memory Leak](https://github.com/rustwasm/wee_alloc/issues/106)
-* [wee_alloc/issues: #107 Is this repo still maintained?](https://github.com/rustwasm/wee_alloc/issues/107)
-* [RUSTSEC-2022-0054: wee_alloc is Unmaintained](https://rustsec.org/advisories/RUSTSEC-2022-0054.html)
-
-## License
-
-[GNU Affero General Public License v3.0](https://choosealicense.com/licenses/agpl-3.0)
+[GNU Affero General Public License v3.0](LICENSE)
