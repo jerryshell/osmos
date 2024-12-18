@@ -16,35 +16,27 @@ const colorList = [
   "#F0A04B",
 ];
 
-const sim = new osmos.Simulator(width, height);
+const simulator = new osmos.Simulator(width, height);
 
 const App = () => {
+  const [speedInput, setSpeedInput] = createSignal(1);
   const [speed, setSpeed] = createSignal(1);
   const [epoch, setEpoch] = createSignal(1);
   const [step, setStep] = createSignal(1);
   const [population, setPopulation] = createSignal(1);
 
-  let speedInput: HTMLInputElement;
   let canvas: HTMLCanvasElement;
 
-  const handleSetSpeedBtnClick = () => {
-    setSpeed(speedInput.valueAsNumber);
-  };
-
-  const handleResetSpeedBtnClick = () => {
-    setSpeed(1);
-  };
-
   onMount(() => {
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas!.getContext("2d");
 
     const render = () => {
       ctx!.clearRect(0, 0, width, height);
 
-      setEpoch(sim.getEpochCount());
-      setStep(sim.getStepCount());
+      setEpoch(simulator.getEpochCount());
+      setStep(simulator.getStepCount());
 
-      const objectList = sim.getObjectList();
+      const objectList = simulator.getObjectList();
       setPopulation(objectList.length);
 
       for (let object of objectList) {
@@ -55,7 +47,7 @@ const App = () => {
       }
 
       for (let i = 0; i < speed(); i++) {
-        sim.step();
+        simulator.step();
       }
 
       frame = requestAnimationFrame(render);
@@ -67,41 +59,46 @@ const App = () => {
   });
 
   return (
-    <div id="app">
-      <div id="header">
-        <div id="info">
-          <span id="speedText">🚀 Speed: {speed()}</span>
-          <span> · </span>
-          <span id="epochText">🧬 Epoch: {epoch()}</span>
-          <span> · </span>
-          <span id="stepText">🎮 Step: {step()}</span>
-          <span> · </span>
-          <span id="populationText">👾 Population: {population()}</span>
+    <>
+      <div id="app">
+        <div id="header">
+          <div id="info">
+            <span>🚀 Speed: {speed()}</span>
+            <span> · </span>
+            <span>🧬 Epoch: {epoch()}</span>
+            <span> · </span>
+            <span>🎮 Step: {step()}</span>
+            <span> · </span>
+            <span>👾 Population: {population()}</span>
+          </div>
+          <input
+            type="number"
+            placeholder="Speed"
+            value={speedInput()}
+            onChange={(e) => setSpeedInput(e.target.valueAsNumber)}
+          />
+          <button onClick={() => setSpeed(speedInput())}>Set Speed</button>
+          <button
+            onClick={() => {
+              setSpeed(1);
+              setSpeedInput(1);
+            }}
+          >
+            Reset Speed
+          </button>
+          <br />
         </div>
-        <input
-          id="speedInput"
-          type="number"
-          placeholder="Speed"
-          ref={speedInput!}
-        />
-        <button id="setSpeedBtn" onClick={handleSetSpeedBtnClick}>
-          Set Speed
-        </button>
-        <button id="resetSpeedBtn" onClick={handleResetSpeedBtnClick}>
-          Reset Speed
-        </button>
-        <br />
-      </div>
 
-      <canvas ref={canvas!} width={width} height={height} />
+        <canvas ref={canvas!} width={width} height={height} />
 
-      <div id="footer">
-        <span>Author: </span>
-        <a href="https://github.com/jerryshell" target="_blank">
-          @jerryshell
-        </a>
+        <div id="footer">
+          <span>Author: </span>
+          <a href="https://github.com/jerryshell" target="_blank">
+            @jerryshell
+          </a>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
