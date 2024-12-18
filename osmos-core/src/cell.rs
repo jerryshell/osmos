@@ -15,7 +15,7 @@ impl Cell {
             position: nalgebra::Point2::new(0.0, 0.0),
             direction: nalgebra::Vector2::new(0.0, 0.0),
             velocity: nalgebra::Vector2::new(0.0, 0.0),
-            energy: rand::Rng::gen_range(rng, 1..=2),
+            energy: rand::Rng::gen_range(rng, 1..=3),
             sensor: crate::sensor::Sensor::new(sensor_range),
         };
         cell.random_position(rng, max_x, max_y);
