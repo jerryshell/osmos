@@ -26,27 +26,21 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 continue;
             }
 
-            match () {
-                _ if current_object_energy > other_object_energy => {
+            match current_object_energy.cmp(&other_object_energy) {
+                std::cmp::Ordering::Greater => {
                     object_list[current_object_index].cell.energy += 1;
                     object_list[other_object_index].cell.energy -= 1;
                 }
-                _ if current_object_energy < other_object_energy => {
+                std::cmp::Ordering::Less => {
                     object_list[current_object_index].cell.energy -= 1;
                     object_list[other_object_index].cell.energy += 1;
                 }
-                _ => {
-                    // energy equal, pull two Object apart using the opposite force
-                    let current_object_velocity = (current_object_position - other_object_position)
-                        .normalize()
-                        * object_list[current_object_index].cell.get_speed();
-
-                    let other_object_velocity = (other_object_position - current_object_position)
-                        .normalize()
-                        * object_list[other_object_index].cell.get_speed();
-
-                    object_list[current_object_index].cell.velocity = current_object_velocity;
-                    object_list[other_object_index].cell.velocity = other_object_velocity;
+                std::cmp::Ordering::Equal => {
+                    let direction = (current_object_position - other_object_position).normalize();
+                    let current_speed = object_list[current_object_index].cell.get_speed();
+                    let other_speed = object_list[other_object_index].cell.get_speed();
+                    object_list[current_object_index].cell.velocity = direction * current_speed;
+                    object_list[other_object_index].cell.velocity = -direction * other_speed;
                 }
             }
         }
