@@ -4,7 +4,7 @@ Rust + WASM + Vite + 神经网络 + 遗传算法
 
 Bilibili 视频：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 
-立刻体验：[https://osmos.jerryshell.eu.org](osmos.jerryshell.eu.org)
+立刻体验：[osmos.jerryshell.eu.org](https://osmos.jerryshell.eu.org)
 
 ## 如何运行
 
