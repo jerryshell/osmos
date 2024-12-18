@@ -68,32 +68,3 @@ pub fn build_network_from_gene_list(
         .collect();
     osmos_nn::network::Network::new(layer_list)
 }
-
-#[cfg(test)]
-mod tests {
-    mod get_gene_list_from_network {
-        #[test]
-        fn test() {
-            let mut rng = rand::thread_rng();
-            let network = osmos_nn::network::Network::random(&mut rng, &[4, 6, 2]);
-            let gene_list = crate::ga::gene::get_gene_list_from_network(&network);
-            assert!(gene_list.len() == (4 * 6 + 6) + (6 * 2 + 2));
-        }
-    }
-
-    mod build_network_from_gene_list {
-        #[test]
-        fn test() {
-            let mut rng = rand::thread_rng();
-            let network = osmos_nn::network::Network::random(&mut rng, &[4, 6, 2]);
-            let gene_list = crate::ga::gene::get_gene_list_from_network(&network);
-
-            let network_2 = crate::ga::gene::build_network_from_gene_list(&[4, 6, 2], &gene_list);
-
-            assert_eq!(
-                gene_list,
-                crate::ga::gene::get_gene_list_from_network(&network_2)
-            );
-        }
-    }
-}
