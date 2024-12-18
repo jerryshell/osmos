@@ -71,19 +71,11 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             assert_eq!(nn_input.len(), object.network.layer_topology[0]);
 
             let nn_output = object.network.feed(&nn_input);
-            assert_eq!(nn_output.len(), 4);
+            assert_eq!(nn_output.len(), 2);
 
-            let up = nn_output[0];
-            let right = nn_output[1];
-            let down = nn_output[2];
-            let left = nn_output[3];
+            let direction_x = nn_output[0].sin();
+            let direction_y = nn_output[1].sin();
 
-            let acc_x = left - right;
-            let acc_y = up - down;
-            object.cell.acceleration = nalgebra::Vector2::new(acc_x, acc_y);
+            object.cell.direction = nalgebra::Vector2::new(direction_x, direction_y);
         });
 }
-
-// fn sigmoid(x: f64) -> f64 {
-//     1.0 / (1.0 + std::f64::consts::E.powf(-x))
-// }

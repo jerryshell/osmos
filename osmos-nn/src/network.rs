@@ -5,7 +5,7 @@ pub struct Network {
 
 impl Network {
     pub fn new(layer_list: Vec<crate::layer::Layer>) -> Self {
-        let mut layer_topology = Vec::with_capacity(layer_list.len() + 1);
+        let mut layer_topology = Vec::with_capacity(layer_list.len());
         layer_topology.push(layer_list[0].neuron_list[0].weight_list.len());
         layer_topology.append(
             &mut layer_list
@@ -46,7 +46,7 @@ mod tests {
         #[test]
         fn test() {
             let mut rng = rand::thread_rng();
-            let layer_topology = [4, 8, 6];
+            let layer_topology = [4, 8, 2];
             let network = crate::network::Network::random(&mut rng, &layer_topology);
             assert_eq!(layer_topology, network.layer_topology[..]);
             assert_eq!(network.layer_list[0].neuron_list.len(), layer_topology[1]);

@@ -38,18 +38,12 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                 _ => {
                     // energy equal, pull two Object apart using the opposite force
                     let current_object_velocity = (current_object_position - other_object_position)
-                        .cap_magnitude(
-                            object_list[current_object_index]
-                                .cell
-                                .get_max_velocity_magnitude(),
-                        );
+                        .normalize()
+                        * object_list[current_object_index].cell.get_speed();
 
                     let other_object_velocity = (other_object_position - current_object_position)
-                        .cap_magnitude(
-                            object_list[other_object_index]
-                                .cell
-                                .get_max_velocity_magnitude(),
-                        );
+                        .normalize()
+                        * object_list[other_object_index].cell.get_speed();
 
                     object_list[current_object_index].cell.velocity = current_object_velocity;
                     object_list[other_object_index].cell.velocity = other_object_velocity;

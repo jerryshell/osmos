@@ -1,12 +1,13 @@
+const BASE_SPEED: f64 = 2.0;
+
 pub struct Cell {
     pub max_x: f64,
     pub max_y: f64,
     pub position: nalgebra::Point2<f64>,
-    pub acceleration: nalgebra::Vector2<f64>,
+    pub direction: nalgebra::Vector2<f64>,
     pub velocity: nalgebra::Vector2<f64>,
     pub energy: usize,
     pub sensor: crate::sensor::Sensor,
-    pub max_position_magnitude: f64,
 }
 
 impl Cell {
@@ -16,11 +17,10 @@ impl Cell {
             max_x,
             max_y,
             position: nalgebra::Point2::new(0.0, 0.0),
-            acceleration: nalgebra::Vector2::new(0.0, 0.0),
+            direction: nalgebra::Vector2::new(0.0, 0.0),
             velocity: nalgebra::Vector2::new(0.0, 0.0),
             energy: rand::Rng::gen_range(rng, 1..=2),
             sensor: crate::sensor::Sensor::new(sensor_range),
-            max_position_magnitude: nalgebra::Vector2::new(max_x, max_y).magnitude(),
         };
         cell.random_position(rng);
         cell
@@ -33,8 +33,7 @@ impl Cell {
         self.position.y = random_y;
     }
 
-    pub fn get_max_velocity_magnitude(&self) -> f64 {
-        self.max_position_magnitude * 0.0005
-            + (1.0 / self.energy as f64) * (self.max_position_magnitude * 0.001)
+    pub fn get_speed(&self) -> f64 {
+        BASE_SPEED + (BASE_SPEED / self.energy as f64)
     }
 }
