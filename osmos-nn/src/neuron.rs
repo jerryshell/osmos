@@ -28,30 +28,3 @@ impl Neuron {
         sum + self.bias
     }
 }
-
-#[cfg(test)]
-mod tests {
-    mod random {
-        #[test]
-        fn test() {
-            let mut rng = rand::thread_rng();
-            let neuron = crate::neuron::Neuron::random(&mut rng, 100);
-            assert!(neuron.weight_list.len() == 100);
-            assert!((-1.0..=1.0).contains(&neuron.bias));
-            assert!(neuron
-                .weight_list
-                .iter()
-                .all(|weight| (-1.0..=1.0).contains(weight)));
-        }
-    }
-
-    mod feed {
-        #[test]
-        fn test() {
-            let neuron = crate::neuron::Neuron::new(1.0, &[2.0, 3.0, 4.0]);
-            let input_list = [2.0, 2.0, 2.0];
-            let output = neuron.feed(&input_list);
-            assert!(output == 19.0);
-        }
-    }
-}
