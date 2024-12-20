@@ -1,5 +1,5 @@
 pub fn crossover(
-    rng: &mut rand::rngs::ThreadRng,
+    rng: &mut impl rand::RngCore,
     parent_a_gene: &crate::gene::Gene,
     parent_b_gene: &crate::gene::Gene,
 ) -> crate::gene::Gene {

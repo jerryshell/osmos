@@ -9,7 +9,7 @@ pub struct Cell {
 }
 
 impl Cell {
-    pub fn random(rng: &mut rand::rngs::ThreadRng, max_x: f64, max_y: f64) -> Self {
+    pub fn random(rng: &mut impl rand::RngCore, max_x: f64, max_y: f64) -> Self {
         let sensor_range = nalgebra::Vector2::new(max_x, max_y).magnitude() * 0.5;
         let mut cell = Self {
             position: nalgebra::Point2::new(0.0, 0.0),
@@ -22,7 +22,7 @@ impl Cell {
         cell
     }
 
-    pub fn random_position(&mut self, rng: &mut rand::rngs::ThreadRng, max_x: f64, max_y: f64) {
+    pub fn random_position(&mut self, rng: &mut impl rand::RngCore, max_x: f64, max_y: f64) {
         let random_x = rand::Rng::gen_range(rng, 0.0..=max_x);
         let random_y = rand::Rng::gen_range(rng, 0.0..=max_y);
         self.position.x = random_x;

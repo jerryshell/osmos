@@ -9,7 +9,7 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new(rng: &mut rand::rngs::ThreadRng, id: usize, max_x: f64, max_y: f64) -> Self {
+    pub fn new(rng: &mut impl rand::RngCore, id: usize, max_x: f64, max_y: f64) -> Self {
         Self {
             id,
             cell: osmos_core::cell::Cell::random(rng, max_x, max_y),
@@ -18,7 +18,7 @@ impl Object {
     }
 
     pub fn from_network(
-        rng: &mut rand::rngs::ThreadRng,
+        rng: &mut impl rand::RngCore,
         network: osmos_nn::network::Network,
         id: usize,
         max_x: f64,
@@ -42,7 +42,7 @@ impl osmos_ga::gene::GeneObject for Object {
     }
 
     fn build(
-        rng: &mut rand::rngs::ThreadRng,
+        rng: &mut impl rand::RngCore,
         gene: osmos_ga::gene::Gene,
         id: usize,
         max_x: f64,

@@ -2,7 +2,7 @@ const MUTATE_CHANCE: f64 = 0.01;
 const MUTATE_COEFF: f64 = 0.3;
 
 pub fn evolve<T>(
-    rng: &mut rand::rngs::ThreadRng,
+    rng: &mut impl rand::RngCore,
     object_list: &[T],
     object_count: usize,
     max_x: f64,

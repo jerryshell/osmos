@@ -19,7 +19,7 @@ impl Network {
         }
     }
 
-    pub fn random(rng: &mut rand::rngs::ThreadRng, layer_topology: &[usize]) -> Self {
+    pub fn random(rng: &mut impl rand::RngCore, layer_topology: &[usize]) -> Self {
         let layer_list = layer_topology
             .windows(2)
             .map(|window| crate::layer::Layer::random(rng, window[0], window[1]))

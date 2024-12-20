@@ -1,5 +1,5 @@
 pub fn selection(
-    rng: &mut rand::rngs::ThreadRng,
+    rng: &mut impl rand::RngCore,
     object_list: &[impl crate::gene::GeneObject],
 ) -> usize {
     let total_fitness = object_list.iter().map(|o| o.fitness()).sum::<isize>();

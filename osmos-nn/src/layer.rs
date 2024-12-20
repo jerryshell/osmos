@@ -8,7 +8,7 @@ impl Layer {
     }
 
     pub fn random(
-        rng: &mut rand::rngs::ThreadRng,
+        rng: &mut impl rand::RngCore,
         weight_list_len_per_neuron: usize,
         neuron_count: usize,
     ) -> Self {

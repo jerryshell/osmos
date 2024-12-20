@@ -1,5 +1,5 @@
 pub fn mutation(
-    rng: &mut rand::rngs::ThreadRng,
+    rng: &mut impl rand::RngCore,
     mutate_chance: f64,
     mutate_coeff: f64,
     gene: &mut crate::gene::Gene,

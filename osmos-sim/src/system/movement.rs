@@ -1,5 +1,5 @@
 pub fn process(
-    rng: &mut rand::rngs::ThreadRng,
+    rng: &mut impl rand::RngCore,
     max_x: f64,
     max_y: f64,
     object_list: &mut [crate::object::Object],
