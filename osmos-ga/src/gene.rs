@@ -1,15 +1,15 @@
-pub type GeneList = Vec<f64>;
+pub type Gene = Vec<f64>;
 
 pub trait GeneObject {
     fn build(
         rng: &mut rand::rngs::ThreadRng,
-        gene_list: GeneList,
+        gene: Gene,
         id: usize,
         max_x: f64,
         max_y: f64,
     ) -> Self;
 
-    fn get_gene_list(&self) -> GeneList;
+    fn gene(&self) -> Gene;
 
     fn fitness(&self) -> isize;
 }

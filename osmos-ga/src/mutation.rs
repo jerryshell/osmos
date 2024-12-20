@@ -2,9 +2,9 @@ pub fn mutation(
     rng: &mut rand::rngs::ThreadRng,
     mutate_chance: f64,
     mutate_coeff: f64,
-    gene_list: &mut crate::gene::GeneList,
+    gene: &mut crate::gene::Gene,
 ) {
-    gene_list.iter_mut().for_each(|gene| {
+    gene.iter_mut().for_each(|gene| {
         let mutate_flag = rand::Rng::gen_bool(rng, mutate_chance);
         if mutate_flag {
             let sign = if rand::Rng::gen_bool(rng, 0.5) {
@@ -12,7 +12,6 @@ pub fn mutation(
             } else {
                 1.0
             };
-
             *gene += sign * mutate_coeff * rand::Rng::gen::<f64>(rng);
         }
     });
