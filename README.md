@@ -32,17 +32,11 @@ npm run dev
 ```
 osmos
 ├── osmos-core # 核心数据结构
+├── osmos-ga   # 遗传算法
 ├── osmos-nn   # 神经网络
-├── osmos-sim  # 进化模拟器，使用类似 ECS 的模式驱动全局数据
+├── osmos-sim  # 进化模拟器
 │   └── src
-│       ├── ga # 遗传算法
-│       │   ├── crossover.rs # 交叉
-│       │   ├── evolve.rs    # 进化
-│       │   ├── fitness.rs   # 适应度
-│       │   ├── gene.rs      # 基因
-│       │   ├── mutation.rs  # 变异
-│       │   └── selection.rs # 选择
-│       └── system # ECS 子系统
+│       └── system           # 子系统
 │           ├── collision.rs # 碰撞系统
 │           ├── epoch.rs     # 迭代系统
 │           ├── movement.rs  # 移动系统

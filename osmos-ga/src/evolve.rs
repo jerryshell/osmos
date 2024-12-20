@@ -9,13 +9,13 @@ pub fn evolve<T>(
     max_y: f64,
 ) -> Vec<T>
 where
-    T: crate::ga::gene::GeneObject,
+    T: crate::gene::GeneObject,
 {
     (0..object_count)
         .map(|id| {
             // select parent_a and parent_b
-            let parent_a_index = crate::ga::selection::selection(rng, object_list);
-            let parent_b_index = crate::ga::selection::selection(rng, object_list);
+            let parent_a_index = crate::selection::selection(rng, object_list);
+            let parent_b_index = crate::selection::selection(rng, object_list);
 
             let parent_a = &object_list[parent_a_index];
             let parent_b = &object_list[parent_b_index];
@@ -26,10 +26,10 @@ where
 
             // get child_gene_list by crossover
             let mut child_gene_list =
-                crate::ga::crossover::crossover(rng, &parent_a_gene_list, &parent_b_gene_list);
+                crate::crossover::crossover(rng, &parent_a_gene_list, &parent_b_gene_list);
 
             // mutate child_gene_list
-            crate::ga::mutation::mutation(rng, MUTATE_CHANCE, MUTATE_COEFF, &mut child_gene_list);
+            crate::mutation::mutation(rng, MUTATE_CHANCE, MUTATE_COEFF, &mut child_gene_list);
 
             // build a new object
             T::build(rng, child_gene_list, id, max_x, max_y)

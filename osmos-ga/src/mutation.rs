@@ -2,7 +2,7 @@ pub fn mutation(
     rng: &mut rand::rngs::ThreadRng,
     mutate_chance: f64,
     mutate_coeff: f64,
-    gene_list: &mut crate::ga::gene::GeneList,
+    gene_list: &mut crate::gene::GeneList,
 ) {
     gene_list.iter_mut().for_each(|gene| {
         let mutate_flag = rand::Rng::gen_bool(rng, mutate_chance);

@@ -1,7 +1,7 @@
 pub fn process(simulator: &mut crate::simulator::Simulator) {
     simulator.step_count += 1;
     if is_epoch_end(simulator) {
-        let new_object_list = crate::ga::evolve::evolve(
+        let new_object_list = osmos_ga::evolve::evolve(
             &mut simulator.rng,
             &simulator.object_list,
             simulator.object_count,

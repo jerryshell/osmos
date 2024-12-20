@@ -32,8 +32,8 @@ impl Object {
     }
 }
 
-impl crate::ga::gene::GeneObject for Object {
-    fn get_gene_list(&self) -> crate::ga::gene::GeneList {
+impl osmos_ga::gene::GeneObject for Object {
+    fn get_gene_list(&self) -> osmos_ga::gene::GeneList {
         get_gene_list_from_network(&self.network)
     }
 
@@ -43,7 +43,7 @@ impl crate::ga::gene::GeneObject for Object {
 
     fn build(
         rng: &mut rand::rngs::ThreadRng,
-        gene_list: crate::ga::gene::GeneList,
+        gene_list: osmos_ga::gene::GeneList,
         id: usize,
         max_x: f64,
         max_y: f64,
@@ -53,7 +53,7 @@ impl crate::ga::gene::GeneObject for Object {
     }
 }
 
-fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> crate::ga::gene::GeneList {
+fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> osmos_ga::gene::GeneList {
     network
         .layer_list
         .iter()
@@ -61,7 +61,7 @@ fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> crate::ga
         .collect()
 }
 
-fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> crate::ga::gene::GeneList {
+fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> osmos_ga::gene::GeneList {
     layer
         .neuron_list
         .iter()
@@ -69,7 +69,7 @@ fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> crate::ga::gene::
         .collect()
 }
 
-fn get_gene_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> crate::ga::gene::GeneList {
+fn get_gene_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> osmos_ga::gene::GeneList {
     let mut gene_list = Vec::with_capacity(neuron.weight_list.len() + 1);
     gene_list.push(neuron.bias);
     gene_list.append(&mut neuron.weight_list.clone());
@@ -89,7 +89,7 @@ fn build_neuron_from_gene_data_iter(
                 .next()
                 .expect("build neuron from gene_data_iter failed")
         })
-        .collect::<crate::ga::gene::GeneList>();
+        .collect::<osmos_ga::gene::GeneList>();
     osmos_nn::neuron::Neuron::new(bias, &weight_list)
 }
 fn build_layer_from_gene_data_iter(
