@@ -1,70 +1,15 @@
 pub type GeneList = Vec<f64>;
 
-impl crate::object::Object {
-    pub fn get_gene_list(&self) -> GeneList {
-        get_gene_list_from_network(&self.network)
-    }
-}
+pub trait GeneObject {
+    fn build(
+        rng: &mut rand::rngs::ThreadRng,
+        gene_list: GeneList,
+        id: usize,
+        max_x: f64,
+        max_y: f64,
+    ) -> Self;
 
-fn get_gene_list_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> GeneList {
-    let mut gene_list = Vec::with_capacity(neuron.weight_list.len() + 1);
-    gene_list.push(neuron.bias);
-    gene_list.append(&mut neuron.weight_list.clone());
-    gene_list
-}
+    fn get_gene_list(&self) -> GeneList;
 
-fn build_neuron_from_gene_data_iter(
-    weight_list_len: usize,
-    gene_data_iter: &mut impl Iterator<Item = f64>,
-) -> osmos_nn::neuron::Neuron {
-    let bias = gene_data_iter
-        .next()
-        .expect("build neuron from gene_data_iter failed");
-    let weight_list = (0..weight_list_len)
-        .map(|_| {
-            gene_data_iter
-                .next()
-                .expect("build neuron from gene_data_iter failed")
-        })
-        .collect::<GeneList>();
-    osmos_nn::neuron::Neuron::new(bias, &weight_list)
-}
-
-fn get_gene_list_from_layer(layer: &osmos_nn::layer::Layer) -> GeneList {
-    layer
-        .neuron_list
-        .iter()
-        .flat_map(get_gene_list_from_neuron)
-        .collect()
-}
-
-fn build_layer_from_gene_data_iter(
-    weight_list_len_per_neuron: usize,
-    neuron_count: usize,
-    gene_data_iter: &mut impl Iterator<Item = f64>,
-) -> osmos_nn::layer::Layer {
-    let neuron_list = (0..neuron_count)
-        .map(|_| build_neuron_from_gene_data_iter(weight_list_len_per_neuron, gene_data_iter))
-        .collect();
-    osmos_nn::layer::Layer::new(neuron_list)
-}
-
-fn get_gene_list_from_network(network: &osmos_nn::network::Network) -> GeneList {
-    network
-        .layer_list
-        .iter()
-        .flat_map(get_gene_list_from_layer)
-        .collect()
-}
-
-pub fn build_network_from_gene_list(
-    layer_topology: &[usize],
-    gene_list: &[f64],
-) -> osmos_nn::network::Network {
-    let mut gene_data_iter = gene_list.iter().copied();
-    let layer_list = layer_topology
-        .windows(2)
-        .map(|window| build_layer_from_gene_data_iter(window[0], window[1], &mut gene_data_iter))
-        .collect();
-    osmos_nn::network::Network::new(layer_list)
+    fn fitness(&self) -> isize;
 }

@@ -1,6 +1,9 @@
 // randomly return an Object index
 // the greater the fitness of Object, the greater the probability of being selected
-pub fn selection(rng: &mut rand::rngs::ThreadRng, object_list: &[crate::object::Object]) -> usize {
+pub fn selection(
+    rng: &mut rand::rngs::ThreadRng,
+    object_list: &[impl crate::ga::gene::GeneObject],
+) -> usize {
     let total_fitness = object_list.iter().map(|o| o.fitness()).sum::<isize>();
     loop {
         let random_index = rand::Rng::gen_range(rng, 0..object_list.len());

@@ -71,7 +71,10 @@ pub fn process(object_list: &mut [crate::object::Object]) {
             assert_eq!(nn_input.len(), object.network.layer_topology[0]);
 
             let nn_output = object.network.feed(&nn_input);
-            assert_eq!(nn_output.len(), 2);
+            assert_eq!(
+                nn_output.len(),
+                object.network.layer_topology[object.network.layer_topology.len() - 1]
+            );
 
             let direction_x = nn_output[0].sin();
             let direction_y = nn_output[1].sin();
