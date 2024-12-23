@@ -4,18 +4,11 @@ pub struct Network {
 
 impl Network {
     pub fn new(layer_list: Vec<crate::layer::Layer>) -> Self {
-        let mut layer_topology = Vec::with_capacity(layer_list.len());
-        layer_topology.push(layer_list[0].neuron_list[0].weight_list.len());
-        layer_topology.append(
-            &mut layer_list
-                .iter()
-                .map(|layer| layer.neuron_list.len())
-                .collect::<Vec<usize>>(),
-        );
         Self { layer_list }
     }
 
     pub fn random(rng: &mut impl rand::RngCore, layer_topology: &[usize]) -> Self {
+        assert!(layer_topology.len() > 1);
         let layer_list = layer_topology
             .windows(2)
             .map(|window| crate::layer::Layer::random(rng, window[0], window[1]))
@@ -24,11 +17,8 @@ impl Network {
     }
 
     pub fn feed(&self, input_list: &[f64]) -> Vec<f64> {
-        let mut output_list = self.layer_list[0].feed(input_list);
         self.layer_list
             .iter()
-            .skip(1)
-            .for_each(|layer| output_list = layer.feed(&output_list));
-        output_list
+            .fold(input_list.to_vec(), |input_list, x| x.feed(&input_list))
     }
 }
