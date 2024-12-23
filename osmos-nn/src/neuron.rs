@@ -5,6 +5,7 @@ pub struct Neuron {
 
 impl Neuron {
     pub fn new(bias: f32, weight_list: &[f32]) -> Self {
+        assert!(!weight_list.is_empty());
         Self {
             bias,
             weight_list: weight_list.to_vec(),
@@ -25,6 +26,6 @@ impl Neuron {
             .zip(&self.weight_list)
             .map(|(input, weight)| input * weight)
             .sum::<f32>();
-        sum + self.bias
+        (sum + self.bias).max(0.0)
     }
 }
