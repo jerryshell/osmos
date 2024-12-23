@@ -1,7 +1,5 @@
 use rand::Rng;
 
-const BASE_SPEED: f32 = 0.002;
-
 pub struct Cell {
     pub position: nalgebra::Point2<f32>,
     pub direction: nalgebra::Vector2<f32>,
@@ -30,6 +28,6 @@ impl Cell {
     }
 
     pub fn get_speed(&self) -> f32 {
-        BASE_SPEED + (BASE_SPEED / self.energy as f32)
+        0.001 + (1.0 / self.energy as f32) * 0.0005
     }
 }

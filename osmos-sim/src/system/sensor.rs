@@ -30,29 +30,30 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                 let current_object_energy = object_list[current_object_index].cell.energy;
                 let other_object_energy = object_list[other_object_index].cell.energy;
 
-                let status = match current_object_energy.cmp(&other_object_energy) {
-                    std::cmp::Ordering::Less => -0.5,
-                    std::cmp::Ordering::Equal => 0.0,
-                    std::cmp::Ordering::Greater => 0.5,
-                } / in_sensor_range_other_object_index_list.len() as f32;
-
                 let current_object_position = object_list[current_object_index].cell.position;
                 let other_object_position = object_list[other_object_index].cell.position;
+                let direction = (other_object_position - current_object_position).normalize();
 
-                // up
-                if other_object_position.y <= current_object_position.y {
+                let sensor_range = object_list[current_object_index].cell.sensor.range;
+                let distance = nalgebra::distance(&current_object_position, &other_object_position);
+
+                let status = (current_object_energy as f32 - other_object_energy as f32)
+                    * ((sensor_range - distance) / sensor_range);
+
+                // up-right
+                if direction.x > 0.0 && direction.y >= 0.0 {
                     sensor_data_list[0] += status;
                 }
-                // right
-                if other_object_position.x >= current_object_position.x {
+                // up-left
+                if direction.x <= 0.0 && direction.y > 0.0 {
                     sensor_data_list[1] += status;
                 }
-                // down
-                if other_object_position.y >= current_object_position.y {
+                // down-left
+                if direction.x < 0.0 && direction.y <= 0.0 {
                     sensor_data_list[2] += status;
                 }
-                // left
-                if other_object_position.x <= current_object_position.x {
+                // down-right
+                if direction.x >= 0.0 && direction.y < 0.0 {
                     sensor_data_list[3] += status;
                 }
             });
