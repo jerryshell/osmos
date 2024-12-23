@@ -30,8 +30,11 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                 let current_object_energy = object_list[current_object_index].cell.energy;
                 let other_object_energy = object_list[other_object_index].cell.energy;
 
-                let status = (current_object_energy as f32 - other_object_energy as f32)
-                    / current_object_energy as f32;
+                let status = match current_object_energy.cmp(&other_object_energy) {
+                    std::cmp::Ordering::Less => -0.5,
+                    std::cmp::Ordering::Equal => 0.0,
+                    std::cmp::Ordering::Greater => 0.5,
+                } / in_sensor_range_other_object_index_list.len() as f32;
 
                 let current_object_position = object_list[current_object_index].cell.position;
                 let other_object_position = object_list[other_object_index].cell.position;
