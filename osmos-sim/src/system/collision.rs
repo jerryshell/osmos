@@ -35,7 +35,8 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
                     object_list[other_object_index].cell.energy += 1;
                 }
                 std::cmp::Ordering::Equal => {
-                    let direction = (current_object_position - other_object_position).normalize();
+                    let direction =
+                        (current_object_position - other_object_position).cap_magnitude(1.0);
                     let current_speed = object_list[current_object_index].cell.get_speed();
                     let other_speed = object_list[other_object_index].cell.get_speed();
                     object_list[current_object_index].cell.velocity = direction * current_speed;

@@ -32,7 +32,8 @@ pub fn process(object_list: &mut [crate::object::Object]) {
 
                 let current_object_position = object_list[current_object_index].cell.position;
                 let other_object_position = object_list[other_object_index].cell.position;
-                let direction = (other_object_position - current_object_position).normalize();
+                let direction =
+                    (other_object_position - current_object_position).cap_magnitude(1.0);
 
                 let sensor_range = object_list[current_object_index].cell.sensor.range;
                 let distance = nalgebra::distance(&current_object_position, &other_object_position);

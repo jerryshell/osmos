@@ -34,8 +34,9 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                 sensor_left_array_zscore[index],
             ];
             let nn_output = object.network.feed(&nn_input);
-            let direction_x = nn_output[0].sin();
-            let direction_y = nn_output[1].sin();
-            object.cell.direction = nalgebra::Vector2::new(direction_x, direction_y);
+            let direction_x = nn_output[0] - nn_output[1];
+            let direction_y = nn_output[2] - nn_output[3];
+            object.cell.direction =
+                nalgebra::Vector2::new(direction_x, direction_y).cap_magnitude(1.0);
         });
 }

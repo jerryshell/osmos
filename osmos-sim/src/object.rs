@@ -1,6 +1,6 @@
 // 4 = [sensor_up, sensor_right, sensor_down, sensor_left]
-// 2 = [direction_x, direction_y]
-const NETWORK_LAYER_TOPOLOGY: [usize; 3] = [4, 16, 2];
+// 4 = [direction_x, direction_x, direction_x, direction_y]
+const NETWORK_LAYER_TOPOLOGY: [usize; 3] = [4, 8, 4];
 
 pub struct Object {
     pub id: usize,
