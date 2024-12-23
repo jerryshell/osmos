@@ -1,18 +1,8 @@
-pub fn process(
-    rng: &mut impl rand::RngCore,
-    max_x: f32,
-    max_y: f32,
-    object_list: &mut [crate::object::Object],
-) {
+pub fn process(object_list: &mut [crate::object::Object]) {
     object_list.iter_mut().for_each(|object| {
         object.cell.velocity = object.cell.direction * object.cell.get_speed();
-
         object.cell.position += object.cell.velocity;
-
-        if !(0.0..max_x).contains(&object.cell.position.x)
-            || !(0.0..max_y).contains(&object.cell.position.y)
-        {
-            object.cell.random_position(rng, max_x, max_y);
-        }
+        object.cell.position.x = nalgebra::wrap(object.cell.position.x, 0.0, 1.0);
+        object.cell.position.y = nalgebra::wrap(object.cell.position.y, 0.0, 1.0);
     });
 }

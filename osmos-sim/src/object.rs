@@ -1,6 +1,6 @@
-// 9 = cell.energy(1) + cell.velocity.x(1) + cell.velocity.y(1) + cell.position.x(1) + cell.position.y(1) + cell.sensor.data_list(4)
+// 4 = [sensor_up, sensor_right, sensor_down, sensor_left]
 // 2 = [direction_x, direction_y]
-const NETWORK_LAYER_TOPOLOGY: [usize; 3] = [9, 16, 2];
+const NETWORK_LAYER_TOPOLOGY: [usize; 3] = [4, 16, 2];
 
 pub struct Object {
     pub id: usize,
@@ -9,10 +9,10 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new(rng: &mut impl rand::RngCore, id: usize, max_x: f32, max_y: f32) -> Self {
+    pub fn new(rng: &mut impl rand::RngCore, id: usize) -> Self {
         Self {
             id,
-            cell: osmos_core::cell::Cell::random(rng, max_x, max_y),
+            cell: osmos_core::cell::Cell::random(rng),
             network: osmos_nn::network::Network::random(rng, &NETWORK_LAYER_TOPOLOGY),
         }
     }
@@ -21,12 +21,10 @@ impl Object {
         rng: &mut impl rand::RngCore,
         network: osmos_nn::network::Network,
         id: usize,
-        max_x: f32,
-        max_y: f32,
     ) -> Self {
         Self {
             id,
-            cell: osmos_core::cell::Cell::random(rng, max_x, max_y),
+            cell: osmos_core::cell::Cell::random(rng),
             network,
         }
     }
@@ -41,15 +39,9 @@ impl osmos_ga::gene::GeneObject for Object {
         self.cell.energy as isize
     }
 
-    fn build(
-        rng: &mut impl rand::RngCore,
-        gene: osmos_ga::gene::Gene,
-        id: usize,
-        max_x: f32,
-        max_y: f32,
-    ) -> Self {
+    fn build(rng: &mut impl rand::RngCore, gene: osmos_ga::gene::Gene, id: usize) -> Self {
         let network = build_network(&NETWORK_LAYER_TOPOLOGY, &gene);
-        Self::from_network(rng, network, id, max_x, max_y)
+        Self::from_network(rng, network, id)
     }
 }
 

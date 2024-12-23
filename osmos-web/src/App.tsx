@@ -1,8 +1,6 @@
 import { createSignal, onCleanup, onMount } from "solid-js";
 import * as osmos from "../osmos-wasm";
 
-const width = 1200;
-const height = 600;
 const colorList = [
   "#FFF1DC",
   "#E8D5C4",
@@ -16,7 +14,8 @@ const colorList = [
   "#F0A04B",
 ];
 
-const simulator = new osmos.Simulator(width, height);
+const size = 900;
+const simulator = new osmos.Simulator();
 
 const App = () => {
   const [speedInput, setSpeedInput] = createSignal(1);
@@ -31,7 +30,7 @@ const App = () => {
     const ctx = canvas!.getContext("2d");
 
     const render = () => {
-      ctx!.clearRect(0, 0, width, height);
+      ctx!.clearRect(0, 0, size, size);
 
       setEpoch(simulator.getEpochCount());
       setStep(simulator.getStepCount());
@@ -42,7 +41,7 @@ const App = () => {
       for (let object of objectList) {
         ctx!.beginPath();
         ctx!.fillStyle = colorList[object.id % colorList.length];
-        ctx!.arc(object.x, object.y, object.energy, 0, 2 * Math.PI);
+        ctx!.arc(object.x * size, object.y * size, object.energy, 0, 2 * Math.PI);
         ctx!.fill();
       }
 
@@ -89,7 +88,7 @@ const App = () => {
           <br />
         </div>
 
-        <canvas ref={canvas!} width={width} height={height} />
+        <canvas ref={canvas!} width={size} height={size} />
 
         <div id="footer">
           <span>Author: </span>

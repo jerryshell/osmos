@@ -20,8 +20,7 @@ pub fn process(object_list: &mut Vec<crate::object::Object>) {
             let other_object_position = &object_list[other_object_index].cell.position;
             let distance = nalgebra::distance(current_object_position, other_object_position);
             let energy_sum = current_object_energy + other_object_energy;
-            let r_sum = energy_sum as f32;
-            if distance >= r_sum {
+            if distance >= energy_sum as f32 / 1000.0 {
                 // current_object and other_object did not collide
                 continue;
             }

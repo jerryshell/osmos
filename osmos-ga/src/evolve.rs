@@ -1,13 +1,7 @@
 const MUTATE_CHANCE: f64 = 0.01;
 const MUTATE_COEFF: f32 = 0.3;
 
-pub fn evolve<T>(
-    rng: &mut impl rand::RngCore,
-    object_list: &[T],
-    object_count: usize,
-    max_x: f32,
-    max_y: f32,
-) -> Vec<T>
+pub fn evolve<T>(rng: &mut impl rand::RngCore, object_list: &[T], object_count: usize) -> Vec<T>
 where
     T: crate::gene::GeneObject,
 {
@@ -31,7 +25,7 @@ where
             crate::mutation::mutation(rng, MUTATE_CHANCE, MUTATE_COEFF, &mut child_gene);
 
             // build a new object
-            T::build(rng, child_gene, id, max_x, max_y)
+            T::build(rng, child_gene, id)
         })
         .collect::<Vec<T>>()
 }

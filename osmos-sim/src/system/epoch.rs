@@ -5,8 +5,6 @@ pub fn process(simulator: &mut crate::simulator::Simulator) {
             &mut simulator.rng,
             &simulator.object_list,
             simulator.object_count,
-            simulator.max_x,
-            simulator.max_y,
         );
         simulator.object_list = new_object_list;
         simulator.step_count = 0;
@@ -15,5 +13,6 @@ pub fn process(simulator: &mut crate::simulator::Simulator) {
 }
 
 fn is_epoch_end(simulator: &crate::simulator::Simulator) -> bool {
-    simulator.step_count >= simulator.max_step_count_per_epoch || simulator.object_list.len() <= 100
+    simulator.step_count >= simulator.max_step_count_per_epoch
+        || simulator.object_list.len() <= simulator.min_object_count_per_epoch
 }

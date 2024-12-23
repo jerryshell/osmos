@@ -1,1 +1,1 @@
-wasm-pack build --out-dir ../osmos-web/osmos-wasm
+wasm-pack build --release --out-dir ../osmos-web/osmos-wasm
