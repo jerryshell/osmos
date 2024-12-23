@@ -1,5 +1,4 @@
 pub struct Network {
-    pub layer_topology: Vec<usize>,
     pub layer_list: Vec<crate::layer::Layer>,
 }
 
@@ -13,10 +12,7 @@ impl Network {
                 .map(|layer| layer.neuron_list.len())
                 .collect::<Vec<usize>>(),
         );
-        Self {
-            layer_topology,
-            layer_list,
-        }
+        Self { layer_list }
     }
 
     pub fn random(rng: &mut impl rand::RngCore, layer_topology: &[usize]) -> Self {
@@ -24,10 +20,7 @@ impl Network {
             .windows(2)
             .map(|window| crate::layer::Layer::random(rng, window[0], window[1]))
             .collect();
-        Self {
-            layer_topology: layer_topology.to_vec(),
-            layer_list,
-        }
+        Self { layer_list }
     }
 
     pub fn feed(&self, input_list: &[f64]) -> Vec<f64> {
