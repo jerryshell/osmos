@@ -1,6 +1,6 @@
 pub struct Simulator {
-    pub max_x: f64,
-    pub max_y: f64,
+    pub max_x: f32,
+    pub max_y: f32,
     pub rng: rand::rngs::ThreadRng,
     pub object_count: usize,
     pub object_list: Vec<crate::object::Object>,
@@ -10,7 +10,7 @@ pub struct Simulator {
 }
 
 impl Simulator {
-    pub fn new(max_x: f64, max_y: f64) -> Self {
+    pub fn new(max_x: f32, max_y: f32) -> Self {
         let object_count = 300;
         let mut rng = rand::thread_rng();
         let object_list = (0..object_count)

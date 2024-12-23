@@ -1,7 +1,7 @@
 pub fn process(
     rng: &mut impl rand::RngCore,
-    max_x: f64,
-    max_y: f64,
+    max_x: f32,
+    max_y: f32,
     object_list: &mut [crate::object::Object],
 ) {
     object_list.iter_mut().for_each(|object| {

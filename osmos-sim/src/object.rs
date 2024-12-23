@@ -9,7 +9,7 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new(rng: &mut impl rand::RngCore, id: usize, max_x: f64, max_y: f64) -> Self {
+    pub fn new(rng: &mut impl rand::RngCore, id: usize, max_x: f32, max_y: f32) -> Self {
         Self {
             id,
             cell: osmos_core::cell::Cell::random(rng, max_x, max_y),
@@ -21,8 +21,8 @@ impl Object {
         rng: &mut impl rand::RngCore,
         network: osmos_nn::network::Network,
         id: usize,
-        max_x: f64,
-        max_y: f64,
+        max_x: f32,
+        max_y: f32,
     ) -> Self {
         Self {
             id,
@@ -45,8 +45,8 @@ impl osmos_ga::gene::GeneObject for Object {
         rng: &mut impl rand::RngCore,
         gene: osmos_ga::gene::Gene,
         id: usize,
-        max_x: f64,
-        max_y: f64,
+        max_x: f32,
+        max_y: f32,
     ) -> Self {
         let network = build_network(&NETWORK_LAYER_TOPOLOGY, &gene);
         Self::from_network(rng, network, id, max_x, max_y)
@@ -76,7 +76,7 @@ fn get_gene_from_neuron(neuron: &osmos_nn::neuron::Neuron) -> osmos_ga::gene::Ge
     gene
 }
 
-pub fn build_network(layer_topology: &[usize], gene: &[f64]) -> osmos_nn::network::Network {
+pub fn build_network(layer_topology: &[usize], gene: &[f32]) -> osmos_nn::network::Network {
     let mut gene_data_iter = gene.iter().copied();
     let layer_list = layer_topology
         .windows(2)
@@ -88,7 +88,7 @@ pub fn build_network(layer_topology: &[usize], gene: &[f64]) -> osmos_nn::networ
 fn build_layer(
     weight_list_len_per_neuron: usize,
     neuron_count: usize,
-    gene_data_iter: &mut impl Iterator<Item = f64>,
+    gene_data_iter: &mut impl Iterator<Item = f32>,
 ) -> osmos_nn::layer::Layer {
     let neuron_list = (0..neuron_count)
         .map(|_| build_neuron(weight_list_len_per_neuron, gene_data_iter))
@@ -98,7 +98,7 @@ fn build_layer(
 
 fn build_neuron(
     weight_list_len: usize,
-    gene_data_iter: &mut impl Iterator<Item = f64>,
+    gene_data_iter: &mut impl Iterator<Item = f32>,
 ) -> osmos_nn::neuron::Neuron {
     let bias = gene_data_iter
         .next()

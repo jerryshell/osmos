@@ -18,7 +18,7 @@ impl Layer {
         Self { neuron_list }
     }
 
-    pub fn feed(&self, input_list: &[f64]) -> Vec<f64> {
+    pub fn feed(&self, input_list: &[f32]) -> Vec<f32> {
         self.neuron_list
             .iter()
             .map(|neuron| neuron.feed(input_list))
@@ -27,6 +27,6 @@ impl Layer {
     }
 }
 
-fn relu(n: f64) -> f64 {
+fn relu(n: f32) -> f32 {
     n.max(0.0)
 }

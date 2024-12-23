@@ -44,7 +44,7 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                     _ if other_object_energy == current_object_energy => -0.5,
                     _ if other_object_energy < current_object_energy => 1.0,
                     _ => 0.0,
-                } * other_object_energy as f64
+                } * other_object_energy as f32
                     / distance;
 
                 let current_object_position = object_list[current_object_index].cell.position;

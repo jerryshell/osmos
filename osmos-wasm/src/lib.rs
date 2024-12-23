@@ -6,7 +6,7 @@ pub struct Simulator {
 #[wasm_bindgen::prelude::wasm_bindgen]
 impl Simulator {
     #[wasm_bindgen::prelude::wasm_bindgen(constructor)]
-    pub fn new(max_x: f64, max_y: f64) -> Self {
+    pub fn new(max_x: f32, max_y: f32) -> Self {
         Self {
             simulator: osmos_sim::simulator::Simulator::new(max_x, max_y),
         }
@@ -41,8 +41,8 @@ impl Simulator {
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Object {
     pub id: usize,
-    pub x: f64,
-    pub y: f64,
+    pub x: f32,
+    pub y: f32,
     pub energy: usize,
 }
 

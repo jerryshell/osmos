@@ -16,7 +16,7 @@ impl Network {
         Self { layer_list }
     }
 
-    pub fn feed(&self, input_list: &[f64]) -> Vec<f64> {
+    pub fn feed(&self, input_list: &[f32]) -> Vec<f32> {
         self.layer_list
             .iter()
             .fold(input_list.to_vec(), |input_list, x| x.feed(&input_list))

@@ -1,7 +1,7 @@
 pub fn mutation(
     rng: &mut impl rand::RngCore,
     mutate_chance: f64,
-    mutate_coeff: f64,
+    mutate_coeff: f32,
     gene: &mut crate::gene::Gene,
 ) {
     gene.iter_mut().for_each(|gene| {
@@ -12,7 +12,7 @@ pub fn mutation(
             } else {
                 1.0
             };
-            *gene += sign * mutate_coeff * rand::Rng::gen::<f64>(rng);
+            *gene += sign * mutate_coeff * rand::Rng::gen::<f32>(rng);
         }
     });
 }

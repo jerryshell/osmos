@@ -1,10 +1,10 @@
 pub struct Neuron {
-    pub bias: f64,
-    pub weight_list: Vec<f64>,
+    pub bias: f32,
+    pub weight_list: Vec<f32>,
 }
 
 impl Neuron {
-    pub fn new(bias: f64, weight_list: &[f64]) -> Self {
+    pub fn new(bias: f32, weight_list: &[f32]) -> Self {
         Self {
             bias,
             weight_list: weight_list.to_vec(),
@@ -19,12 +19,12 @@ impl Neuron {
         Self { bias, weight_list }
     }
 
-    pub fn feed(&self, input_list: &[f64]) -> f64 {
+    pub fn feed(&self, input_list: &[f32]) -> f32 {
         let sum = input_list
             .iter()
             .zip(&self.weight_list)
             .map(|(input, weight)| input * weight)
-            .sum::<f64>();
+            .sum::<f32>();
         sum + self.bias
     }
 }
