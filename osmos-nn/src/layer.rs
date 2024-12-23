@@ -4,6 +4,11 @@ pub struct Layer {
 
 impl Layer {
     pub fn new(neuron_list: Vec<crate::neuron::Neuron>) -> Self {
+        assert!(!neuron_list.is_empty());
+        let weight_list_len = neuron_list[0].weight_list.len();
+        assert!(neuron_list
+            .iter()
+            .all(|neuron| neuron.weight_list.len() == weight_list_len));
         Self { neuron_list }
     }
 
