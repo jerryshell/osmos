@@ -1,0 +1,7 @@
+[package]
+name = "osmos-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+osmos-sim = { path = "../osmos-sim" }

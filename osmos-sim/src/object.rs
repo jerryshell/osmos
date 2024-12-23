@@ -45,7 +45,7 @@ impl osmos_ga::gene::GeneObject for Object {
     }
 }
 
-fn get_gene_from_network(network: &osmos_nn::network::Network) -> osmos_ga::gene::Gene {
+pub fn get_gene_from_network(network: &osmos_nn::network::Network) -> osmos_ga::gene::Gene {
     network
         .layer_list
         .iter()
