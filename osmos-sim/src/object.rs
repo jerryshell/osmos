@@ -6,6 +6,7 @@ pub struct Object {
     pub id: usize,
     pub cell: osmos_core::cell::Cell,
     pub network: osmos_nn::network::Network,
+    pub network_output: f32,
 }
 
 impl Object {
@@ -14,6 +15,7 @@ impl Object {
             id,
             cell: osmos_core::cell::Cell::random(rng),
             network: osmos_nn::network::Network::random(rng, &NETWORK_LAYER_TOPOLOGY),
+            network_output: 0.0,
         }
     }
 
@@ -26,6 +28,7 @@ impl Object {
             id,
             cell: osmos_core::cell::Cell::random(rng),
             network,
+            network_output: 0.0,
         }
     }
 }

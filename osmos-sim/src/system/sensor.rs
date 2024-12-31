@@ -58,6 +58,17 @@ pub fn process(object_list: &mut [crate::object::Object]) {
                     sensor_data_list[3] += status;
                 }
             });
+        normalize(&mut sensor_data_list);
         object_list[current_object_index].cell.sensor.data_list = sensor_data_list;
+    }
+}
+
+fn normalize(v: &mut [f32; 4]) {
+    let magnitude = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]).sqrt();
+    if magnitude != 0.0 {
+        v[0] /= magnitude;
+        v[1] /= magnitude;
+        v[2] /= magnitude;
+        v[3] /= magnitude;
     }
 }
