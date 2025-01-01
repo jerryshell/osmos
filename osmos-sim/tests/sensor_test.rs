@@ -11,8 +11,8 @@ fn danger_u_test() {
     object_2.cell.energy = 2;
     let mut object_list = [object_1, object_2];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, -0.8, 0.0, 0.0]);
-    assert_eq!(object_list[1].cell.sensor.data_list, [0.0, 0.0, 0.0, 0.8]);
+    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, -1.0, 0.0, 0.0]);
+    assert_eq!(object_list[1].cell.sensor.data_list, [0.0, 0.0, 0.0, 1.0]);
 }
 
 #[test]
@@ -28,8 +28,8 @@ fn danger_r_test() {
     object_2.cell.energy = 2;
     let mut object_list = [object_1, object_2];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(object_list[0].cell.sensor.data_list, [-0.8, 0.0, 0.0, 0.0]);
-    assert_eq!(object_list[1].cell.sensor.data_list, [0.0, 0.0, 0.8, 0.0]);
+    assert_eq!(object_list[0].cell.sensor.data_list, [-1.0, 0.0, 0.0, 0.0]);
+    assert_eq!(object_list[1].cell.sensor.data_list, [0.0, 0.0, 1.0, 0.0]);
 }
 
 #[test]
@@ -45,8 +45,8 @@ fn danger_d_test() {
     object_2.cell.energy = 2;
     let mut object_list = [object_1, object_2];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, 0.0, 0.0, -0.8]);
-    assert_eq!(object_list[1].cell.sensor.data_list, [0.0, 0.8, 0.0, 0.0]);
+    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, 0.0, 0.0, -1.0]);
+    assert_eq!(object_list[1].cell.sensor.data_list, [0.0, 1.0, 0.0, 0.0]);
 }
 
 #[test]
@@ -62,8 +62,8 @@ fn danger_l_test() {
     object_2.cell.energy = 2;
     let mut object_list = [object_1, object_2];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, 0.0, -0.8, 0.0]);
-    assert_eq!(object_list[1].cell.sensor.data_list, [0.8, 0.0, 0.0, 0.0]);
+    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, 0.0, -1.0, 0.0]);
+    assert_eq!(object_list[1].cell.sensor.data_list, [1.0, 0.0, 0.0, 0.0]);
 }
 
 #[test]
@@ -79,14 +79,8 @@ fn danger_rd_test() {
     object_2.cell.energy = 2;
     let mut object_list = [object_1, object_2];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(
-        object_list[0].cell.sensor.data_list,
-        [-0.71715724, 0.0, 0.0, 0.0]
-    );
-    assert_eq!(
-        object_list[1].cell.sensor.data_list,
-        [0.0, 0.0, 0.71715724, 0.0]
-    );
+    assert_eq!(object_list[0].cell.sensor.data_list, [-1.0, 0.0, 0.0, 0.0]);
+    assert_eq!(object_list[1].cell.sensor.data_list, [0.0, 0.0, 1.0, 0.0]);
 }
 
 #[test]
@@ -106,10 +100,7 @@ fn danger_lu_test() {
     object_2.cell.energy = 2;
     let mut object_list = [object_1, object_2];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(
-        object_list[0].cell.sensor.data_list,
-        [0.0, 0.0, -0.71715724, 0.0]
-    );
+    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, 0.0, -1.0, 0.0]);
 }
 
 #[test]
@@ -127,10 +118,7 @@ fn danger_ru_test() {
     osmos_sim::system::sensor::process(&mut object_list);
     assert_eq!(object_list[0].cell.energy, 1);
     assert_eq!(object_list[1].cell.energy, 2);
-    assert_eq!(
-        object_list[0].cell.sensor.data_list,
-        [0.0, 0.0, 0.0, -0.71715724]
-    );
+    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, 0.0, 0.0, -1.0]);
 }
 
 #[test]
@@ -146,10 +134,7 @@ fn danger_ld_test() {
     object_2.cell.energy = 2;
     let mut object_list = [object_1, object_2];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(
-        object_list[0].cell.sensor.data_list,
-        [0.0, -0.15147185, 0.0, 0.0]
-    );
+    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, -1.0, 0.0, 0.0]);
 }
 
 #[test]
@@ -169,10 +154,7 @@ fn food_ld_test() {
     object_3.cell.energy = 1;
     let mut object_list = [object_1, object_2, object_3];
     osmos_sim::system::sensor::process(&mut object_list);
-    assert_eq!(
-        object_list[0].cell.sensor.data_list,
-        [0.0, 0.2545585, 0.0, 0.0]
-    );
+    assert_eq!(object_list[0].cell.sensor.data_list, [0.0, 1.0, 0.0, 0.0]);
 }
 
 #[test]

@@ -1,0 +1,1 @@
+cargo watch -s wasm_pack_build.bat

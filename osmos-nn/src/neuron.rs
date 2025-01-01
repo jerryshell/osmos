@@ -1,4 +1,4 @@
-use std::f32::consts::TAU;
+pub const RANGE: std::ops::RangeInclusive<f32> = 0.0..=std::f32::consts::TAU;
 
 pub struct Neuron {
     pub bias: f32,
@@ -15,9 +15,9 @@ impl Neuron {
     }
 
     pub fn random(rng: &mut impl rand::RngCore, weight_list_len: usize) -> Self {
-        let bias = rand::Rng::gen_range(rng, 0.0..=TAU);
+        let bias = rand::Rng::gen_range(rng, RANGE);
         let weight_list = (0..weight_list_len)
-            .map(|_| rand::Rng::gen_range(rng, 0.0..=TAU))
+            .map(|_| rand::Rng::gen_range(rng, RANGE))
             .collect();
         Self { bias, weight_list }
     }

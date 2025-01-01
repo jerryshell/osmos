@@ -41,7 +41,13 @@ const App = () => {
       for (let object of objectList) {
         ctx!.beginPath();
         ctx!.fillStyle = colorList[object.id % colorList.length];
-        ctx!.arc(object.x * size, object.y * size, object.energy, 0, 2 * Math.PI);
+        ctx!.arc(
+          object.x * size,
+          (1 - object.y) * size,
+          object.energy,
+          0,
+          2 * Math.PI
+        );
         ctx!.fill();
       }
 

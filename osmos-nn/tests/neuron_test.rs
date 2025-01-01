@@ -3,11 +3,11 @@ fn random_test() {
     let mut rng = rand::thread_rng();
     let neuron = osmos_nn::neuron::Neuron::random(&mut rng, 100);
     assert!(neuron.weight_list.len() == 100);
-    assert!((-1.0..=1.0).contains(&neuron.bias));
+    assert!(osmos_nn::neuron::RANGE.contains(&neuron.bias));
     assert!(neuron
         .weight_list
         .iter()
-        .all(|weight| (-1.0..=1.0).contains(weight)));
+        .all(|weight| osmos_nn::neuron::RANGE.contains(weight)));
 }
 
 #[test]

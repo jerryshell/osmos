@@ -28,6 +28,6 @@ impl Cell {
     }
 
     pub fn get_speed(&self) -> f32 {
-        0.002 + (1.0 / self.energy as f32) * 0.003
+        0.001 + (1.0 / self.energy as f32) * 0.003
     }
 }
