@@ -2,6 +2,8 @@ use rand::Rng;
 
 pub fn process(rng: &mut impl rand::RngCore, object_list: &mut [crate::object::Object]) {
     object_list.iter_mut().for_each(|object| {
+        object.cell.direction.x = object.network_output.cos();
+        object.cell.direction.y = object.network_output.sin();
         object.cell.velocity = object.cell.direction * object.cell.get_speed();
         object.cell.position += object.cell.velocity;
         // object.cell.position.x = nalgebra::wrap(object.cell.position.x, 0.0, 1.0);

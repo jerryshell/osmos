@@ -21,7 +21,7 @@ impl Default for Simulator {
             object_list,
             step_count: 0,
             max_step_count_per_epoch: 5000,
-            min_object_count_per_epoch: 100,
+            min_object_count_per_epoch: 50,
             epoch_count: 0,
         }
     }

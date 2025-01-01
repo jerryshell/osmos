@@ -1,3 +1,5 @@
+use std::f32::consts::TAU;
+
 pub struct Neuron {
     pub bias: f32,
     pub weight_list: Vec<f32>,
@@ -13,9 +15,9 @@ impl Neuron {
     }
 
     pub fn random(rng: &mut impl rand::RngCore, weight_list_len: usize) -> Self {
-        let bias = rand::Rng::gen_range(rng, -1.0..=1.0);
+        let bias = rand::Rng::gen_range(rng, 0.0..=TAU);
         let weight_list = (0..weight_list_len)
-            .map(|_| rand::Rng::gen_range(rng, -1.0..=1.0))
+            .map(|_| rand::Rng::gen_range(rng, 0.0..=TAU))
             .collect();
         Self { bias, weight_list }
     }
