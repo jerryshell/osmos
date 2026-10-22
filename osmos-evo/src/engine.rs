@@ -58,10 +58,11 @@ impl Engine {
     }
 
     pub fn with_scenario(seed: u64, scenario: Scenario) -> Self {
-        let config = scenario.config(SimConfig {
-            seed,
-            ..SimConfig::default()
-        });
+        Self::with_scenario_config(seed, scenario, SimConfig::default())
+    }
+
+    pub fn with_scenario_config(seed: u64, scenario: Scenario, base: SimConfig) -> Self {
+        let config = scenario.config(SimConfig { seed, ..base });
         Self::build(config, scenario)
     }
 

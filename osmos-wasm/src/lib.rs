@@ -102,6 +102,11 @@ impl Engine {
             "ejectaState",
             Float32Array::from(snapshot.ejecta_state.as_slice()).into(),
         );
+        set(
+            &result,
+            "wellState",
+            Float32Array::from(snapshot.well_state.as_slice()).into(),
+        );
 
         let stats = Object::new();
         set(

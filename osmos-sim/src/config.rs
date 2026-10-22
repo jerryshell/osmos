@@ -24,6 +24,13 @@ pub struct SimConfig {
     pub max_ejecta: usize,
     pub max_pellets: usize,
     pub owner_immunity_ticks: u32,
+    pub gravity_center_x: f32,
+    pub gravity_center_y: f32,
+    pub gravity_strength: f32,
+    pub gravity_softening: f32,
+    pub gravity_max_accel: f32,
+    pub gravity_well_radius: f32,
+    pub orbit_speed_factor: f32,
 }
 
 impl Default for SimConfig {
@@ -50,6 +57,13 @@ impl Default for SimConfig {
             max_ejecta: 512,
             max_pellets: 300,
             owner_immunity_ticks: 18,
+            gravity_center_x: 0.5,
+            gravity_center_y: 0.5,
+            gravity_strength: 0.0,
+            gravity_softening: 0.04,
+            gravity_max_accel: 0.12,
+            gravity_well_radius: 0.045,
+            orbit_speed_factor: 0.0,
         }
     }
 }
@@ -73,5 +87,12 @@ impl SimConfig {
         assert!(self.ejecta_packet.is_finite() && self.ejecta_packet > 0.0);
         assert!(self.max_ejecta > 0);
         assert!(self.max_pellets > 0);
+        assert!(self.gravity_center_x.is_finite() && (0.0..=1.0).contains(&self.gravity_center_x));
+        assert!(self.gravity_center_y.is_finite() && (0.0..=1.0).contains(&self.gravity_center_y));
+        assert!(self.gravity_strength.is_finite());
+        assert!(self.gravity_softening.is_finite() && self.gravity_softening > 0.0);
+        assert!(self.gravity_max_accel.is_finite() && self.gravity_max_accel > 0.0);
+        assert!(self.gravity_well_radius.is_finite() && self.gravity_well_radius > 0.0);
+        assert!(self.orbit_speed_factor.is_finite() && self.orbit_speed_factor >= 0.0);
     }
 }

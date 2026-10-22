@@ -61,6 +61,12 @@ if (process.env.VERIFY_INTERACTIONS === "1") {
   const paused = await page.getByRole("button", { name: "Resume" }).getAttribute("aria-pressed");
   await page.getByRole("button", { name: "Reset" }).click();
   const resetUrl = page.url();
+  await page.getByRole("button", { name: "Orbital" }).click();
+  const orbitalUrl = page.url();
+  const orbitalPressed = await page.getByRole("button", { name: "Orbital" }).getAttribute("aria-pressed");
+  await page.getByRole("button", { name: "Repulsor" }).click();
+  const repulsorUrl = page.url();
+  const repulsorPressed = await page.getByRole("button", { name: "Repulsor" }).getAttribute("aria-pressed");
 
   const reducedErrors = [];
   const reduced = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -70,7 +76,20 @@ if (process.env.VERIFY_INTERACTIONS === "1") {
   await reduced.waitForTimeout(300);
   const reducedPaused = await reduced.getByRole("button", { name: "Resume" }).getAttribute("aria-pressed");
 
-  console.log(JSON.stringify({ case: "interactions", paused, resetUrl, reducedPaused, errors, reducedErrors }));
+  console.log(
+    JSON.stringify({
+      case: "interactions",
+      paused,
+      resetUrl,
+      orbitalUrl,
+      orbitalPressed,
+      repulsorUrl,
+      repulsorPressed,
+      reducedPaused,
+      errors,
+      reducedErrors
+    })
+  );
   await page.close();
   await reduced.close();
   await browser.close();
@@ -84,7 +103,19 @@ const cases = [
   { name: "desktop-8x", viewport: { width: 1280, height: 800 }, speed: 8 },
   { name: "mobile-1x", viewport: { width: 390, height: 844 }, speed: 1 },
   { name: "mobile-4x", viewport: { width: 390, height: 844 }, speed: 4 },
-  { name: "mobile-8x", viewport: { width: 390, height: 844 }, speed: 8 }
+  { name: "mobile-8x", viewport: { width: 390, height: 844 }, speed: 8 },
+  {
+    name: "mobile-orbital-4x",
+    viewport: { width: 390, height: 844 },
+    speed: 4,
+    scenario: "orbital"
+  },
+  {
+    name: "mobile-repulsor-4x",
+    viewport: { width: 390, height: 844 },
+    speed: 4,
+    scenario: "repulsor"
+  }
 ];
 
 for (const item of cases) {
@@ -101,7 +132,8 @@ for (const item of cases) {
       for (const entry of list.getEntries()) window.__longTasks.push(entry.duration);
     }).observe({ entryTypes: ["longtask"] });
   });
-  await page.goto(`http://127.0.0.1:${port}/?seed=42`, { waitUntil: "networkidle" });
+  const query = item.scenario ? `?seed=42&scenario=${item.scenario}` : "?seed=42";
+  await page.goto(`http://127.0.0.1:${port}/${query}`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: `${item.speed}×` }).click();
   await page.waitForTimeout(300);
   await page.evaluate(() => {

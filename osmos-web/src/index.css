@@ -74,6 +74,7 @@ canvas {
 
 .scenarios {
   display: flex;
+  pointer-events: auto;
   gap: 2px;
   padding: 2px;
   border: 1px solid rgba(49, 214, 196, 0.2);

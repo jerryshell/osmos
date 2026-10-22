@@ -6,6 +6,7 @@ use rand::{RngExt, SeedableRng};
 
 use crate::config::{SimConfig, SUBSTEPS, TICKS_PER_SECOND};
 use crate::ejecta::Ejecta;
+use crate::gravity::GravityWell;
 use crate::grid::Grid;
 use crate::mote::{Mote, MoteRole, MoteState};
 use crate::pellet::Pellet;
@@ -28,6 +29,7 @@ pub struct World {
     mote_grid: Grid,
     pellet_grid: Grid,
     ejecta_grid: Grid,
+    gravity: GravityWell,
     scratch: Vec<u32>,
     ejected_total: f32,
     next_ejecta_id: u32,
@@ -71,19 +73,31 @@ impl World {
         config.validate();
 
         let mut rng = StdRng::seed_from_u64(config.seed);
+        let gravity = GravityWell::from_config(&config);
         let mut motes = Vec::with_capacity(config.motes as usize);
         let mut pellets = Vec::with_capacity(config.pellets as usize);
 
         for index in 0..config.motes {
-            let angle = rng.random_range(0.0..TAU);
-            let speed = 0.0;
+            // Keep the original draw order so the Ambient seed sequence is unchanged.
+            let _angle = rng.random_range(0.0..TAU);
+            let position = random_position(&mut rng);
+            let velocity = if config.orbit_speed_factor > 0.0 {
+                let radial = position - Vec2::new(config.gravity_center_x, config.gravity_center_y);
+                let distance = radial.length();
+                let acceleration = gravity.acceleration(position).length();
+                let circular_speed = (acceleration * distance).sqrt();
+                let tangent = Vec2::new(-radial.y, radial.x).normalize_or_zero();
+                tangent * (circular_speed * config.orbit_speed_factor)
+            } else {
+                Vec2::ZERO
+            };
             let mut mote = Mote::new(
                 MoteId::new(index),
                 LineageId::new((index % LINEAGES as u32) as u16),
                 MoteRole::Ai,
                 Mass::new(config.mote_mass),
-                random_position(&mut rng),
-                Vec2::new(angle.cos() * speed, angle.sin() * speed),
+                position,
+                velocity,
             );
             mote.controller = controllers.get(index as usize).cloned().flatten();
             motes.push(mote);
@@ -131,6 +145,7 @@ impl World {
             mote_grid: Grid::new(),
             pellet_grid: Grid::new(),
             ejecta_grid: Grid::new(),
+            gravity,
             scratch: Vec::new(),
             ejected_total: 0.0,
             next_ejecta_id: 0,
@@ -399,6 +414,15 @@ impl World {
             ]);
         }
 
+        if self.gravity.is_active() {
+            snapshot.well_state.extend_from_slice(&[
+                self.gravity.center.x,
+                self.gravity.center.y,
+                self.gravity.radius,
+                self.gravity.kind(),
+            ]);
+        }
+
         let alive = snapshot.mote_ids.len() as u32;
         let pellets = snapshot.pellet_state.len() as u32 / PELLET_STATE_STRIDE as u32;
         let ejecta = snapshot.ejecta_state.len() as u32 / EJECTA_STATE_STRIDE as u32;
@@ -418,12 +442,17 @@ impl World {
     fn integrate(&mut self, dt: f32) {
         let max_speed = self.config.max_speed;
         let wall_restitution = self.config.wall_restitution;
+        let gravity = self.gravity;
+        let field_active = gravity.is_active();
 
         for mote in &mut self.motes {
             if !mote.is_alive() {
                 continue;
             }
 
+            if field_active {
+                mote.velocity += gravity.acceleration(mote.position) * dt;
+            }
             mote.position += mote.velocity * dt;
             mote.velocity = mote.velocity.clamp_length(max_speed);
 
@@ -459,12 +488,17 @@ impl World {
     fn integrate_ejecta(&mut self, dt: f32) {
         let max_speed = self.config.max_speed;
         let restitution = self.config.wall_restitution;
+        let gravity = self.gravity;
+        let field_active = gravity.is_active();
 
         for ejecta in &mut self.ejecta {
             if !ejecta.alive {
                 continue;
             }
 
+            if field_active {
+                ejecta.velocity += gravity.acceleration(ejecta.position) * dt;
+            }
             ejecta.position += ejecta.velocity * dt;
             ejecta.velocity = ejecta.velocity.clamp_length(max_speed);
             let radius = ejecta.radius();
@@ -832,6 +866,53 @@ mod tests {
 
         let after = world.total_mass();
         assert!((before - after).abs() <= before * 1e-4);
+    }
+
+    #[test]
+    fn attractor_pulls_a_mote_toward_the_center() {
+        let mut setup = config(1, 0);
+        setup.gravity_strength = 0.002;
+        let mut world = World::new(setup);
+        set_mote(&mut world, 0, Vec2::new(0.7, 0.5), Vec2::ZERO, 1.0);
+
+        world.step();
+
+        assert!(world.motes[0].velocity.x < 0.0);
+        assert_eq!(world.snapshot().well_state, vec![0.5, 0.5, 0.045, 1.0]);
+    }
+
+    #[test]
+    fn passive_mote_can_orbit_the_attractor() {
+        let mut setup = config(1, 0);
+        setup.gravity_strength = 0.002;
+        let mut world = World::new(setup);
+        set_mote(
+            &mut world,
+            0,
+            Vec2::new(0.75, 0.5),
+            Vec2::new(0.0, 0.06),
+            1.0,
+        );
+
+        for _ in 0..600 {
+            world.step();
+        }
+
+        let radius = (world.motes[0].position - Vec2::new(0.5, 0.5)).length();
+        assert!(radius > 0.08, "mote collapsed into the center: {radius}");
+    }
+
+    #[test]
+    fn repulsor_pushes_a_mote_away_from_the_center() {
+        let mut setup = config(1, 0);
+        setup.gravity_strength = -0.002;
+        let mut world = World::new(setup);
+        set_mote(&mut world, 0, Vec2::new(0.7, 0.5), Vec2::ZERO, 1.0);
+
+        world.step();
+
+        assert!(world.motes[0].velocity.x > 0.0);
+        assert_eq!(world.snapshot().well_state[3], -1.0);
     }
 
     #[test]

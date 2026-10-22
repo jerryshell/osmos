@@ -31,12 +31,14 @@ type Snapshot = {
   moteFlags: Uint8Array;
   pelletState: Float32Array;
   ejectaState: Float32Array;
+  wellState: Float32Array;
   stats: Stats;
 };
 
 const MOTE_STRIDE = 7;
 const PELLET_STRIDE = 4;
 const EJECTA_STRIDE = 5;
+const WELL_STRIDE = 4;
 const MAX_STEPS_PER_FRAME = 16;
 
 type PerfSummary = {
@@ -68,13 +70,18 @@ const readSeed = (): number => {
 const writeState = (seed: number, scenario: number) => {
   const url = new URL(window.location.href);
   url.searchParams.set("seed", String(seed));
-  url.searchParams.set("scenario", scenario === 1 ? "sentient" : "ambient");
+  const name =
+    scenario === 1 ? "sentient" : scenario === 2 ? "orbital" : scenario === 3 ? "repulsor" : "ambient";
+  url.searchParams.set("scenario", name);
   window.history.replaceState(null, "", url);
 };
 
 const readScenario = (): number => {
   const value = new URLSearchParams(window.location.search).get("scenario");
-  return value === "sentient" || value === "1" ? 1 : 0;
+  if (value === "sentient" || value === "1") return 1;
+  if (value === "orbital" || value === "2") return 2;
+  if (value === "repulsor" || value === "3") return 3;
+  return 0;
 };
 
 const roleName = (role: number) => {
@@ -149,6 +156,37 @@ const App = () => {
     ctx.strokeStyle = "rgba(49, 214, 196, 0.24)";
     ctx.lineWidth = 1;
     ctx.strokeRect(left + 0.5, top + 0.5, size - 1, size - 1);
+
+    const wells = snapshot.wellState ?? new Float32Array(0);
+    for (let index = 0; index < wells.length; index += WELL_STRIDE) {
+      const x = left + wells[index] * size;
+      const y = top + (1 - wells[index + 1]) * size;
+      const radius = Math.max(7, wells[index + 2] * size);
+      const kind = wells[index + 3];
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 3.2);
+      if (kind > 0) {
+        glow.addColorStop(0, "rgba(49, 214, 196, 0.22)");
+        glow.addColorStop(0.45, "rgba(49, 214, 196, 0.07)");
+        glow.addColorStop(1, "rgba(49, 214, 196, 0)");
+      } else {
+        glow.addColorStop(0, "rgba(255, 200, 87, 0.2)");
+        glow.addColorStop(0.45, "rgba(255, 200, 87, 0.06)");
+        glow.addColorStop(1, "rgba(255, 200, 87, 0)");
+      }
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.strokeStyle = kind > 0 ? "rgba(49, 214, 196, 0.62)" : "rgba(255, 200, 87, 0.72)";
+      ctx.lineWidth = 1.5;
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.fillStyle = kind > 0 ? "#31d6c4" : "#ffc857";
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     const pellets = snapshot.pelletState;
     ctx.beginPath();
@@ -463,6 +501,20 @@ const App = () => {
           >
             Sentient
           </button>
+          <button
+            type="button"
+            aria-pressed={scenario() === 2}
+            onClick={() => chooseScenario(2)}
+          >
+            Orbital
+          </button>
+          <button
+            type="button"
+            aria-pressed={scenario() === 3}
+            onClick={() => chooseScenario(3)}
+          >
+            Repulsor
+          </button>
         </div>
         <span class="seed">SEED {seed().toString(16).toUpperCase().padStart(8, "0")}</span>
       </header>
@@ -522,7 +574,13 @@ const App = () => {
         </span>
       </section>
 
-      <p id="caption">MASS IS THE ONLY RESOURCE. LARGER CIRCLES ABSORB SMALLER ONES.</p>
+      <p id="caption">
+        {scenario() === 2
+          ? "A CENTRAL ATTRACTOR BENDS EVERY ORBIT."
+          : scenario() === 3
+            ? "A CENTRAL REPULSOR PUSHES EVERY ORBIT APART."
+            : "MASS IS THE ONLY RESOURCE. LARGER CIRCLES ABSORB SMALLER ONES."}
+      </p>
 
       <footer id="controls">
         <button

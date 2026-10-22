@@ -1,5 +1,5 @@
 use osmos_core::brain::Genome;
-use osmos_evo::{Engine, Trainer};
+use osmos_evo::{Engine, Scenario, Trainer};
 use osmos_sim::SimConfig;
 
 fn main() {
@@ -10,6 +10,7 @@ fn main() {
     let mut episode = 2400_u64;
     let mut train = false;
     let mut holdout = 0_usize;
+    let mut scenario = 0_u32;
 
     let mut arguments = std::env::args().skip(1);
     while let Some(argument) = arguments.next() {
@@ -21,6 +22,7 @@ fn main() {
             "--episode" => episode = parse(&mut arguments, "episode"),
             "--train" => train = true,
             "--holdout" => holdout = parse(&mut arguments, "holdout"),
+            "--scenario" => scenario = parse(&mut arguments, "scenario"),
             other => panic!("unknown argument: {other}"),
         }
     }
@@ -68,7 +70,7 @@ fn main() {
         return;
     }
 
-    let mut engine = Engine::with_config(config);
+    let mut engine = Engine::with_scenario_config(seed, Scenario::from_id(scenario), config);
 
     for _ in 0..generations {
         let report = engine.run_generation();
