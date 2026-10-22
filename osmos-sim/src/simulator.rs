@@ -11,7 +11,7 @@ pub struct Simulator {
 impl Default for Simulator {
     fn default() -> Self {
         let object_count = 300;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let object_list = (0..object_count)
             .map(|id| crate::object::Object::new(&mut rng, id))
             .collect();

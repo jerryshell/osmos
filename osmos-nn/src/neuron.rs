@@ -14,10 +14,10 @@ impl Neuron {
         }
     }
 
-    pub fn random(rng: &mut impl rand::RngCore, weight_list_len: usize) -> Self {
-        let bias = rand::Rng::gen_range(rng, RANGE);
+    pub fn random(rng: &mut impl rand::Rng, weight_list_len: usize) -> Self {
+        let bias = rand::RngExt::random_range(rng, RANGE);
         let weight_list = (0..weight_list_len)
-            .map(|_| rand::Rng::gen_range(rng, RANGE))
+            .map(|_| rand::RngExt::random_range(rng, RANGE))
             .collect();
         Self { bias, weight_list }
     }

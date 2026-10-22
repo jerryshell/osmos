@@ -7,7 +7,7 @@ impl Network {
         Self { layer_list }
     }
 
-    pub fn random(rng: &mut impl rand::RngCore, layer_topology: &[usize]) -> Self {
+    pub fn random(rng: &mut impl rand::Rng, layer_topology: &[usize]) -> Self {
         assert!(layer_topology.len() > 1);
         let layer_list = layer_topology
             .windows(2)

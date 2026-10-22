@@ -7,8 +7,13 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "*"
+wasm-bindgen = "0.2"
 osmos-sim = { path = "../osmos-sim" }
-getrandom = { version = "*", features = ["js"] }
-serde = { version = "*", features = ["derive"] }
-serde-wasm-bindgen = "*"
+getrandom = { version = "0.4", features = ["wasm_js"] }
+serde = { version = "1", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+
+[package.metadata.wasm-pack.profile.release]
+# Rust emits bulk-memory and nontrapping-float-to-int instructions; wasm-opt 117
+# rejects them unless these features are enabled. -O4 gives runtime gains.
+wasm-opt = ["-O4", "--enable-bulk-memory", "--enable-nontrapping-float-to-int"]

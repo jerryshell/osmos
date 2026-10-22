@@ -1,7 +1,7 @@
 const MUTATE_CHANCE: f64 = 0.01;
 const MUTATE_COEFF: f32 = 0.3;
 
-pub fn evolve<T>(rng: &mut impl rand::RngCore, object_list: &[T], object_count: usize) -> Vec<T>
+pub fn evolve<T>(rng: &mut impl rand::Rng, object_list: &[T], object_count: usize) -> Vec<T>
 where
     T: crate::gene::GeneObject,
 {

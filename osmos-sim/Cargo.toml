@@ -7,5 +7,5 @@ edition = "2021"
 osmos-core = { path = "../osmos-core" }
 osmos-ga = { path = "../osmos-ga" }
 osmos-nn = { path = "../osmos-nn" }
-nalgebra = "*"
-rand = "*"
+nalgebra = "0.35"
+rand = "0.10"

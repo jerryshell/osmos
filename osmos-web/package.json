@@ -5,13 +5,14 @@
     "start": "vite --host 0.0.0.0",
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "build:wasm": "cd ../osmos-wasm && wasm-pack build --release --out-dir ../osmos-web/osmos-wasm",
+    "build:all": "npm run build:wasm && npm run build"
   },
   "devDependencies": {
     "typescript": "^5.7.2",
     "vite": "^8.3.5",
     "vite-plugin-solid": "^2.11.12",
-    "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.6.0"
   },
   "dependencies": {

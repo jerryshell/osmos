@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nalgebra = "*"
-rand = "*"
+nalgebra = "0.35"
+rand = "0.10"

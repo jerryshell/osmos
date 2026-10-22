@@ -1,6 +1,6 @@
 #[test]
 fn danger_u_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -17,7 +17,7 @@ fn danger_u_test() {
 
 #[test]
 fn danger_r_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -34,7 +34,7 @@ fn danger_r_test() {
 
 #[test]
 fn danger_d_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -51,7 +51,7 @@ fn danger_d_test() {
 
 #[test]
 fn danger_l_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -68,7 +68,7 @@ fn danger_l_test() {
 
 #[test]
 fn danger_rd_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -89,7 +89,7 @@ fn danger_lu_test() {
         nalgebra::Vector2::new(-1.0, -1.0).angle(&nalgebra::Vector2::new(1.0, 0.0)),
         nalgebra::Vector2::new(-1.0, 1.0).angle(&nalgebra::Vector2::new(1.0, 0.0))
     );
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -105,7 +105,7 @@ fn danger_lu_test() {
 
 #[test]
 fn danger_ru_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -123,7 +123,7 @@ fn danger_ru_test() {
 
 #[test]
 fn danger_ld_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -139,7 +139,7 @@ fn danger_ld_test() {
 
 #[test]
 fn food_ld_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;
@@ -159,7 +159,7 @@ fn food_ld_test() {
 
 #[test]
 fn equal_rd_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut object_1 = osmos_sim::object::Object::new(&mut rng, 1);
     object_1.cell.position.x = 0.0;
     object_1.cell.position.y = 0.0;

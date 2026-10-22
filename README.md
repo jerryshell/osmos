@@ -8,9 +8,13 @@ Bilibili 视频：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 
 ## 如何运行
 
-1. 安装 `wasm-pack`
+1. 安装 `wasm-pack` 和 wasm32 目标
 
-[https://rustwasm.github.io/wasm-pack](https://rustwasm.github.io/wasm-pack)
+```bash
+rustup target add wasm32-unknown-unknown
+```
+
+[https://wasm-bindgen.github.io/wasm-pack/](https://wasm-bindgen.github.io/wasm-pack/)
 
 2. 编译 `osmos-wasm`
 
@@ -26,6 +30,15 @@ cd osmos-web
 npm install
 npm run dev
 ```
+
+## 生产构建
+
+```bash
+cd osmos-web
+npm run build:all   # wasm-pack release + wasm-opt，然后 Vite 构建到 dist/
+```
+
+也可以分开执行：`npm run build:wasm` 和 `npm run build`。
 
 ## 项目结构简介
 

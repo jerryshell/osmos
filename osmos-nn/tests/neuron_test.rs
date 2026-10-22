@@ -1,6 +1,6 @@
 #[test]
 fn random_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let neuron = osmos_nn::neuron::Neuron::random(&mut rng, 100);
     assert!(neuron.weight_list.len() == 100);
     assert!(osmos_nn::neuron::RANGE.contains(&neuron.bias));

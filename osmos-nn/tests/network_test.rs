@@ -1,7 +1,7 @@
 mod random {
     #[test]
     fn test() {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let layer_topology = [4, 8, 2];
         let network = osmos_nn::network::Network::random(&mut rng, &layer_topology);
         assert_eq!(network.layer_list[0].neuron_list.len(), layer_topology[1]);

@@ -1,6 +1,6 @@
 #[test]
 fn random_test() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let layer = osmos_nn::layer::Layer::random(&mut rng, 4, 10);
     assert!(layer.neuron_list.len() == 10);
     assert!(layer

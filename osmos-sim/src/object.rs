@@ -10,7 +10,7 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new(rng: &mut impl rand::RngCore, id: usize) -> Self {
+    pub fn new(rng: &mut impl rand::Rng, id: usize) -> Self {
         Self {
             id,
             cell: osmos_core::cell::Cell::random(rng),
@@ -20,7 +20,7 @@ impl Object {
     }
 
     pub fn from_network(
-        rng: &mut impl rand::RngCore,
+        rng: &mut impl rand::Rng,
         network: osmos_nn::network::Network,
         id: usize,
     ) -> Self {
@@ -42,7 +42,7 @@ impl osmos_ga::gene::GeneObject for Object {
         self.cell.energy as isize
     }
 
-    fn build(rng: &mut impl rand::RngCore, gene: osmos_ga::gene::Gene, id: usize) -> Self {
+    fn build(rng: &mut impl rand::Rng, gene: osmos_ga::gene::Gene, id: usize) -> Self {
         let network = build_network(&NETWORK_LAYER_TOPOLOGY, &gene);
         Self::from_network(rng, network, id)
     }
