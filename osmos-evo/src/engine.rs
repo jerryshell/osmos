@@ -1,4 +1,4 @@
-use osmos_core::brain::{ControlNetwork, Genome};
+use osmos_core::brain::{ControlNetwork, Genome, SENSOR_INPUTS};
 use osmos_sim::{SimConfig, Snapshot, World};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
@@ -17,6 +17,18 @@ pub struct GenerationReport {
     pub ejected_mass: f32,
     pub alive: u32,
     pub best_score: f32,
+}
+
+#[derive(Clone, Debug)]
+pub struct Inspect {
+    pub id: u32,
+    pub mass: f32,
+    pub role: u8,
+    pub sensor: [f32; SENSOR_INPUTS],
+    pub thrust: [f32; 2],
+    pub absorbed_pellets: u32,
+    pub absorbed_motes: u32,
+    pub ejected_mass: f32,
 }
 
 pub struct Engine {
@@ -116,6 +128,23 @@ impl Engine {
 
     pub fn scenario(&self) -> Scenario {
         self.scenario
+    }
+
+    pub fn inspect(&self, id: u32) -> Option<Inspect> {
+        self.world
+            .motes
+            .iter()
+            .find(|mote| mote.id.get() == id && mote.is_alive())
+            .map(|mote| Inspect {
+                id: mote.id.get(),
+                mass: mote.mass.get(),
+                role: mote.role.as_u8(),
+                sensor: mote.sensor,
+                thrust: [mote.thrust.x, mote.thrust.y],
+                absorbed_pellets: mote.absorbed_pellets,
+                absorbed_motes: mote.absorbed_motes,
+                ejected_mass: mote.ejected_mass,
+            })
     }
 
     pub fn reset(&mut self, seed: u64) {

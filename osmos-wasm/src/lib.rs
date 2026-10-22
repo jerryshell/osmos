@@ -26,6 +26,47 @@ impl Engine {
         self.inner.reset(seed as u64);
     }
 
+    pub fn inspect(&self, id: u32) -> JsValue {
+        let Some(detail) = self.inner.inspect(id) else {
+            return JsValue::NULL;
+        };
+        let result = Object::new();
+        set(&result, "id", JsValue::from_f64(detail.id as f64));
+        set(&result, "mass", JsValue::from_f64(detail.mass as f64));
+        set(&result, "role", JsValue::from_f64(detail.role as f64));
+        set(
+            &result,
+            "sensor",
+            Float32Array::from(detail.sensor.as_slice()).into(),
+        );
+        set(
+            &result,
+            "thrustX",
+            JsValue::from_f64(detail.thrust[0] as f64),
+        );
+        set(
+            &result,
+            "thrustY",
+            JsValue::from_f64(detail.thrust[1] as f64),
+        );
+        set(
+            &result,
+            "absorbedPellets",
+            JsValue::from_f64(detail.absorbed_pellets as f64),
+        );
+        set(
+            &result,
+            "absorbedMotes",
+            JsValue::from_f64(detail.absorbed_motes as f64),
+        );
+        set(
+            &result,
+            "ejectedMass",
+            JsValue::from_f64(detail.ejected_mass as f64),
+        );
+        result.into()
+    }
+
     pub fn snapshot(&self) -> JsValue {
         let snapshot = self.inner.snapshot();
         let result = Object::new();

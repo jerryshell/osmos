@@ -140,6 +140,133 @@ canvas {
   font-variant-numeric: tabular-nums;
 }
 
+#inspector {
+  position: fixed;
+  top: 84px;
+  right: 18px;
+  bottom: 78px;
+  width: 320px;
+  padding: 16px;
+  border: 1px solid rgba(49, 214, 196, 0.24);
+  border-radius: 14px;
+  background: rgba(12, 24, 27, 0.94);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  overflow: auto;
+  z-index: 6;
+}
+
+.inspector-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(49, 214, 196, 0.2);
+  border-radius: 999px;
+  background: transparent;
+  color: #8aa7a4;
+  font-size: 18px;
+}
+
+.inspector-eyebrow,
+.inspector-section {
+  margin: 0 0 8px;
+  color: #31d6c4;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+.inspector-title {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+
+.inspector-sub {
+  margin: 4px 0 14px;
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.inspector-metrics,
+.inspector-output {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border: 1px solid rgba(49, 214, 196, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(49, 214, 196, 0.15);
+}
+
+.inspector-metrics div,
+.inspector-output div {
+  padding: 8px 9px;
+  background: #101b1e;
+}
+
+.inspector-metrics span,
+.inspector-output span {
+  display: block;
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.inspector-metrics strong,
+.inspector-output strong {
+  display: block;
+  margin-top: 2px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.inspector-section {
+  margin-top: 16px;
+}
+
+.sensor-row {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 8px;
+}
+
+.sensor-bars {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  align-items: end;
+  gap: 2px;
+  height: 22px;
+}
+
+.sensor-bars i {
+  display: block;
+  min-height: 2px;
+  border-radius: 1px;
+  background: #31d6c4;
+  opacity: 0.8;
+}
+
+.sensor-bars.radial i {
+  background: #ffc857;
+}
+
 #caption {
   position: fixed;
   left: 22px;
@@ -270,7 +397,16 @@ button[aria-pressed="true"]:hover {
     top: 62px;
   }
 
-  #caption {
+  #inspector {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 72px;
+    width: auto;
+    max-height: 52dvh;
+  }
+
+#caption {
     left: 14px;
     bottom: 84px;
     max-width: 240px;

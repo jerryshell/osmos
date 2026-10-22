@@ -11,6 +11,18 @@ type Stats = {
   totalMass: number;
 };
 
+type Detail = {
+  id: number;
+  mass: number;
+  role: number;
+  sensor: Float32Array;
+  thrustX: number;
+  thrustY: number;
+  absorbedPellets: number;
+  absorbedMotes: number;
+  ejectedMass: number;
+};
+
 type Snapshot = {
   tick: number;
   moteIds: Uint32Array;
@@ -65,6 +77,12 @@ const readScenario = (): number => {
   return value === "sentient" || value === "1" ? 1 : 0;
 };
 
+const roleName = (role: number) => {
+  if (role === 1) return "Hunter";
+  if (role === 2) return "Prey";
+  return "AI mote";
+};
+
 const App = () => {
   const [scenario, setScenario] = createSignal(0);
   const [paused, setPaused] = createSignal(false);
@@ -76,6 +94,8 @@ const App = () => {
   const [snapshotEjecta, setSnapshotEjecta] = createSignal(0);
   const [bestMass, setBestMass] = createSignal(0);
   const [seed, setSeed] = createSignal(0);
+  const [selectedId, setSelectedId] = createSignal<number | null>(null);
+  const [detail, setDetail] = createSignal<Detail | null>(null);
   const [error, setError] = createSignal("");
 
   let canvas: HTMLCanvasElement | undefined;
@@ -94,9 +114,7 @@ const App = () => {
     ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
 
-  const draw = (snapshot: Snapshot) => {
-    if (!ctx) return;
-
+  const fieldLayout = () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const mobile = width < 640;
@@ -104,6 +122,13 @@ const App = () => {
     const size = Math.min(width, height) - padding * 2;
     const left = (width - size) / 2;
     const top = mobile ? 132 : (height - size) / 2;
+    return { width, height, size, left, top };
+  };
+
+  const draw = (snapshot: Snapshot) => {
+    if (!ctx) return;
+
+    const { width, height, size, left, top } = fieldLayout();
 
     ctx.clearRect(0, 0, width, height);
 
@@ -179,6 +204,25 @@ const App = () => {
         ctx.arc(x, y, radius + 4, 0, Math.PI * 2);
         ctx.stroke();
       }
+
+      if (snapshot.moteIds[index / MOTE_STRIDE] === selectedId()) {
+        ctx.beginPath();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.arc(x, y, radius + 7, 0, Math.PI * 2);
+        ctx.stroke();
+
+        const current = detail();
+        if (current && current.id === selectedId()) {
+          const length = Math.max(12, radius * 2.4);
+          ctx.beginPath();
+          ctx.strokeStyle = "#31d6c4";
+          ctx.lineWidth = 2;
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + current.thrustX * length, y - current.thrustY * length);
+          ctx.stroke();
+        }
+      }
     }
   };
 
@@ -189,6 +233,13 @@ const App = () => {
     setPellets(snapshot.stats.pellets);
     setSnapshotEjecta(snapshot.stats.ejecta);
     setBestMass(snapshot.stats.bestMass);
+
+    const selected = selectedId();
+    if (selected !== null && engine) {
+      const current = engine.inspect(selected) as Detail | null;
+      setDetail(current);
+      if (!current) setSelectedId(null);
+    }
   };
 
   const reset = () => {
@@ -198,6 +249,8 @@ const App = () => {
     setSeed(next);
     setPaused(false);
     resetStats();
+    setSelectedId(null);
+    setDetail(null);
     writeState(next, scenario());
   };
 
@@ -217,8 +270,16 @@ const App = () => {
     setSpeed(1);
     setPaused(false);
     resetStats();
+    setSelectedId(null);
+    setDetail(null);
     writeState(seed(), next);
   };
+
+  const sensorBars = (offset: number) =>
+    Array.from({ length: 16 }, (_, index) => {
+      const value = detail()?.sensor[offset + index] ?? 0;
+      return <i style={{ height: `${Math.max(2, Math.min(100, Math.abs(value) * 100))}%` }} />;
+    });
 
   onMount(() => {
     if (!canvas) return;
@@ -319,12 +380,64 @@ const App = () => {
       if (snapshot) draw(snapshot);
     };
 
+    const onPointerDown = (event: PointerEvent) => {
+      if (!canvas || !engine) return;
+      const snapshot = engine.snapshot() as Snapshot;
+      const { size, left, top } = fieldLayout();
+      const rect = canvas.getBoundingClientRect();
+      const x = (event.clientX - rect.left - left) / size;
+      const y = 1 - (event.clientY - rect.top - top) / size;
+
+      let bestId: number | null = null;
+      let bestDistance = Number.POSITIVE_INFINITY;
+      for (let index = 0; index < snapshot.moteState.length; index += MOTE_STRIDE) {
+        const mx = snapshot.moteState[index];
+        const my = snapshot.moteState[index + 1];
+        const radius = snapshot.moteState[index + 5];
+        const distance = Math.hypot(mx - x, my - y);
+        if (distance <= radius + 0.02 && distance < bestDistance) {
+          bestDistance = distance;
+          bestId = snapshot.moteIds[index / MOTE_STRIDE];
+        }
+      }
+
+      if (bestId === null) {
+        setSelectedId(null);
+        setDetail(null);
+        return;
+      }
+      setSelectedId(bestId);
+      setDetail(engine.inspect(bestId) as Detail | null);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code === "Space") {
+        event.preventDefault();
+        setPaused(!paused());
+      } else if (event.key === "Escape") {
+        setSelectedId(null);
+        setDetail(null);
+      } else if (event.key === "r" || event.key === "R") {
+        reset();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        setSpeed((value) => Math.min(8, value * 2));
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        setSpeed((value) => Math.max(1, value / 2));
+      }
+    };
+
     window.addEventListener("resize", onResize);
+    window.addEventListener("keydown", onKeyDown);
+    canvas.addEventListener("pointerdown", onPointerDown);
     frame = requestAnimationFrame(render);
 
     onCleanup(() => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("keydown", onKeyDown);
+      canvas?.removeEventListener("pointerdown", onPointerDown);
     });
   });
 
@@ -363,6 +476,43 @@ const App = () => {
           aria-label="A simulation of motes absorbing smaller motes and pellets. Each circle is a mote, and larger circles have more mass."
         />
       </main>
+
+      {selectedId() !== null && detail() && (
+        <aside id="inspector" aria-label="Selected mote">
+          <button
+            class="inspector-close"
+            type="button"
+            aria-label="Close inspector"
+            onClick={() => {
+              setSelectedId(null);
+              setDetail(null);
+            }}
+          >
+            ×
+          </button>
+          <p class="inspector-eyebrow">{roleName(detail()!.role)} · LINEAGE {String(selectedId()! % 12).padStart(2, "0")}</p>
+          <h2 class="inspector-title">Mote #{selectedId()}</h2>
+          <p class="inspector-sub">
+            mass {detail()!.mass.toFixed(2)} · absorbed {detail()!.absorbedPellets} pellets · {detail()!.absorbedMotes} motes
+          </p>
+
+          <div class="inspector-metrics">
+            <div><span>MASS</span><strong>{detail()!.mass.toFixed(2)}</strong></div>
+            <div><span>EJECTED</span><strong>{detail()!.ejectedMass.toFixed(2)}</strong></div>
+          </div>
+
+          <p class="inspector-section">SENSORY RING · 16 SECTORS</p>
+          <div class="sensor-row"><span>MASS</span><div class="sensor-bars">{sensorBars(0)}</div></div>
+          <div class="sensor-row"><span>PROX</span><div class="sensor-bars">{sensorBars(16)}</div></div>
+          <div class="sensor-row"><span>RADIAL</span><div class="sensor-bars radial">{sensorBars(32)}</div></div>
+
+          <p class="inspector-section">CONTROL OUTPUT</p>
+          <div class="inspector-output">
+            <div><span>THRUST X</span><strong>{detail()!.thrustX >= 0 ? "+" : ""}{detail()!.thrustX.toFixed(2)}</strong></div>
+            <div><span>THRUST Y</span><strong>{detail()!.thrustY >= 0 ? "+" : ""}{detail()!.thrustY.toFixed(2)}</strong></div>
+          </div>
+        </aside>
+      )}
 
       <section id="hud">
         <span class="eyebrow">BEST MASS</span>
