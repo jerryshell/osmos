@@ -148,6 +148,7 @@ canvas {
 }
 
 button {
+  min-width: 44px;
   min-height: 44px;
   padding: 0 11px;
   border: 0;
@@ -175,7 +176,8 @@ button[aria-pressed="true"] {
 }
 
 .speed-group button {
-  min-height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0 9px;
   color: #8aa7a4;
 }

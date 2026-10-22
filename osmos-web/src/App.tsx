@@ -186,8 +186,9 @@ const App = () => {
 
       if (!paused()) {
         accumulator += elapsed * 60 * speed();
-        const steps = Math.min(Math.floor(accumulator), MAX_STEPS_PER_FRAME);
-        accumulator -= steps;
+        const wanted = Math.floor(accumulator);
+        const steps = Math.min(wanted, MAX_STEPS_PER_FRAME);
+        accumulator -= wanted;
         if (steps > 0) {
           engine?.step(steps);
         }

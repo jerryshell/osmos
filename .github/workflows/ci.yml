@@ -51,3 +51,19 @@ jobs:
       - name: Build web
         working-directory: osmos-web
         run: npm run build
+
+      - name: Install Playwright browser
+        working-directory: osmos-web
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify UI
+        working-directory: osmos-web
+        env:
+          VERIFY_SECONDS: 5
+        run: npm run verify:ui
+
+      - name: Verify interactions
+        working-directory: osmos-web
+        env:
+          VERIFY_INTERACTIONS: 1
+        run: npm run verify:ui

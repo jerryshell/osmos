@@ -1,0 +1,8 @@
+
+> osmos-web@0.0.0 verify:ui
+> node scripts/verify-ui.mjs
+
+{"case":"desktop-1x","durationSeconds":60,"frames":3598,"fps":59.96666666666667,"frameP50":16.69999999999709,"frameP95":16.700000000004366,"start":{"tick":50,"alive":64,"pellets":206},"end":{"tick":3656,"alive":24,"pellets":44},"smallButtons":[],"errors":[]}
+{"case":"desktop-8x","durationSeconds":60,"frames":3596,"fps":59.93333333333333,"frameP50":16.69999999999709,"frameP95":16.700000000004366,"start":{"tick":144,"alive":64,"pellets":189},"end":{"tick":28919,"alive":5,"pellets":11},"smallButtons":[],"errors":[]}
+{"case":"mobile-1x","durationSeconds":60,"frames":3600,"fps":60,"frameP50":16.69999999999709,"frameP95":16.700000000004366,"start":{"tick":53,"alive":64,"pellets":206},"end":{"tick":3646,"alive":24,"pellets":44},"smallButtons":[],"errors":[]}
+{"case":"mobile-8x","durationSeconds":60,"frames":3601,"fps":60.016666666666666,"frameP50":16.69999999999709,"frameP95":16.700000000004366,"start":{"tick":76,"alive":64,"pellets":201},"end":{"tick":28891,"alive":5,"pellets":11},"smallButtons":[],"errors":[]}

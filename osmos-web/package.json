@@ -10,10 +10,12 @@
     "build:all": "npm run build:wasm && npm run build",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint src vite.config.ts",
-    "check": "npm run typecheck && npm run lint"
+    "check": "npm run typecheck && npm run lint",
+    "verify:ui": "node scripts/verify-ui.mjs"
   },
   "devDependencies": {
     "oxlint": "^1.89.0",
+    "playwright": "^1.64.1",
     "typescript": "^5.7.2",
     "vite": "^8.3.5",
     "vite-plugin-solid": "^2.11.12"

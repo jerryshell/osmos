@@ -22,8 +22,8 @@ impl Default for SimConfig {
             pellets: 236,
             mote_mass: 1.0,
             pellet_mass: 0.12,
-            max_speed: 0.2,
-            wall_restitution: 0.9,
+            max_speed: 0.25,
+            wall_restitution: 0.8,
             collision_restitution: 0.8,
             absorb_ratio: 1.15,
         }

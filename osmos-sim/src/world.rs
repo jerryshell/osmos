@@ -513,4 +513,98 @@ mod tests {
         assert_eq!(snapshot.mote_flags[0] & FLAG_TARGET_REACHED, 0);
         assert_eq!(snapshot.mote_flags[0] & FLAG_ALIVE, FLAG_ALIVE);
     }
+
+    #[test]
+    fn one_mote_can_absorb_three_targets_in_one_substep() {
+        let mut world = World::new(config(3, 0));
+        set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 1.2);
+        set_mote(&mut world, 1, Vec2::new(0.52, 0.5), Vec2::ZERO, 1.0);
+        set_mote(&mut world, 2, Vec2::new(0.525, 0.5), Vec2::ZERO, 0.5);
+
+        world.step();
+
+        assert_eq!(world.motes.len(), 1);
+        assert!((world.motes[0].mass.get() - 2.7).abs() < 1e-5);
+    }
+
+    #[test]
+    fn maximum_speed_does_not_tunnel_through_a_pellet() {
+        let mut world = World::new(config(1, 1));
+        set_mote(
+            &mut world,
+            0,
+            Vec2::new(0.5, 0.5),
+            Vec2::new(0.25, 0.0),
+            0.05,
+        );
+        world.pellets[0].position = Vec2::new(0.508, 0.5);
+
+        world.step();
+
+        assert_eq!(world.pellets.len(), 0);
+        assert!((world.motes[0].mass.get() - 0.17).abs() < 1e-5);
+    }
+
+    #[test]
+    fn wall_bounce_keeps_the_mote_inside() {
+        let mut world = World::new(config(1, 0));
+        set_mote(
+            &mut world,
+            0,
+            Vec2::new(0.99, 0.5),
+            Vec2::new(0.25, 0.0),
+            1.0,
+        );
+
+        world.step();
+
+        assert!(world.motes[0].velocity.x < 0.0);
+        assert!(world.motes[0].position.x <= 1.0 - world.motes[0].radius() + 1e-4);
+    }
+
+    #[test]
+    fn one_thousand_steps_have_a_stable_quantized_hash() {
+        let config = SimConfig {
+            seed: 42,
+            motes: 64,
+            pellets: 236,
+            ..SimConfig::default()
+        };
+        let mut first = World::new(config);
+        let mut second = World::new(config);
+        let mut different = World::new(SimConfig { seed: 43, ..config });
+
+        for _ in 0..1000 {
+            first.step();
+            second.step();
+            different.step();
+        }
+
+        let hash = hash_snapshot(&first.snapshot());
+        println!("quantized_hash={hash:016x}");
+        assert_eq!(hash, hash_snapshot(&second.snapshot()));
+        assert_ne!(hash, hash_snapshot(&different.snapshot()));
+    }
+
+    fn hash_snapshot(snapshot: &Snapshot) -> u64 {
+        let mut hash = 14_695_981_039_346_656_037_u64;
+        let mut write = |value: f32| {
+            let quantized = (value * 10_000.0).round() as i64 as u64;
+            hash ^= quantized;
+            hash = hash.wrapping_mul(1_099_511_628_211);
+        };
+
+        for index in (0..snapshot.mote_state.len()).step_by(MOTE_STATE_STRIDE) {
+            write(snapshot.mote_state[index]);
+            write(snapshot.mote_state[index + 1]);
+            write(snapshot.mote_state[index + 4]);
+        }
+        for index in (0..snapshot.pellet_state.len()).step_by(PELLET_STATE_STRIDE) {
+            write(snapshot.pellet_state[index]);
+            write(snapshot.pellet_state[index + 1]);
+            write(snapshot.pellet_state[index + 2]);
+        }
+
+        hash
+    }
 }
