@@ -1,8 +1,10 @@
 # Osmos
 
-Rust + WASM + Vite + 神经网络 + 遗传算法
+Rust + WASM + Vite + 质量生态
 
-Bilibili 视频：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
+当前进度是 Phase 1。世界包含质量、吞噬、空间网格、固定步长和扁平快照。感知、控制网络、喷射推进和遗传算法在后续阶段加入。
+
+旧版演示：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 
 立刻体验：[osmos.jerryshell.eu.org](https://osmos.jerryshell.eu.org)
 
@@ -41,24 +43,18 @@ npm run build:all   # wasm-pack release + wasm-opt，然后 Vite 构建到 dist/
 
 也可以分开执行：`npm run build:wasm` 和 `npm run build`。
 
-## 项目结构简介
+## 项目结构
 
 ```
 osmos
-├── osmos-core # 核心数据结构
-├── osmos-ga   # 遗传算法
-├── osmos-nn   # 神经网络
-├── osmos-sim  # 进化模拟器
-│   └── src
-│       └── system           # 子系统
-│           ├── collision.rs # 碰撞系统
-│           ├── epoch.rs     # 迭代系统
-│           ├── movement.rs  # 移动系统
-│           ├── network.rs   # 神经网络系统
-│           └── sensor.rs    # 感知器系统
-├── osmos-wasm # 将模拟器编译为 WASM，代理模式
-└── osmos-web  # Web UI，通过导入 WASM 启动模拟器，并将模拟器的数据渲染到 Canvas 中
+├── osmos-core # ID、向量、质量、半径
+├── osmos-sim  # 世界、质体、颗粒、碰撞、空间网格、快照
+├── osmos-evo  # 引擎外壳；遗传算法在后续阶段加入
+├── osmos-wasm # 扁平快照 ABI
+└── osmos-web  # SolidJS + Canvas 2D
 ```
+
+`osmos-sim` 默认生成 64 个质体和 236 个颗粒，一共 300 个实体。仿真以 60 Hz 固定步长推进，内部使用 2 个物理子步和 4 × 4 空间网格。
 
 ## 开源协议
 
