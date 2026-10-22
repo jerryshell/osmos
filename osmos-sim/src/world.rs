@@ -265,7 +265,6 @@ impl World {
             }
 
             let position = self.motes[index].position;
-            let radius = self.motes[index].radius();
             let mut nearby = std::mem::take(&mut self.scratch);
             self.mote_grid.nearby(position, &mut nearby);
 
@@ -274,9 +273,10 @@ impl World {
                     continue;
                 }
 
+                let current_position = self.motes[index].position;
                 let other_position = self.motes[other_index].position;
-                let reach = radius + self.motes[other_index].radius();
-                if position.distance_squared(other_position) > reach * reach {
+                let reach = self.motes[index].radius() + self.motes[other_index].radius();
+                if current_position.distance_squared(other_position) > reach * reach {
                     continue;
                 }
 
