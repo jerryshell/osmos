@@ -7,15 +7,22 @@
     "build": "vite build",
     "serve": "vite preview",
     "build:wasm": "cd ../osmos-wasm && wasm-pack build --release --out-dir ../osmos-web/osmos-wasm",
-    "build:all": "npm run build:wasm && npm run build"
+    "build:all": "npm run build:wasm && npm run build",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src vite.config.ts",
+    "check": "npm run typecheck && npm run lint"
   },
   "devDependencies": {
+    "oxlint": "^1.89.0",
     "typescript": "^5.7.2",
     "vite": "^8.3.5",
-    "vite-plugin-solid": "^2.11.12",
-    "vite-plugin-wasm": "^3.6.0"
+    "vite-plugin-solid": "^2.11.12"
   },
   "dependencies": {
     "solid-js": "^1.9.5"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
   }
 }

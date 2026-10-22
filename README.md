@@ -35,6 +35,7 @@ npm run dev
 
 ```bash
 cd osmos-web
+npm run check       # TypeScript 类型检查 + Oxlint
 npm run build:all   # wasm-pack release + wasm-opt，然后 Vite 构建到 dist/
 ```
 
