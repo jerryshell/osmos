@@ -1,3 +1,4 @@
 /target
+/.audit/
 **/pkg
 **/*.DS_Store

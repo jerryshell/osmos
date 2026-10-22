@@ -1,0 +1,5 @@
+steps=10000 elapsed_s=5.573 steps_per_s=1794.5 population=224 epoch=12
+steps=10000 elapsed_s=5.806 steps_per_s=1722.5 population=118 epoch=12
+steps=10000 elapsed_s=5.677 steps_per_s=1761.6 population=165 epoch=12
+steps=10000 elapsed_s=5.403 steps_per_s=1850.8 population=57 epoch=11
+steps=10000 elapsed_s=5.267 steps_per_s=1898.6 population=270 epoch=12
