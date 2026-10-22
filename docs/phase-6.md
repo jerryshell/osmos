@@ -29,7 +29,7 @@ Nginx 增加三个位置。
 
 ## 2. 回滚
 
-预览配置修改前的 vhost 备份在 `docs/phase-6/vhost-before-preview.conf`。
+预览配置修改前的 vhost 备份在 `docs/phase-6/vhost-before-preview.conf`。当前带预览位置的配置快照在 `docs/phase-6/vhost-with-preview.conf`。
 
 回滚步骤。
 
