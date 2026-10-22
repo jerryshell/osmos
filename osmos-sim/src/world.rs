@@ -5,40 +5,69 @@ use rand::rngs::StdRng;
 use rand::{RngExt, SeedableRng};
 
 use crate::config::{SimConfig, SUBSTEPS, TICKS_PER_SECOND};
+use crate::ejecta::Ejecta;
 use crate::grid::Grid;
 use crate::mote::{Mote, MoteRole, MoteState};
 use crate::pellet::Pellet;
 use crate::sensor::SenseContext;
-use crate::snapshot::{Snapshot, Stats, FLAG_ALIVE, MOTE_STATE_STRIDE, PELLET_STATE_STRIDE};
+use crate::snapshot::{
+    Snapshot, Stats, EJECTA_STATE_STRIDE, FLAG_ALIVE, MOTE_STATE_STRIDE, PELLET_STATE_STRIDE,
+};
 
 const LINEAGES: u16 = 12;
+const HUNTER_MASS: f32 = 2.0;
+const PREY_MASS: f32 = 0.6;
+const HUNTER_SPEED: f32 = 0.11;
 
 pub struct World {
     config: SimConfig,
     tick: u64,
     pub motes: Vec<Mote>,
     pub pellets: Vec<Pellet>,
+    pub ejecta: Vec<Ejecta>,
     mote_grid: Grid,
     pellet_grid: Grid,
+    ejecta_grid: Grid,
     scratch: Vec<u32>,
     ejected_total: f32,
+    next_ejecta_id: u32,
+    next_pellet_id: u32,
 }
 
 impl World {
     pub fn new(config: SimConfig) -> Self {
-        Self::build(config, Vec::new())
+        Self::build(config, Vec::new(), 0, 0)
     }
 
     pub fn with_controllers(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
+        Self::with_scenario(config, controllers, 0, 0)
+    }
+
+    pub fn with_scenario(
+        config: SimConfig,
+        controllers: Vec<ControlNetwork>,
+        hunters: u32,
+        prey: u32,
+    ) -> Self {
         assert_eq!(
             controllers.len(),
             config.motes as usize,
             "controller count must match mote count"
         );
-        Self::build(config, controllers.into_iter().map(Some).collect())
+        Self::build(
+            config,
+            controllers.into_iter().map(Some).collect(),
+            hunters,
+            prey,
+        )
     }
 
-    fn build(config: SimConfig, controllers: Vec<Option<ControlNetwork>>) -> Self {
+    fn build(
+        config: SimConfig,
+        controllers: Vec<Option<ControlNetwork>>,
+        hunters: u32,
+        prey: u32,
+    ) -> Self {
         config.validate();
 
         let mut rng = StdRng::seed_from_u64(config.seed);
@@ -68,15 +97,44 @@ impl World {
             ));
         }
 
+        let mut next_id = config.motes;
+        for _ in 0..hunters {
+            motes.push(Mote::new(
+                MoteId::new(next_id),
+                LineageId::new(0),
+                MoteRole::Hunter,
+                Mass::new(HUNTER_MASS),
+                random_position(&mut rng),
+                random_velocity(&mut rng),
+            ));
+            next_id += 1;
+        }
+
+        for _ in 0..prey {
+            motes.push(Mote::new(
+                MoteId::new(next_id),
+                LineageId::new(0),
+                MoteRole::Prey,
+                Mass::new(PREY_MASS),
+                random_position(&mut rng),
+                random_velocity(&mut rng),
+            ));
+            next_id += 1;
+        }
+
         Self {
             config,
             tick: 0,
             motes,
             pellets,
+            ejecta: Vec::new(),
             mote_grid: Grid::new(),
             pellet_grid: Grid::new(),
+            ejecta_grid: Grid::new(),
             scratch: Vec::new(),
             ejected_total: 0.0,
+            next_ejecta_id: 0,
+            next_pellet_id: config.pellets,
         }
     }
 
@@ -94,17 +152,66 @@ impl World {
 
     pub fn step(&mut self) {
         self.tick += 1;
+        for ejecta in &mut self.ejecta {
+            ejecta.age += 1;
+        }
+
         self.rebuild_grids();
         self.sense_and_control();
+        self.drive_hunters();
         self.apply_thrust(1.0 / TICKS_PER_SECOND as f32);
+        self.rebuild_grids();
 
         let dt = 1.0 / (TICKS_PER_SECOND as f32 * SUBSTEPS as f32);
         for _ in 0..SUBSTEPS {
             self.integrate(dt);
+            self.integrate_ejecta(dt);
             self.rebuild_grids();
             self.resolve_pellets();
+            self.resolve_ejecta();
             self.resolve_motes();
             self.remove_dead();
+        }
+
+        self.expire_ejecta();
+    }
+
+    fn drive_hunters(&mut self) {
+        let absorb_ratio = self.config.absorb_ratio;
+        let hunter_speed = HUNTER_SPEED;
+
+        for index in 0..self.motes.len() {
+            if !self.motes[index].is_alive() || self.motes[index].role != MoteRole::Hunter {
+                continue;
+            }
+
+            let hunter = &self.motes[index];
+            let mut target = None;
+            let mut best = f32::INFINITY;
+            for other_index in 0..self.motes.len() {
+                if other_index == index {
+                    continue;
+                }
+                let other = &self.motes[other_index];
+                if !other.is_alive()
+                    || other.role != MoteRole::Prey
+                    || other.mass.get() * absorb_ratio > hunter.mass.get()
+                {
+                    continue;
+                }
+                let distance = hunter.position.distance_squared(other.position);
+                if distance < best {
+                    best = distance;
+                    target = Some(other.position);
+                }
+            }
+
+            if let Some(target) = target {
+                let direction = (target - hunter.position).normalize_or_zero();
+                if direction != Vec2::ZERO {
+                    self.motes[index].velocity = direction * hunter_speed;
+                }
+            }
         }
     }
 
@@ -123,8 +230,10 @@ impl World {
             SenseContext::new(
                 &self.motes,
                 &self.pellets,
+                &self.ejecta,
                 &self.mote_grid,
                 &self.pellet_grid,
+                &self.ejecta_grid,
                 self.config.sensor_range,
                 self.config.max_speed,
                 self.config.episode_ticks,
@@ -144,7 +253,12 @@ impl World {
         let min_mass = self.config.min_mass;
         let eject_speed = self.config.eject_speed;
         let max_speed = self.config.max_speed;
+        let ejecta_enabled = self.config.ejecta_enabled;
+        let ejecta_packet = self.config.ejecta_packet;
+        let max_ejecta = self.config.max_ejecta;
         let mut ejected = 0.0_f32;
+        let mut spawns = Vec::new();
+        let mut next_id = self.next_ejecta_id;
 
         for mote in &mut self.motes {
             if !mote.is_alive() {
@@ -174,22 +288,50 @@ impl World {
             mote.velocity = mote.velocity.clamp_length(max_speed);
             mote.ejected_mass += mass_flow;
             ejected += mass_flow;
+
+            if ejecta_enabled {
+                mote.pending_ejecta += mass_flow;
+                while mote.pending_ejecta >= ejecta_packet && spawns.len() < max_ejecta {
+                    mote.pending_ejecta -= ejecta_packet;
+                    spawns.push(Ejecta::new(
+                        next_id,
+                        mote.id,
+                        Mass::new(ejecta_packet),
+                        mote.position - direction * (mote.radius() + 0.003),
+                        mote.velocity - direction * eject_speed,
+                        mote.hue(),
+                    ));
+                    next_id = next_id.wrapping_add(1);
+                }
+            }
         }
 
         self.ejected_total += ejected;
+        self.next_ejecta_id = next_id;
+        self.ejecta.extend(spawns);
+        while self.ejecta.len() > max_ejecta {
+            self.convert_ejecta_to_pellet(0);
+            self.ejecta.remove(0);
+        }
     }
 
     pub fn total_mass(&self) -> f32 {
         self.motes
             .iter()
             .filter(|mote| mote.is_alive())
-            .map(|mote| mote.mass.get())
+            .map(|mote| mote.mass.get() + mote.pending_ejecta)
             .sum::<f32>()
             + self
                 .pellets
                 .iter()
                 .filter(|pellet| pellet.alive)
                 .map(|pellet| pellet.mass.get())
+                .sum::<f32>()
+            + self
+                .ejecta
+                .iter()
+                .filter(|ejecta| ejecta.alive)
+                .map(|ejecta| ejecta.mass.get())
                 .sum::<f32>()
     }
 
@@ -207,6 +349,9 @@ impl World {
         snapshot
             .pellet_state
             .reserve(self.pellets.len() * PELLET_STATE_STRIDE);
+        snapshot
+            .ejecta_state
+            .reserve(self.ejecta.len() * EJECTA_STATE_STRIDE);
 
         let mut best_mass = 0.0_f32;
         for mote in &self.motes {
@@ -241,13 +386,28 @@ impl World {
             ]);
         }
 
+        for ejecta in &self.ejecta {
+            if !ejecta.alive {
+                continue;
+            }
+            snapshot.ejecta_state.extend_from_slice(&[
+                ejecta.position.x,
+                ejecta.position.y,
+                ejecta.mass.get(),
+                ejecta.radius(),
+                ejecta.hue,
+            ]);
+        }
+
         let alive = snapshot.mote_ids.len() as u32;
         let pellets = snapshot.pellet_state.len() as u32 / PELLET_STATE_STRIDE as u32;
+        let ejecta = snapshot.ejecta_state.len() as u32 / EJECTA_STATE_STRIDE as u32;
         snapshot.stats = Stats {
             generation: 0,
             tick: self.tick,
             alive,
             pellets,
+            ejecta,
             best_mass,
             total_mass: self.total_mass(),
         };
@@ -296,6 +456,37 @@ impl World {
         }
     }
 
+    fn integrate_ejecta(&mut self, dt: f32) {
+        let max_speed = self.config.max_speed;
+        let restitution = self.config.wall_restitution;
+
+        for ejecta in &mut self.ejecta {
+            if !ejecta.alive {
+                continue;
+            }
+
+            ejecta.position += ejecta.velocity * dt;
+            ejecta.velocity = ejecta.velocity.clamp_length(max_speed);
+            let radius = ejecta.radius();
+
+            if ejecta.position.x < radius {
+                ejecta.position.x = radius;
+                ejecta.velocity.x = ejecta.velocity.x.abs() * restitution;
+            } else if ejecta.position.x > 1.0 - radius {
+                ejecta.position.x = 1.0 - radius;
+                ejecta.velocity.x = -ejecta.velocity.x.abs() * restitution;
+            }
+
+            if ejecta.position.y < radius {
+                ejecta.position.y = radius;
+                ejecta.velocity.y = ejecta.velocity.y.abs() * restitution;
+            } else if ejecta.position.y > 1.0 - radius {
+                ejecta.position.y = 1.0 - radius;
+                ejecta.velocity.y = -ejecta.velocity.y.abs() * restitution;
+            }
+        }
+    }
+
     fn rebuild_grids(&mut self) {
         self.mote_grid.clear();
         for (index, mote) in self.motes.iter().enumerate() {
@@ -308,6 +499,13 @@ impl World {
         for (index, pellet) in self.pellets.iter().enumerate() {
             if pellet.alive {
                 self.pellet_grid.insert(index, pellet.position);
+            }
+        }
+
+        self.ejecta_grid.clear();
+        for (index, ejecta) in self.ejecta.iter().enumerate() {
+            if ejecta.alive {
+                self.ejecta_grid.insert(index, ejecta.position);
             }
         }
     }
@@ -345,6 +543,46 @@ impl World {
                 mote.velocity *= old_mass / new_mass;
                 mote.mass = Mass::new(new_mass);
                 mote.absorbed_pellets += count;
+            }
+
+            self.scratch = nearby;
+        }
+    }
+
+    fn resolve_ejecta(&mut self) {
+        let immunity = self.config.owner_immunity_ticks;
+        let max_speed = self.config.max_speed;
+
+        for index in 0..self.motes.len() {
+            if !self.motes[index].is_alive() {
+                continue;
+            }
+
+            let position = self.motes[index].position;
+            let radius = self.motes[index].radius();
+            let owner = self.motes[index].id;
+            let mut nearby = std::mem::take(&mut self.scratch);
+            self.ejecta_grid.nearby(position, &mut nearby);
+
+            for ejecta_index in nearby.iter().copied().map(|value| value as usize) {
+                let ejecta = &self.ejecta[ejecta_index];
+                if !ejecta.alive || (ejecta.owner == owner && ejecta.age < immunity) {
+                    continue;
+                }
+                let reach = radius + ejecta.radius();
+                if position.distance_squared(ejecta.position) > reach * reach {
+                    continue;
+                }
+
+                let ejecta_mass = ejecta.mass.get();
+                let ejecta_velocity = ejecta.velocity;
+                self.ejecta[ejecta_index].alive = false;
+                let mote = &mut self.motes[index];
+                let total = mote.mass.get() + ejecta_mass;
+                mote.velocity = (mote.velocity * mote.mass.get() + ejecta_velocity * ejecta_mass)
+                    * (1.0 / total);
+                mote.velocity = mote.velocity.clamp_length(max_speed);
+                mote.mass = Mass::new(total);
             }
 
             self.scratch = nearby;
@@ -454,7 +692,74 @@ impl World {
             (second_velocity - normal * (impulse / second_mass)).clamp_length(max_speed);
     }
 
+    fn expire_ejecta(&mut self) {
+        let ttl = self.config.ejecta_ttl_ticks;
+        let mut index = 0;
+        while index < self.ejecta.len() {
+            if self.ejecta[index].alive && self.ejecta[index].age >= ttl {
+                self.convert_ejecta_to_pellet(index);
+                self.ejecta.remove(index);
+            } else {
+                index += 1;
+            }
+        }
+        self.ejecta.retain(|ejecta| ejecta.alive);
+    }
+
+    fn convert_ejecta_to_pellet(&mut self, index: usize) {
+        if index >= self.ejecta.len() || !self.ejecta[index].alive {
+            return;
+        }
+        let ejecta = &mut self.ejecta[index];
+        ejecta.alive = false;
+        let mass = ejecta.mass;
+        let position = ejecta.position;
+        self.add_pellet(mass, position);
+    }
+
+    fn add_pellet(&mut self, mass: Mass, position: Vec2) {
+        if self.pellets.len() < self.config.max_pellets {
+            self.pellets.push(Pellet::new(
+                PelletId::new(self.next_pellet_id),
+                mass,
+                position,
+            ));
+            self.next_pellet_id = self.next_pellet_id.wrapping_add(1);
+            return;
+        }
+
+        if let Some(nearest) = self
+            .pellets
+            .iter()
+            .enumerate()
+            .min_by(|(_, left), (_, right)| {
+                left.position
+                    .distance_squared(position)
+                    .total_cmp(&right.position.distance_squared(position))
+            })
+            .map(|(index, _)| index)
+        {
+            let total = self.pellets[nearest].mass.get() + mass.get();
+            self.pellets[nearest].mass = Mass::new(total);
+        }
+    }
+
     fn remove_dead(&mut self) {
+        let pending = self
+            .motes
+            .iter_mut()
+            .filter(|mote| !mote.is_alive() && mote.pending_ejecta > 0.0)
+            .map(|mote| {
+                let mass = Mass::new(mote.pending_ejecta);
+                mote.pending_ejecta = 0.0;
+                (mass, mote.position)
+            })
+            .collect::<Vec<_>>();
+
+        for (mass, position) in pending {
+            self.add_pellet(mass, position);
+        }
+
         self.motes.retain(|mote| mote.is_alive());
         self.pellets.retain(|pellet| pellet.alive);
     }
@@ -462,6 +767,12 @@ impl World {
 
 fn random_position(rng: &mut StdRng) -> Vec2 {
     Vec2::new(rng.random_range(0.03..0.97), rng.random_range(0.03..0.97))
+}
+
+fn random_velocity(rng: &mut StdRng) -> Vec2 {
+    let angle = rng.random_range(0.0..TAU);
+    let speed = rng.random_range(0.0..0.01);
+    Vec2::new(angle.cos() * speed, angle.sin() * speed)
 }
 
 fn clamp_to_world(position: Vec2, radius: f32) -> Vec2 {
@@ -667,6 +978,7 @@ mod tests {
             seed: 1,
             motes: 1,
             pellets: 0,
+            ejecta_enabled: false,
             ..SimConfig::default()
         };
         let mut genome = Genome::zeros();
@@ -682,6 +994,30 @@ mod tests {
         assert!(world.motes[0].mass.get() < 1.0);
         assert!(world.motes[0].velocity.x > 0.0);
         assert!(world.motes[0].ejected_mass > 0.0);
+    }
+
+    #[test]
+    fn ejecta_preserves_mass() {
+        let config = SimConfig {
+            seed: 2,
+            motes: 1,
+            pellets: 0,
+            ..SimConfig::default()
+        };
+        let mut genome = Genome::zeros();
+        genome.as_mut_slice()[HIDDEN_NEURONS + HIDDEN_NEURONS * SENSOR_INPUTS] = 2.0;
+        let network = ControlNetwork::from_genome(&genome);
+        let mut world = World::with_controllers(config, vec![network]);
+        set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 1.0);
+
+        let before = world.total_mass();
+        for _ in 0..120 {
+            world.step();
+        }
+        let after = world.total_mass();
+
+        assert!((before - after).abs() < 1e-4);
+        assert!(world.ejected_total() > 0.0);
     }
 
     #[test]

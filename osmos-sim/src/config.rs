@@ -18,6 +18,12 @@ pub struct SimConfig {
     pub min_mass: f32,
     pub eject_speed: f32,
     pub target_mass: f32,
+    pub ejecta_enabled: bool,
+    pub ejecta_ttl_ticks: u32,
+    pub ejecta_packet: f32,
+    pub max_ejecta: usize,
+    pub max_pellets: usize,
+    pub owner_immunity_ticks: u32,
 }
 
 impl Default for SimConfig {
@@ -38,6 +44,12 @@ impl Default for SimConfig {
             min_mass: 0.05,
             eject_speed: 2.0,
             target_mass: 4.0,
+            ejecta_enabled: true,
+            ejecta_ttl_ticks: 480,
+            ejecta_packet: 0.01,
+            max_ejecta: 512,
+            max_pellets: 300,
+            owner_immunity_ticks: 18,
         }
     }
 }
@@ -57,5 +69,9 @@ impl SimConfig {
         assert!(self.min_mass.is_finite() && self.min_mass > 0.0);
         assert!(self.eject_speed.is_finite() && self.eject_speed > 0.0);
         assert!(self.target_mass.is_finite() && self.target_mass > self.mote_mass);
+        assert!(self.ejecta_ttl_ticks > 0);
+        assert!(self.ejecta_packet.is_finite() && self.ejecta_packet > 0.0);
+        assert!(self.max_ejecta > 0);
+        assert!(self.max_pellets > 0);
     }
 }

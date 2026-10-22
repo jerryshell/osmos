@@ -9,9 +9,12 @@ pub struct Engine {
 #[wasm_bindgen]
 impl Engine {
     #[wasm_bindgen(constructor)]
-    pub fn new(seed: u32) -> Self {
+    pub fn new(seed: u32, scenario: u32) -> Self {
         Self {
-            inner: osmos_evo::Engine::new(seed as u64),
+            inner: osmos_evo::Engine::with_scenario(
+                seed as u64,
+                osmos_evo::Scenario::from_id(scenario),
+            ),
         }
     }
 
@@ -53,6 +56,11 @@ impl Engine {
             "pelletState",
             Float32Array::from(snapshot.pellet_state.as_slice()).into(),
         );
+        set(
+            &result,
+            "ejectaState",
+            Float32Array::from(snapshot.ejecta_state.as_slice()).into(),
+        );
 
         let stats = Object::new();
         set(
@@ -74,6 +82,11 @@ impl Engine {
             &stats,
             "pellets",
             JsValue::from_f64(snapshot.stats.pellets as f64),
+        );
+        set(
+            &stats,
+            "ejecta",
+            JsValue::from_f64(snapshot.stats.ejecta as f64),
         );
         set(
             &stats,

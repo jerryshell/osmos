@@ -2,6 +2,7 @@ use std::f32::consts::{PI, TAU};
 
 use osmos_core::{Vec2, SENSOR_INPUTS};
 
+use crate::ejecta::Ejecta;
 use crate::grid::Grid;
 use crate::mote::Mote;
 use crate::pellet::Pellet;
@@ -13,19 +14,24 @@ const SELF_OFFSET: usize = SECTORS * 3;
 pub struct SenseContext<'a> {
     motes: &'a [Mote],
     pellets: &'a [Pellet],
+    ejecta: &'a [Ejecta],
     mote_grid: &'a Grid,
     pellet_grid: &'a Grid,
+    ejecta_grid: &'a Grid,
     range: f32,
     max_speed: f32,
     episode_ticks: u64,
 }
 
 impl<'a> SenseContext<'a> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         motes: &'a [Mote],
         pellets: &'a [Pellet],
+        ejecta: &'a [Ejecta],
         mote_grid: &'a Grid,
         pellet_grid: &'a Grid,
+        ejecta_grid: &'a Grid,
         range: f32,
         max_speed: f32,
         episode_ticks: u64,
@@ -33,8 +39,10 @@ impl<'a> SenseContext<'a> {
         Self {
             motes,
             pellets,
+            ejecta,
             mote_grid,
             pellet_grid,
+            ejecta_grid,
             range,
             max_speed,
             episode_ticks,
@@ -67,6 +75,15 @@ impl<'a> SenseContext<'a> {
                 continue;
             }
             self.add(out, me, Body::from(pellet));
+        }
+
+        self.ejecta_grid.nearby(me.position, nearby);
+        for ejecta_index in nearby.iter().copied().map(|value| value as usize) {
+            let ejecta = &self.ejecta[ejecta_index];
+            if !ejecta.alive {
+                continue;
+            }
+            self.add(out, me, Body::from(ejecta));
         }
 
         for value in &mut out[..SELF_OFFSET] {
@@ -122,6 +139,16 @@ impl From<&Mote> for Body {
     }
 }
 
+impl From<&Ejecta> for Body {
+    fn from(ejecta: &Ejecta) -> Self {
+        Self {
+            position: ejecta.position,
+            mass: ejecta.mass.get(),
+            velocity: ejecta.velocity,
+        }
+    }
+}
+
 impl From<&Pellet> for Body {
     fn from(pellet: &Pellet) -> Self {
         Self {
@@ -164,8 +191,19 @@ mod tests {
         pellets: &'a [Pellet],
         mote_grid: &'a Grid,
         pellet_grid: &'a Grid,
+        ejecta_grid: &'a Grid,
     ) -> SenseContext<'a> {
-        SenseContext::new(motes, pellets, mote_grid, pellet_grid, 0.25, 0.25, 2400)
+        SenseContext::new(
+            motes,
+            pellets,
+            &[],
+            mote_grid,
+            pellet_grid,
+            ejecta_grid,
+            0.25,
+            0.25,
+            2400,
+        )
     }
 
     #[test]
@@ -176,6 +214,7 @@ mod tests {
         mote_grid.insert(0, me.position);
         let mut pellet_grid = Grid::new();
         pellet_grid.insert(0, food.position);
+        let ejecta_grid = Grid::new();
         let mut out = [0.0; SENSOR_INPUTS];
         let mut nearby = Vec::new();
 
@@ -184,6 +223,7 @@ mod tests {
             std::slice::from_ref(&food),
             &mote_grid,
             &pellet_grid,
+            &ejecta_grid,
         )
         .sense(0, 0, &mut nearby, &mut out);
 
@@ -199,10 +239,16 @@ mod tests {
         mote_grid.insert(0, me.position);
         mote_grid.insert(1, other.position);
         let pellet_grid = Grid::new();
+        let ejecta_grid = Grid::new();
         let mut out = [0.0; SENSOR_INPUTS];
         let mut nearby = Vec::new();
 
-        context(&[me, other], &[], &mote_grid, &pellet_grid).sense(0, 0, &mut nearby, &mut out);
+        context(&[me, other], &[], &mote_grid, &pellet_grid, &ejecta_grid).sense(
+            0,
+            0,
+            &mut nearby,
+            &mut out,
+        );
 
         assert!(out[8] > 0.0);
     }
@@ -213,10 +259,16 @@ mod tests {
         let mut grid = Grid::new();
         grid.insert(0, me.position);
         let empty = Grid::new();
+        let ejecta_grid = Grid::new();
         let mut out = [0.0; SENSOR_INPUTS];
         let mut nearby = Vec::new();
 
-        context(std::slice::from_ref(&me), &[], &grid, &empty).sense(0, 0, &mut nearby, &mut out);
+        context(std::slice::from_ref(&me), &[], &grid, &empty, &ejecta_grid).sense(
+            0,
+            0,
+            &mut nearby,
+            &mut out,
+        );
 
         assert_eq!(out[50], 0.0);
         assert_eq!(out[51], 0.0);

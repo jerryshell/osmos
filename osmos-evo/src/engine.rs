@@ -5,6 +5,7 @@ use rand::SeedableRng;
 
 use crate::fitness::{median, score};
 use crate::ga::{next_population, random_population};
+use crate::scenario::Scenario;
 
 #[derive(Clone, Debug)]
 pub struct GenerationReport {
@@ -20,6 +21,9 @@ pub struct GenerationReport {
 
 pub struct Engine {
     config: SimConfig,
+    scenario: Scenario,
+    hunters: u32,
+    prey: u32,
     seed: u64,
     rng: StdRng,
     generation: u32,
@@ -38,14 +42,31 @@ impl Engine {
     }
 
     pub fn with_config(config: SimConfig) -> Self {
+        Self::build(config, Scenario::Ambient)
+    }
+
+    pub fn with_scenario(seed: u64, scenario: Scenario) -> Self {
+        let config = scenario.config(SimConfig {
+            seed,
+            ..SimConfig::default()
+        });
+        Self::build(config, scenario)
+    }
+
+    fn build(config: SimConfig, scenario: Scenario) -> Self {
         let seed = config.seed;
         let mut rng = StdRng::seed_from_u64(seed ^ 0xA5A5_5A5A_1234_5678);
         let population = random_population(&mut rng, config.motes as usize);
         let best_genome = population[0].clone();
-        let world = World::with_controllers(config, controllers(&population));
+        let hunters = scenario.hunters();
+        let prey = scenario.prey();
+        let world = World::with_scenario(config, controllers(&population), hunters, prey);
 
         Self {
             config,
+            scenario,
+            hunters,
+            prey,
             seed,
             rng,
             generation: 0,
@@ -93,6 +114,10 @@ impl Engine {
         self.config
     }
 
+    pub fn scenario(&self) -> Scenario {
+        self.scenario
+    }
+
     pub fn reset(&mut self, seed: u64) {
         self.seed = seed;
         self.config.seed = seed;
@@ -101,7 +126,12 @@ impl Engine {
         self.population = random_population(&mut self.rng, self.config.motes as usize);
         self.best_genome = self.population[0].clone();
         self.best_score = f32::NEG_INFINITY;
-        self.world = World::with_controllers(self.config, controllers(&self.population));
+        self.world = World::with_scenario(
+            self.config,
+            controllers(&self.population),
+            self.hunters,
+            self.prey,
+        );
     }
 
     fn evolve(&mut self) -> GenerationReport {
@@ -120,7 +150,12 @@ impl Engine {
 
         let mut next_config = self.config;
         next_config.seed = self.seed;
-        self.world = World::with_controllers(next_config, controllers(&self.population));
+        self.world = World::with_scenario(
+            next_config,
+            controllers(&self.population),
+            self.hunters,
+            self.prey,
+        );
 
         report
     }
@@ -256,5 +291,21 @@ mod tests {
         assert_eq!(engine.generation(), 1);
         assert_eq!(engine.tick(), 0);
         assert_eq!(engine.snapshot().stats.generation, 1);
+    }
+
+    #[test]
+    fn scenario_spawns_hunters_and_prey() {
+        let engine = Engine::with_scenario(7, Scenario::Sentient);
+        let snapshot = engine.snapshot();
+
+        assert_eq!(snapshot.stats.alive, 48 + 4 + 12);
+        assert_eq!(
+            snapshot.mote_role.iter().filter(|role| **role == 1).count(),
+            4
+        );
+        assert_eq!(
+            snapshot.mote_role.iter().filter(|role| **role == 2).count(),
+            12
+        );
     }
 }

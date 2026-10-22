@@ -72,6 +72,31 @@ canvas {
   letter-spacing: 0.04em;
 }
 
+.scenarios {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgba(49, 214, 196, 0.2);
+  border-radius: 999px;
+}
+
+.scenarios button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #8aa7a4;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+}
+
+.scenarios button[aria-pressed="true"] {
+  background: #31d6c4;
+  color: #06201d;
+}
+
 .seed {
   margin-left: auto;
   color: #7e9b98;

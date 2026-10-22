@@ -1,5 +1,6 @@
 pub const MOTE_STATE_STRIDE: usize = 7;
 pub const PELLET_STATE_STRIDE: usize = 4;
+pub const EJECTA_STATE_STRIDE: usize = 5;
 
 pub const FLAG_ALIVE: u8 = 1;
 pub const FLAG_TARGET_REACHED: u8 = 2;
@@ -10,6 +11,7 @@ pub struct Stats {
     pub tick: u64,
     pub alive: u32,
     pub pellets: u32,
+    pub ejecta: u32,
     pub best_mass: f32,
     pub total_mass: f32,
 }
@@ -22,6 +24,7 @@ pub struct Snapshot {
     pub mote_role: Vec<u8>,
     pub mote_flags: Vec<u8>,
     pub pellet_state: Vec<f32>,
+    pub ejecta_state: Vec<f32>,
     pub stats: Stats,
 }
 

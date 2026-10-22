@@ -6,6 +6,7 @@ type Stats = {
   tick: number;
   alive: number;
   pellets: number;
+  ejecta: number;
   bestMass: number;
   totalMass: number;
 };
@@ -17,11 +18,13 @@ type Snapshot = {
   moteRole: Uint8Array;
   moteFlags: Uint8Array;
   pelletState: Float32Array;
+  ejectaState: Float32Array;
   stats: Stats;
 };
 
 const MOTE_STRIDE = 7;
 const PELLET_STRIDE = 4;
+const EJECTA_STRIDE = 5;
 const MAX_STEPS_PER_FRAME = 16;
 
 type PerfSummary = {
@@ -50,19 +53,27 @@ const readSeed = (): number => {
   return Number.isFinite(parsed) ? parsed >>> 0 : (Date.now() >>> 0);
 };
 
-const writeSeed = (seed: number) => {
+const writeState = (seed: number, scenario: number) => {
   const url = new URL(window.location.href);
   url.searchParams.set("seed", String(seed));
+  url.searchParams.set("scenario", scenario === 1 ? "sentient" : "ambient");
   window.history.replaceState(null, "", url);
 };
 
+const readScenario = (): number => {
+  const value = new URLSearchParams(window.location.search).get("scenario");
+  return value === "sentient" || value === "1" ? 1 : 0;
+};
+
 const App = () => {
+  const [scenario, setScenario] = createSignal(0);
   const [paused, setPaused] = createSignal(false);
   const [speed, setSpeed] = createSignal(1);
   const [generation, setGeneration] = createSignal(0);
   const [tick, setTick] = createSignal(0);
   const [alive, setAlive] = createSignal(0);
   const [pellets, setPellets] = createSignal(0);
+  const [snapshotEjecta, setSnapshotEjecta] = createSignal(0);
   const [bestMass, setBestMass] = createSignal(0);
   const [seed, setSeed] = createSignal(0);
   const [error, setError] = createSignal("");
@@ -126,6 +137,18 @@ const App = () => {
     ctx.fillStyle = "rgba(208, 235, 228, 0.42)";
     ctx.fill();
 
+    const ejecta = snapshot.ejectaState;
+    for (let index = 0; index < ejecta.length; index += EJECTA_STRIDE) {
+      const x = left + ejecta[index] * size;
+      const y = top + (1 - ejecta[index + 1]) * size;
+      const radius = Math.max(1, ejecta[index + 3] * size);
+      const hue = ejecta[index + 4] * 360;
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${hue}, 64%, 72%, 0.55)`;
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     const motes = snapshot.moteState;
     const roles = snapshot.moteRole;
     for (let index = 0; index < motes.length; index += MOTE_STRIDE) {
@@ -164,6 +187,7 @@ const App = () => {
     setTick(snapshot.stats.tick);
     setAlive(snapshot.stats.alive);
     setPellets(snapshot.stats.pellets);
+    setSnapshotEjecta(snapshot.stats.ejecta);
     setBestMass(snapshot.stats.bestMass);
   };
 
@@ -173,24 +197,41 @@ const App = () => {
     engine.reset(next);
     setSeed(next);
     setPaused(false);
+    resetStats();
+    writeState(next, scenario());
+  };
+
+  const resetStats = () => {
     setGeneration(0);
     setTick(0);
     setAlive(0);
     setPellets(0);
+    setSnapshotEjecta(0);
     setBestMass(0);
-    writeSeed(next);
+  };
+
+  const chooseScenario = (next: number) => {
+    if (next === scenario()) return;
+    setScenario(next);
+    engine = new osmos.Engine(seed(), next);
+    setSpeed(1);
+    setPaused(false);
+    resetStats();
+    writeState(seed(), next);
   };
 
   onMount(() => {
     if (!canvas) return;
 
     const initialSeed = readSeed();
+    const initialScenario = readScenario();
     setSeed(initialSeed);
-    writeSeed(initialSeed);
+    setScenario(initialScenario);
+    writeState(initialSeed, initialScenario);
     resize();
 
     try {
-      engine = new osmos.Engine(initialSeed);
+      engine = new osmos.Engine(initialSeed, initialScenario);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The simulation engine failed to load.");
       return;
@@ -294,6 +335,22 @@ const App = () => {
           OSMOS <span>FIELD</span>
         </h1>
         <p class="tagline">mass, momentum, absorption</p>
+        <div class="scenarios" role="group" aria-label="Scenario">
+          <button
+            type="button"
+            aria-pressed={scenario() === 0}
+            onClick={() => chooseScenario(0)}
+          >
+            Ambient
+          </button>
+          <button
+            type="button"
+            aria-pressed={scenario() === 1}
+            onClick={() => chooseScenario(1)}
+          >
+            Sentient
+          </button>
+        </div>
         <span class="seed">SEED {seed().toString(16).toUpperCase().padStart(8, "0")}</span>
       </header>
 
@@ -311,7 +368,7 @@ const App = () => {
         <span class="eyebrow">BEST MASS</span>
         <strong class="best">{bestMass().toFixed(2)}</strong>
         <span class="meta">
-          GEN {generation()} · TICK {tick()} · {alive()} ALIVE · {pellets()} PELLETS
+          GEN {generation()} · TICK {tick()} · {alive()} ALIVE · {pellets()} PELLETS · {snapshotEjecta()} EJECTA
         </span>
       </section>
 
