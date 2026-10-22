@@ -125,6 +125,7 @@ impl World {
                 mote.velocity.x,
                 mote.velocity.y,
                 mote.mass.get(),
+                mote.radius(),
                 mote.hue(),
             ]);
             snapshot.mote_role.push(mote.role.as_u8());
@@ -140,6 +141,7 @@ impl World {
                 pellet.position.x,
                 pellet.position.y,
                 pellet.mass.get(),
+                pellet.radius(),
             ]);
         }
 

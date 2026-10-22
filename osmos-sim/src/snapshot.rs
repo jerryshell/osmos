@@ -1,5 +1,5 @@
-pub const MOTE_STATE_STRIDE: usize = 6;
-pub const PELLET_STATE_STRIDE: usize = 3;
+pub const MOTE_STATE_STRIDE: usize = 7;
+pub const PELLET_STATE_STRIDE: usize = 4;
 
 pub const FLAG_ALIVE: u8 = 1;
 pub const FLAG_TARGET_REACHED: u8 = 2;

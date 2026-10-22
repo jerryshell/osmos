@@ -400,10 +400,10 @@ Web 控件
 | 数组 | 类型 | 内容 |
 | --- | --- | --- |
 | `moteIds` | `Uint32Array` | 稳定 ID |
-| `moteState` | `Float32Array` | `x`, `y`, `vx`, `vy`, `mass`, `hue` |
+| `moteState` | `Float32Array` | `x`, `y`, `vx`, `vy`, `mass`, `radius`, `hue` |
 | `moteRole` | `Uint8Array` | 0 表示 AI，1 表示猎手，2 表示猎物 |
 | `moteFlags` | `Uint8Array` | 第 0 位存活，第 1 位达到目标质量 |
-| `pelletState` | `Float32Array` | `x`, `y`, `mass` |
+| `pelletState` | `Float32Array` | `x`, `y`, `mass`, `radius` |
 | `ejectaState` | `Float32Array` | `x`, `y`, `mass`, `ttl` |
 | `stats` | 对象 | 世代和步数为计数，质量为世界单位，目标达成率为 0 到 1 |
 
