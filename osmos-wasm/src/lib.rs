@@ -1,57 +1,91 @@
-#[wasm_bindgen::prelude::wasm_bindgen]
-#[derive(Default)]
-pub struct Simulator {
-    simulator: osmos_sim::simulator::Simulator,
+use js_sys::{Float32Array, Object, Reflect, Uint32Array, Uint8Array};
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub struct Engine {
+    inner: osmos_evo::Engine,
 }
 
-#[wasm_bindgen::prelude::wasm_bindgen]
-impl Simulator {
-    #[wasm_bindgen::prelude::wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    #[wasm_bindgen::prelude::wasm_bindgen(js_name = getObjectList)]
-    pub fn get_object_list(&self) -> wasm_bindgen::JsValue {
-        let object_list = self
-            .simulator
-            .object_list
-            .iter()
-            .map(Object::from)
-            .collect::<Vec<Object>>();
-        serde_wasm_bindgen::to_value(&object_list).unwrap()
-    }
-
-    #[wasm_bindgen::prelude::wasm_bindgen(js_name = getStepCount)]
-    pub fn get_step_count(&self) -> usize {
-        self.simulator.step_count
-    }
-
-    #[wasm_bindgen::prelude::wasm_bindgen(js_name = getEpochCount)]
-    pub fn get_epoch_count(&self) -> usize {
-        self.simulator.epoch_count
-    }
-
-    pub fn step(&mut self) {
-        self.simulator.step()
-    }
-}
-
-#[derive(serde::Deserialize, serde::Serialize)]
-pub struct Object {
-    pub id: usize,
-    pub x: f32,
-    pub y: f32,
-    pub energy: usize,
-}
-
-impl From<&osmos_sim::object::Object> for Object {
-    fn from(sim_object: &osmos_sim::object::Object) -> Self {
+#[wasm_bindgen]
+impl Engine {
+    #[wasm_bindgen(constructor)]
+    pub fn new(seed: u32) -> Self {
         Self {
-            id: sim_object.id,
-            x: sim_object.cell.position.x,
-            y: sim_object.cell.position.y,
-            energy: sim_object.cell.energy,
+            inner: osmos_evo::Engine::new(seed as u64),
         }
     }
+
+    pub fn step(&mut self, steps: u32) {
+        self.inner.step(steps);
+    }
+
+    pub fn reset(&mut self, seed: u32) {
+        self.inner.reset(seed as u64);
+    }
+
+    pub fn snapshot(&self) -> JsValue {
+        let snapshot = self.inner.snapshot();
+        let result = Object::new();
+
+        set(&result, "tick", JsValue::from_f64(snapshot.tick as f64));
+        set(
+            &result,
+            "moteIds",
+            Uint32Array::from(snapshot.mote_ids.as_slice()).into(),
+        );
+        set(
+            &result,
+            "moteState",
+            Float32Array::from(snapshot.mote_state.as_slice()).into(),
+        );
+        set(
+            &result,
+            "moteRole",
+            Uint8Array::from(snapshot.mote_role.as_slice()).into(),
+        );
+        set(
+            &result,
+            "moteFlags",
+            Uint8Array::from(snapshot.mote_flags.as_slice()).into(),
+        );
+        set(
+            &result,
+            "pelletState",
+            Float32Array::from(snapshot.pellet_state.as_slice()).into(),
+        );
+
+        let stats = Object::new();
+        set(
+            &stats,
+            "tick",
+            JsValue::from_f64(snapshot.stats.tick as f64),
+        );
+        set(
+            &stats,
+            "alive",
+            JsValue::from_f64(snapshot.stats.alive as f64),
+        );
+        set(
+            &stats,
+            "pellets",
+            JsValue::from_f64(snapshot.stats.pellets as f64),
+        );
+        set(
+            &stats,
+            "bestMass",
+            JsValue::from_f64(snapshot.stats.best_mass as f64),
+        );
+        set(
+            &stats,
+            "totalMass",
+            JsValue::from_f64(snapshot.stats.total_mass as f64),
+        );
+        set(&result, "stats", stats.into());
+
+        result.into()
+    }
+}
+
+fn set(object: &Object, key: &str, value: JsValue) {
+    Reflect::set(object, &JsValue::from_str(key), &value).expect("snapshot object is writable");
 }
