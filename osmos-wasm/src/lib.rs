@@ -57,6 +57,11 @@ impl Engine {
         let stats = Object::new();
         set(
             &stats,
+            "generation",
+            JsValue::from_f64(snapshot.stats.generation as f64),
+        );
+        set(
+            &stats,
             "tick",
             JsValue::from_f64(snapshot.stats.tick as f64),
         );

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["osmos-core", "osmos-sim", "osmos-evo", "osmos-wasm"]
+members = ["osmos-core", "osmos-sim", "osmos-evo", "osmos-wasm", "osmos-headless"]
 
 [profile.release]
 lto = true

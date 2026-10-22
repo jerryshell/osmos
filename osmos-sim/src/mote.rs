@@ -1,4 +1,4 @@
-use osmos_core::{LineageId, Mass, MoteId, Vec2};
+use osmos_core::{ControlNetwork, LineageId, Mass, MoteId, Vec2, SENSOR_INPUTS};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MoteRole {
@@ -42,6 +42,9 @@ pub struct Mote {
     pub absorbed_pellets: u32,
     pub absorbed_motes: u32,
     pub ejected_mass: f32,
+    pub controller: Option<ControlNetwork>,
+    pub sensor: [f32; SENSOR_INPUTS],
+    pub thrust: Vec2,
 }
 
 impl Mote {
@@ -64,6 +67,9 @@ impl Mote {
             absorbed_pellets: 0,
             absorbed_motes: 0,
             ejected_mass: 0.0,
+            controller: None,
+            sensor: [0.0; SENSOR_INPUTS],
+            thrust: Vec2::ZERO,
         }
     }
 

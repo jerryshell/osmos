@@ -105,6 +105,16 @@ version = "0.1.0"
 dependencies = [
  "osmos-core",
  "osmos-sim",
+ "rand",
+]
+
+[[package]]
+name = "osmos-headless"
+version = "0.1.0"
+dependencies = [
+ "osmos-core",
+ "osmos-evo",
+ "osmos-sim",
 ]
 
 [[package]]

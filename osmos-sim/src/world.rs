@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use osmos_core::{LineageId, Mass, MoteId, PelletId, Vec2};
+use osmos_core::{ControlNetwork, LineageId, Mass, MoteId, PelletId, Vec2, SENSOR_INPUTS};
 use rand::rngs::StdRng;
 use rand::{RngExt, SeedableRng};
 
@@ -8,6 +8,7 @@ use crate::config::{SimConfig, SUBSTEPS, TICKS_PER_SECOND};
 use crate::grid::Grid;
 use crate::mote::{Mote, MoteRole, MoteState};
 use crate::pellet::Pellet;
+use crate::sensor::SenseContext;
 use crate::snapshot::{Snapshot, Stats, FLAG_ALIVE, MOTE_STATE_STRIDE, PELLET_STATE_STRIDE};
 
 const LINEAGES: u16 = 12;
@@ -24,6 +25,19 @@ pub struct World {
 
 impl World {
     pub fn new(config: SimConfig) -> Self {
+        Self::build(config, Vec::new())
+    }
+
+    pub fn with_controllers(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
+        assert_eq!(
+            controllers.len(),
+            config.motes as usize,
+            "controller count must match mote count"
+        );
+        Self::build(config, controllers.into_iter().map(Some).collect())
+    }
+
+    fn build(config: SimConfig, controllers: Vec<Option<ControlNetwork>>) -> Self {
         config.validate();
 
         let mut rng = StdRng::seed_from_u64(config.seed);
@@ -32,15 +46,17 @@ impl World {
 
         for index in 0..config.motes {
             let angle = rng.random_range(0.0..TAU);
-            let speed = rng.random_range(0.02..0.06);
-            motes.push(Mote::new(
+            let speed = 0.0;
+            let mut mote = Mote::new(
                 MoteId::new(index),
                 LineageId::new((index % LINEAGES as u32) as u16),
                 MoteRole::Ai,
                 Mass::new(config.mote_mass),
                 random_position(&mut rng),
                 Vec2::new(angle.cos() * speed, angle.sin() * speed),
-            ));
+            );
+            mote.controller = controllers.get(index as usize).cloned().flatten();
+            motes.push(mote);
         }
 
         for index in 0..config.pellets {
@@ -72,14 +88,84 @@ impl World {
 
     pub fn step(&mut self) {
         self.tick += 1;
-        let dt = 1.0 / (TICKS_PER_SECOND as f32 * SUBSTEPS as f32);
+        self.rebuild_grids();
+        self.sense_and_control();
+        self.apply_thrust(1.0 / TICKS_PER_SECOND as f32);
 
+        let dt = 1.0 / (TICKS_PER_SECOND as f32 * SUBSTEPS as f32);
         for _ in 0..SUBSTEPS {
             self.integrate(dt);
             self.rebuild_grids();
             self.resolve_pellets();
             self.resolve_motes();
             self.remove_dead();
+        }
+    }
+
+    fn sense_and_control(&mut self) {
+        let mut nearby = Vec::new();
+
+        for index in 0..self.motes.len() {
+            if !self.motes[index].is_alive() {
+                continue;
+            }
+            let Some(controller) = self.motes[index].controller.take() else {
+                continue;
+            };
+
+            let mut sensor = [0.0_f32; SENSOR_INPUTS];
+            SenseContext::new(
+                &self.motes,
+                &self.pellets,
+                &self.mote_grid,
+                &self.pellet_grid,
+                self.config.sensor_range,
+                self.config.max_speed,
+                self.config.episode_ticks,
+            )
+            .sense(index, self.tick, &mut nearby, &mut sensor);
+            let output = controller.feed(&sensor);
+
+            let mote = &mut self.motes[index];
+            mote.sensor = sensor;
+            mote.thrust = Vec2::new(output[0], output[1]);
+            mote.controller = Some(controller);
+        }
+    }
+
+    fn apply_thrust(&mut self, dt: f32) {
+        let max_eject_rate = self.config.max_eject_rate;
+        let min_mass = self.config.min_mass;
+        let eject_speed = self.config.eject_speed;
+        let max_speed = self.config.max_speed;
+
+        for mote in &mut self.motes {
+            if !mote.is_alive() {
+                continue;
+            }
+
+            let magnitude = mote.thrust.clamp_length(1.0).length();
+            if magnitude <= 0.05 || mote.mass.get() <= min_mass + 1e-6 {
+                continue;
+            }
+
+            let direction = mote.thrust.normalize_or_zero();
+            if direction == Vec2::ZERO {
+                continue;
+            }
+
+            let available = mote.mass.get() - min_mass;
+            let mass_flow = (max_eject_rate * magnitude * dt).min(available);
+            if mass_flow <= 0.0 {
+                continue;
+            }
+
+            let old_mass = mote.mass.get();
+            let new_mass = old_mass - mass_flow;
+            mote.mass = Mass::new(new_mass);
+            mote.velocity += direction * (eject_speed * mass_flow / new_mass);
+            mote.velocity = mote.velocity.clamp_length(max_speed);
+            mote.ejected_mass += mass_flow;
         }
     }
 
@@ -148,6 +234,7 @@ impl World {
         let alive = snapshot.mote_ids.len() as u32;
         let pellets = snapshot.pellet_state.len() as u32 / PELLET_STATE_STRIDE as u32;
         snapshot.stats = Stats {
+            generation: 0,
             tick: self.tick,
             alive,
             pellets,
@@ -378,6 +465,8 @@ fn clamp_to_world(position: Vec2, radius: f32) -> Vec2 {
 mod tests {
     use super::*;
     use crate::snapshot::FLAG_TARGET_REACHED;
+    use osmos_core::brain::HIDDEN_NEURONS;
+    use osmos_core::{ControlNetwork, Genome};
 
     fn config(motes: u32, pellets: u32) -> SimConfig {
         SimConfig {
@@ -517,14 +606,14 @@ mod tests {
     #[test]
     fn one_mote_can_absorb_three_targets_in_one_substep() {
         let mut world = World::new(config(3, 0));
-        set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 1.2);
+        set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 2.2);
         set_mote(&mut world, 1, Vec2::new(0.52, 0.5), Vec2::ZERO, 1.0);
-        set_mote(&mut world, 2, Vec2::new(0.525, 0.5), Vec2::ZERO, 0.5);
+        set_mote(&mut world, 2, Vec2::new(0.528, 0.5), Vec2::ZERO, 0.5);
 
         world.step();
 
         assert_eq!(world.motes.len(), 1);
-        assert!((world.motes[0].mass.get() - 2.7).abs() < 1e-5);
+        assert!((world.motes[0].mass.get() - 3.7).abs() < 1e-5);
     }
 
     #[test]
@@ -560,6 +649,27 @@ mod tests {
 
         assert!(world.motes[0].velocity.x < 0.0);
         assert!(world.motes[0].position.x <= 1.0 - world.motes[0].radius() + 1e-4);
+    }
+
+    #[test]
+    fn controller_thrust_spends_mass_and_moves_the_mote() {
+        let config = SimConfig {
+            seed: 1,
+            motes: 1,
+            pellets: 0,
+            ..SimConfig::default()
+        };
+        let mut genome = Genome::zeros();
+        genome.as_mut_slice()[HIDDEN_NEURONS + HIDDEN_NEURONS * SENSOR_INPUTS] = 2.0;
+        let network = ControlNetwork::from_genome(&genome);
+        let mut world = World::with_controllers(config, vec![network]);
+        set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 1.0);
+
+        world.step();
+
+        assert!(world.motes[0].mass.get() < 1.0);
+        assert!(world.motes[0].velocity.x > 0.0);
+        assert!(world.motes[0].ejected_mass > 0.0);
     }
 
     #[test]

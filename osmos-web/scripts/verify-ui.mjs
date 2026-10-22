@@ -110,10 +110,17 @@ for (const item of cases) {
     async ({ durationMs }) => {
       const read = () => {
         const text = document.querySelector("#hud .meta")?.textContent ?? "";
-        const match = text.match(/TICK\s+(\d+)\s+·\s+(\d+)\s+ALIVE\s+·\s+(\d+)\s+PELLETS/);
+        const match = text.match(
+          /GEN\s+(\d+)\s+·\s+TICK\s+(\d+)\s+·\s+(\d+)\s+ALIVE\s+·\s+(\d+)\s+PELLETS/
+        );
         return match
-          ? { tick: Number(match[1]), alive: Number(match[2]), pellets: Number(match[3]) }
-          : { tick: 0, alive: 0, pellets: 0 };
+          ? {
+              generation: Number(match[1]),
+              tick: Number(match[2]),
+              alive: Number(match[3]),
+              pellets: Number(match[4])
+            }
+          : { generation: 0, tick: 0, alive: 0, pellets: 0 };
       };
 
       const start = read();

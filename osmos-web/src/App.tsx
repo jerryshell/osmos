@@ -2,6 +2,7 @@ import { createSignal, onCleanup, onMount } from "solid-js";
 import * as osmos from "../osmos-wasm";
 
 type Stats = {
+  generation: number;
   tick: number;
   alive: number;
   pellets: number;
@@ -38,6 +39,7 @@ const writeSeed = (seed: number) => {
 const App = () => {
   const [paused, setPaused] = createSignal(false);
   const [speed, setSpeed] = createSignal(1);
+  const [generation, setGeneration] = createSignal(0);
   const [tick, setTick] = createSignal(0);
   const [alive, setAlive] = createSignal(0);
   const [pellets, setPellets] = createSignal(0);
@@ -138,6 +140,7 @@ const App = () => {
   };
 
   const applyStats = (snapshot: Snapshot) => {
+    setGeneration(snapshot.stats.generation);
     setTick(snapshot.stats.tick);
     setAlive(snapshot.stats.alive);
     setPellets(snapshot.stats.pellets);
@@ -150,6 +153,7 @@ const App = () => {
     engine.reset(next);
     setSeed(next);
     setPaused(false);
+    setGeneration(0);
     setTick(0);
     setAlive(0);
     setPellets(0);
@@ -247,7 +251,7 @@ const App = () => {
         <span class="eyebrow">BEST MASS</span>
         <strong class="best">{bestMass().toFixed(2)}</strong>
         <span class="meta">
-          TICK {tick()} · {alive()} ALIVE · {pellets()} PELLETS
+          GEN {generation()} · TICK {tick()} · {alive()} ALIVE · {pellets()} PELLETS
         </span>
       </section>
 

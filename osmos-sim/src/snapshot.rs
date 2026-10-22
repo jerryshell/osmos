@@ -6,6 +6,7 @@ pub const FLAG_TARGET_REACHED: u8 = 2;
 
 #[derive(Clone, Debug, Default)]
 pub struct Stats {
+    pub generation: u32,
     pub tick: u64,
     pub alive: u32,
     pub pellets: u32,
