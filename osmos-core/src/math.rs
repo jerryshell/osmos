@@ -46,6 +46,36 @@ impl Vec2 {
     }
 }
 
+/// Wrap a position into the unit torus.
+pub fn wrap_position(position: Vec2) -> Vec2 {
+    Vec2::new(wrap_coordinate(position.x), wrap_coordinate(position.y))
+}
+
+fn wrap_coordinate(value: f32) -> f32 {
+    if value < 0.0 {
+        value + 1.0
+    } else if value >= 1.0 {
+        value - 1.0
+    } else {
+        value
+    }
+}
+
+/// Return the shortest signed delta on the unit torus.
+pub fn wrap_delta(delta: Vec2) -> Vec2 {
+    Vec2::new(wrap_component(delta.x), wrap_component(delta.y))
+}
+
+fn wrap_component(value: f32) -> f32 {
+    if value > 0.5 {
+        value - 1.0
+    } else if value < -0.5 {
+        value + 1.0
+    } else {
+        value
+    }
+}
+
 impl std::ops::Add for Vec2 {
     type Output = Self;
 
@@ -102,5 +132,14 @@ mod tests {
         assert!((a.dot(Vec2::new(1.0, 0.0)) - 3.0).abs() < 1e-6);
         assert_eq!(Vec2::ZERO.normalize_or_zero(), Vec2::ZERO);
         assert!((a.normalize_or_zero().length() - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn positions_and_deltas_wrap() {
+        assert_eq!(wrap_position(Vec2::new(1.25, -0.25)), Vec2::new(0.25, 0.75));
+        let delta = wrap_delta(Vec2::new(0.75, -0.6));
+        assert!((delta.x + 0.25).abs() < 1e-6);
+        assert!((delta.y - 0.4).abs() < 1e-6);
+        assert_eq!(wrap_delta(Vec2::new(-0.5, 0.5)), Vec2::new(-0.5, 0.5));
     }
 }

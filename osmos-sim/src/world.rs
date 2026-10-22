@@ -1,6 +1,9 @@
 use std::f32::consts::TAU;
 
-use osmos_core::{ControlNetwork, LineageId, Mass, MoteId, PelletId, Vec2, SENSOR_INPUTS};
+use osmos_core::{
+    wrap_delta, wrap_position, ControlNetwork, LineageId, Mass, MoteId, PelletId, Vec2,
+    SENSOR_INPUTS,
+};
 use rand::rngs::StdRng;
 use rand::{RngExt, SeedableRng};
 
@@ -18,7 +21,6 @@ use crate::snapshot::{
 const LINEAGES: u16 = 12;
 const HUNTER_MASS: f32 = 2.0;
 const PREY_MASS: f32 = 0.6;
-const HUNTER_SPEED: f32 = 0.11;
 
 pub struct World {
     config: SimConfig,
@@ -43,6 +45,45 @@ impl World {
 
     pub fn with_controllers(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
         Self::with_scenario(config, controllers, 0, 0)
+    }
+
+    pub fn with_predator_training(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
+        let mut world = Self::with_scenario(config, controllers, 0, 2);
+        if world.motes.len() >= 3 {
+            world.motes[0].position = Vec2::new(0.5, 0.5);
+            world.motes[1].position = Vec2::new(0.2, 0.5);
+            world.motes[2].position = Vec2::new(0.8, 0.5);
+            for mote in &mut world.motes {
+                mote.velocity = Vec2::ZERO;
+            }
+        }
+        world
+    }
+
+    pub fn with_prey_training(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
+        let mut world = Self::with_scenario(config, controllers, 1, 0);
+        if world.motes.len() >= 2 {
+            world.motes[0].position = Vec2::new(0.5, 0.5);
+            world.motes[1].position = Vec2::new(0.95, 0.5);
+            for mote in &mut world.motes {
+                mote.velocity = Vec2::ZERO;
+            }
+        }
+        world
+    }
+
+    pub fn with_training(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
+        let mut world = Self::with_scenario(config, controllers, 1, 2);
+        if world.motes.len() >= 4 {
+            world.motes[0].position = Vec2::new(0.5, 0.5);
+            world.motes[1].position = Vec2::new(0.92, 0.5);
+            world.motes[2].position = Vec2::new(0.08, 0.5);
+            world.motes[3].position = Vec2::new(0.5, 0.08);
+            for mote in &mut world.motes {
+                mote.velocity = Vec2::ZERO;
+            }
+        }
+        world
     }
 
     pub fn with_scenario(
@@ -174,6 +215,7 @@ impl World {
         self.rebuild_grids();
         self.sense_and_control();
         self.drive_hunters();
+        self.drive_prey();
         self.apply_thrust(1.0 / TICKS_PER_SECOND as f32);
         self.rebuild_grids();
 
@@ -193,7 +235,7 @@ impl World {
 
     fn drive_hunters(&mut self) {
         let absorb_ratio = self.config.absorb_ratio;
-        let hunter_speed = HUNTER_SPEED;
+        let hunter_speed = self.config.hunter_speed;
 
         for index in 0..self.motes.len() {
             if !self.motes[index].is_alive() || self.motes[index].role != MoteRole::Hunter {
@@ -208,13 +250,10 @@ impl World {
                     continue;
                 }
                 let other = &self.motes[other_index];
-                if !other.is_alive()
-                    || other.role != MoteRole::Prey
-                    || other.mass.get() * absorb_ratio > hunter.mass.get()
-                {
+                if !other.is_alive() || other.mass.get() * absorb_ratio > hunter.mass.get() {
                     continue;
                 }
-                let distance = hunter.position.distance_squared(other.position);
+                let distance = wrap_delta(other.position - hunter.position).length_squared();
                 if distance < best {
                     best = distance;
                     target = Some(other.position);
@@ -222,9 +261,45 @@ impl World {
             }
 
             if let Some(target) = target {
-                let direction = (target - hunter.position).normalize_or_zero();
+                let direction = wrap_delta(target - hunter.position).normalize_or_zero();
                 if direction != Vec2::ZERO {
                     self.motes[index].velocity = direction * hunter_speed;
+                }
+            }
+        }
+    }
+
+    fn drive_prey(&mut self) {
+        let absorb_ratio = self.config.absorb_ratio;
+        let prey_speed = self.config.prey_speed;
+
+        for index in 0..self.motes.len() {
+            if !self.motes[index].is_alive() || self.motes[index].role != MoteRole::Prey {
+                continue;
+            }
+
+            let prey = &self.motes[index];
+            let mut threat = None;
+            let mut best = f32::INFINITY;
+            for other_index in 0..self.motes.len() {
+                if other_index == index {
+                    continue;
+                }
+                let other = &self.motes[other_index];
+                if !other.is_alive() || other.mass.get() < prey.mass.get() * absorb_ratio {
+                    continue;
+                }
+                let distance = wrap_delta(other.position - prey.position).length_squared();
+                if distance < best {
+                    best = distance;
+                    threat = Some(other.position);
+                }
+            }
+
+            if let Some(threat) = threat {
+                let direction = wrap_delta(prey.position - threat).normalize_or_zero();
+                if direction != Vec2::ZERO {
+                    self.motes[index].velocity = direction * prey_speed;
                 }
             }
         }
@@ -441,7 +516,6 @@ impl World {
 
     fn integrate(&mut self, dt: f32) {
         let max_speed = self.config.max_speed;
-        let wall_restitution = self.config.wall_restitution;
         let gravity = self.gravity;
         let field_active = gravity.is_active();
 
@@ -453,41 +527,13 @@ impl World {
             if field_active {
                 mote.velocity += gravity.acceleration(mote.position) * dt;
             }
-            mote.position += mote.velocity * dt;
-            mote.velocity = mote.velocity.clamp_length(max_speed);
-
-            let radius = mote.radius();
-            if mote.position.x < radius {
-                mote.position.x = radius;
-                if mote.velocity.x < 0.0 {
-                    mote.velocity.x = -mote.velocity.x * wall_restitution;
-                }
-            } else if mote.position.x > 1.0 - radius {
-                mote.position.x = 1.0 - radius;
-                if mote.velocity.x > 0.0 {
-                    mote.velocity.x = -mote.velocity.x * wall_restitution;
-                }
-            }
-
-            if mote.position.y < radius {
-                mote.position.y = radius;
-                if mote.velocity.y < 0.0 {
-                    mote.velocity.y = -mote.velocity.y * wall_restitution;
-                }
-            } else if mote.position.y > 1.0 - radius {
-                mote.position.y = 1.0 - radius;
-                if mote.velocity.y > 0.0 {
-                    mote.velocity.y = -mote.velocity.y * wall_restitution;
-                }
-            }
-
+            mote.position = wrap_position(mote.position + mote.velocity * dt);
             mote.velocity = mote.velocity.clamp_length(max_speed);
         }
     }
 
     fn integrate_ejecta(&mut self, dt: f32) {
         let max_speed = self.config.max_speed;
-        let restitution = self.config.wall_restitution;
         let gravity = self.gravity;
         let field_active = gravity.is_active();
 
@@ -499,25 +545,8 @@ impl World {
             if field_active {
                 ejecta.velocity += gravity.acceleration(ejecta.position) * dt;
             }
-            ejecta.position += ejecta.velocity * dt;
+            ejecta.position = wrap_position(ejecta.position + ejecta.velocity * dt);
             ejecta.velocity = ejecta.velocity.clamp_length(max_speed);
-            let radius = ejecta.radius();
-
-            if ejecta.position.x < radius {
-                ejecta.position.x = radius;
-                ejecta.velocity.x = ejecta.velocity.x.abs() * restitution;
-            } else if ejecta.position.x > 1.0 - radius {
-                ejecta.position.x = 1.0 - radius;
-                ejecta.velocity.x = -ejecta.velocity.x.abs() * restitution;
-            }
-
-            if ejecta.position.y < radius {
-                ejecta.position.y = radius;
-                ejecta.velocity.y = ejecta.velocity.y.abs() * restitution;
-            } else if ejecta.position.y > 1.0 - radius {
-                ejecta.position.y = 1.0 - radius;
-                ejecta.velocity.y = -ejecta.velocity.y.abs() * restitution;
-            }
         }
     }
 
@@ -563,7 +592,7 @@ impl World {
                     continue;
                 }
                 let reach = radius + pellet.radius();
-                if position.distance_squared(pellet.position) <= reach * reach {
+                if wrap_delta(pellet.position - position).length_squared() <= reach * reach {
                     gained += pellet.mass.get();
                     count += 1;
                     self.pellets[pellet_index].alive = false;
@@ -604,7 +633,7 @@ impl World {
                     continue;
                 }
                 let reach = radius + ejecta.radius();
-                if position.distance_squared(ejecta.position) > reach * reach {
+                if wrap_delta(ejecta.position - position).length_squared() > reach * reach {
                     continue;
                 }
 
@@ -645,7 +674,7 @@ impl World {
                 let current_position = self.motes[index].position;
                 let other_position = self.motes[other_index].position;
                 let reach = self.motes[index].radius() + self.motes[other_index].radius();
-                if current_position.distance_squared(other_position) > reach * reach {
+                if wrap_delta(other_position - current_position).length_squared() > reach * reach {
                     continue;
                 }
 
@@ -694,7 +723,7 @@ impl World {
         let first_radius = self.motes[first].radius();
         let second_radius = self.motes[second].radius();
 
-        let delta = second_position - first_position;
+        let delta = wrap_delta(second_position - first_position);
         let distance = delta.length();
         let normal = if distance > 1e-6 {
             delta * (1.0 / distance)
@@ -709,10 +738,8 @@ impl World {
             self.motes[second].position += offset;
         }
 
-        self.motes[first].position =
-            clamp_to_world(self.motes[first].position, self.motes[first].radius());
-        self.motes[second].position =
-            clamp_to_world(self.motes[second].position, self.motes[second].radius());
+        self.motes[first].position = wrap_position(self.motes[first].position);
+        self.motes[second].position = wrap_position(self.motes[second].position);
 
         let approach = (first_velocity - second_velocity).dot(normal);
         if approach <= 0.0 {
@@ -767,9 +794,9 @@ impl World {
             .iter()
             .enumerate()
             .min_by(|(_, left), (_, right)| {
-                left.position
-                    .distance_squared(position)
-                    .total_cmp(&right.position.distance_squared(position))
+                wrap_delta(left.position - position)
+                    .length_squared()
+                    .total_cmp(&wrap_delta(right.position - position).length_squared())
             })
             .map(|(index, _)| index)
         {
@@ -807,13 +834,6 @@ fn random_velocity(rng: &mut StdRng) -> Vec2 {
     let angle = rng.random_range(0.0..TAU);
     let speed = rng.random_range(0.0..0.01);
     Vec2::new(angle.cos() * speed, angle.sin() * speed)
-}
-
-fn clamp_to_world(position: Vec2, radius: f32) -> Vec2 {
-    Vec2::new(
-        position.x.clamp(radius, 1.0 - radius),
-        position.y.clamp(radius, 1.0 - radius),
-    )
 }
 
 #[cfg(test)]
@@ -929,6 +949,30 @@ mod tests {
     }
 
     #[test]
+    fn absorption_works_across_the_wrapped_edge() {
+        let mut world = World::new(config(2, 0));
+        set_mote(&mut world, 0, Vec2::new(0.01, 0.5), Vec2::ZERO, 2.0);
+        set_mote(&mut world, 1, Vec2::new(0.99, 0.5), Vec2::ZERO, 1.0);
+
+        world.step();
+
+        assert_eq!(world.motes.len(), 1);
+        assert!((world.motes[0].mass.get() - 3.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn pellet_is_absorbed_across_the_wrapped_edge() {
+        let mut world = World::new(config(1, 1));
+        set_mote(&mut world, 0, Vec2::new(0.01, 0.5), Vec2::ZERO, 1.0);
+        world.pellets[0].position = Vec2::new(0.995, 0.5);
+
+        world.step();
+
+        assert_eq!(world.pellets.len(), 0);
+        assert!((world.motes[0].mass.get() - 1.12).abs() < 1e-5);
+    }
+
+    #[test]
     fn larger_mote_absorbs_smaller_and_keeps_mass() {
         let mut world = World::new(config(2, 0));
         set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 2.0);
@@ -1037,20 +1081,20 @@ mod tests {
     }
 
     #[test]
-    fn wall_bounce_keeps_the_mote_inside() {
+    fn mote_wraps_at_the_right_edge() {
         let mut world = World::new(config(1, 0));
         set_mote(
             &mut world,
             0,
-            Vec2::new(0.99, 0.5),
+            Vec2::new(0.999, 0.5),
             Vec2::new(0.25, 0.0),
             1.0,
         );
 
         world.step();
 
-        assert!(world.motes[0].velocity.x < 0.0);
-        assert!(world.motes[0].position.x <= 1.0 - world.motes[0].radius() + 1e-4);
+        assert!(world.motes[0].velocity.x > 0.0);
+        assert!(world.motes[0].position.x < 0.01);
     }
 
     #[test]

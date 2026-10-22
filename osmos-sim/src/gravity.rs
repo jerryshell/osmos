@@ -1,4 +1,4 @@
-use osmos_core::Vec2;
+use osmos_core::{wrap_delta, Vec2};
 
 use crate::config::SimConfig;
 
@@ -35,7 +35,7 @@ impl GravityWell {
             return Vec2::ZERO;
         }
 
-        let delta = self.center - position;
+        let delta = wrap_delta(self.center - position);
         let distance_squared = delta.length_squared();
         let denominator = distance_squared + self.softening * self.softening;
         let magnitude = (self.strength / denominator).clamp(-self.max_accel, self.max_accel);

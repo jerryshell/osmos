@@ -1,6 +1,6 @@
 use std::f32::consts::{PI, TAU};
 
-use osmos_core::{Vec2, SENSOR_INPUTS};
+use osmos_core::{wrap_delta, Vec2, SENSOR_INPUTS};
 
 use crate::ejecta::Ejecta;
 use crate::grid::Grid;
@@ -10,6 +10,8 @@ use crate::pellet::Pellet;
 pub const SECTORS: usize = 16;
 const CHANNEL_OFFSET: usize = 16;
 const SELF_OFFSET: usize = SECTORS * 3;
+const THREAT_OFFSET: usize = SELF_OFFSET + 3;
+const FOOD_OFFSET: usize = SELF_OFFSET + 5;
 
 pub struct SenseContext<'a> {
     motes: &'a [Mote],
@@ -93,9 +95,7 @@ impl<'a> SenseContext<'a> {
         out[SELF_OFFSET] = (me.mass / (me.mass + 1.0)) * 2.0 - 1.0;
         out[SELF_OFFSET + 1] = (me.velocity.length() / self.max_speed).clamp(0.0, 1.0) * 2.0 - 1.0;
         out[SELF_OFFSET + 2] = me.position.x * 2.0 - 1.0;
-        out[SELF_OFFSET + 3] = (1.0 - me.position.x) * 2.0 - 1.0;
         out[SELF_OFFSET + 4] = me.position.y * 2.0 - 1.0;
-        out[SELF_OFFSET + 5] = (1.0 - me.position.y) * 2.0 - 1.0;
         out[SELF_OFFSET + 6] = if self.episode_ticks == 0 {
             0.0
         } else {
@@ -104,7 +104,7 @@ impl<'a> SenseContext<'a> {
     }
 
     fn add(&self, out: &mut [f32; SENSOR_INPUTS], me: Body, other: Body) {
-        let delta = other.position - me.position;
+        let delta = wrap_delta(other.position - me.position);
         let distance = delta.length();
         if distance <= 1e-6 || distance > self.range {
             return;
@@ -119,6 +119,12 @@ impl<'a> SenseContext<'a> {
         out[sector] += mass_delta * weight;
         out[CHANNEL_OFFSET + sector] += weight;
         out[CHANNEL_OFFSET * 2 + sector] += radial.clamp(-1.0, 1.0) * weight;
+
+        if other.mass > me.mass {
+            out[THREAT_OFFSET] = out[THREAT_OFFSET].max(weight);
+        } else if other.mass < me.mass {
+            out[FOOD_OFFSET] = out[FOOD_OFFSET].max(weight);
+        }
     }
 }
 
@@ -229,6 +235,32 @@ mod tests {
 
         assert!(out[8] < 0.0);
         assert!(out[16 + 8] > 0.0);
+        assert!(out[FOOD_OFFSET] > 0.0);
+    }
+
+    #[test]
+    fn wrapped_food_on_the_left_edge_is_still_on_the_right() {
+        let me = mote(Vec2::new(0.99, 0.5), 1.0);
+        let food = pellet(Vec2::new(0.01, 0.5), 0.12);
+        let mut mote_grid = Grid::new();
+        mote_grid.insert(0, me.position);
+        let mut pellet_grid = Grid::new();
+        pellet_grid.insert(0, food.position);
+        let ejecta_grid = Grid::new();
+        let mut out = [0.0; SENSOR_INPUTS];
+        let mut nearby = Vec::new();
+
+        context(
+            std::slice::from_ref(&me),
+            std::slice::from_ref(&food),
+            &mote_grid,
+            &pellet_grid,
+            &ejecta_grid,
+        )
+        .sense(0, 0, &mut nearby, &mut out);
+
+        assert!(out[8] < 0.0);
+        assert!(out[FOOD_OFFSET] > 0.0);
     }
 
     #[test]
@@ -251,10 +283,11 @@ mod tests {
         );
 
         assert!(out[8] > 0.0);
+        assert!(out[THREAT_OFFSET] > 0.0);
     }
 
     #[test]
-    fn wall_distances_are_centered() {
+    fn empty_threat_and_food_channels_are_centered() {
         let me = mote(Vec2::new(0.5, 0.5), 1.0);
         let mut grid = Grid::new();
         grid.insert(0, me.position);
@@ -273,6 +306,28 @@ mod tests {
         assert_eq!(out[50], 0.0);
         assert_eq!(out[51], 0.0);
         assert_eq!(out[52], 0.0);
+        assert_eq!(out[53], 0.0);
+    }
+
+    #[test]
+    fn edge_position_has_no_false_wall_signal() {
+        let me = mote(Vec2::new(0.01, 0.5), 1.0);
+        let mut grid = Grid::new();
+        grid.insert(0, me.position);
+        let empty = Grid::new();
+        let ejecta_grid = Grid::new();
+        let mut out = [0.0; SENSOR_INPUTS];
+        let mut nearby = Vec::new();
+
+        context(std::slice::from_ref(&me), &[], &grid, &empty, &ejecta_grid).sense(
+            0,
+            0,
+            &mut nearby,
+            &mut out,
+        );
+
+        assert!(out[50] < 0.0);
+        assert_eq!(out[51], 0.0);
         assert_eq!(out[53], 0.0);
     }
 }

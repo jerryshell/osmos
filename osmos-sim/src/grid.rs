@@ -1,6 +1,6 @@
 use osmos_core::Vec2;
 
-pub const GRID_SIDE: usize = 4;
+pub const GRID_SIDE: usize = 8;
 const CELL_SIZE: f32 = 1.0 / GRID_SIDE as f32;
 
 #[derive(Clone, Debug, Default)]
@@ -31,13 +31,12 @@ impl Grid {
         out.clear();
         let x = axis(position.x);
         let y = axis(position.y);
-        let x0 = x.saturating_sub(1);
-        let y0 = y.saturating_sub(1);
-        let x1 = (x + 1).min(GRID_SIDE - 1);
-        let y1 = (y + 1).min(GRID_SIDE - 1);
+        let side = GRID_SIDE as isize;
 
-        for cy in y0..=y1 {
-            for cx in x0..=x1 {
+        for dy in -2..=2 {
+            for dx in -2..=2 {
+                let cx = (x as isize + dx).rem_euclid(side) as usize;
+                let cy = (y as isize + dy).rem_euclid(side) as usize;
                 out.extend_from_slice(&self.cells[cy * GRID_SIDE + cx]);
             }
         }
@@ -45,7 +44,14 @@ impl Grid {
 }
 
 fn axis(value: f32) -> usize {
-    ((value / CELL_SIZE).floor() as isize).clamp(0, GRID_SIDE as isize - 1) as usize
+    let wrapped = if value < 0.0 {
+        value + 1.0
+    } else if value >= 1.0 {
+        value - 1.0
+    } else {
+        value
+    };
+    ((wrapped / CELL_SIZE).floor() as isize).clamp(0, GRID_SIDE as isize - 1) as usize
 }
 
 #[cfg(test)]
@@ -64,16 +70,16 @@ mod tests {
 
         assert!(found.contains(&0));
         assert!(found.contains(&1));
-        assert!(!found.contains(&2));
+        assert!(found.contains(&2));
     }
 
     #[test]
-    fn edges_are_clamped() {
+    fn edges_wrap() {
         let mut grid = Grid::new();
-        grid.insert(7, Vec2::new(1.0, 0.0));
+        grid.insert(7, Vec2::new(0.98, 0.02));
 
         let mut found = Vec::new();
-        grid.nearby(Vec2::new(1.0, 0.0), &mut found);
+        grid.nearby(Vec2::new(0.02, 0.02), &mut found);
 
         assert_eq!(found, vec![7]);
     }

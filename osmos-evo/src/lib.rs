@@ -6,4 +6,4 @@ pub mod trainer;
 
 pub use engine::{Engine, Inspect};
 pub use scenario::Scenario;
-pub use trainer::{Trainer, TrainerReport};
+pub use trainer::{ProbeReport, Trainer, TrainerReport};

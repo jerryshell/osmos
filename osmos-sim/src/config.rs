@@ -9,7 +9,6 @@ pub struct SimConfig {
     pub mote_mass: f32,
     pub pellet_mass: f32,
     pub max_speed: f32,
-    pub wall_restitution: f32,
     pub collision_restitution: f32,
     pub absorb_ratio: f32,
     pub episode_ticks: u64,
@@ -17,6 +16,8 @@ pub struct SimConfig {
     pub max_eject_rate: f32,
     pub min_mass: f32,
     pub eject_speed: f32,
+    pub hunter_speed: f32,
+    pub prey_speed: f32,
     pub target_mass: f32,
     pub ejecta_enabled: bool,
     pub ejecta_ttl_ticks: u32,
@@ -42,7 +43,6 @@ impl Default for SimConfig {
             mote_mass: 1.0,
             pellet_mass: 0.12,
             max_speed: 0.25,
-            wall_restitution: 0.8,
             collision_restitution: 0.8,
             absorb_ratio: 2.0,
             episode_ticks: 2400,
@@ -50,6 +50,8 @@ impl Default for SimConfig {
             max_eject_rate: 0.005,
             min_mass: 0.05,
             eject_speed: 2.0,
+            hunter_speed: 0.11,
+            prey_speed: 0.08,
             target_mass: 4.0,
             ejecta_enabled: true,
             ejecta_ttl_ticks: 480,
@@ -74,7 +76,6 @@ impl SimConfig {
         assert!(self.mote_mass.is_finite() && self.mote_mass > 0.0);
         assert!(self.pellet_mass.is_finite() && self.pellet_mass > 0.0);
         assert!(self.max_speed.is_finite() && self.max_speed > 0.0);
-        assert!((0.0..=1.0).contains(&self.wall_restitution));
         assert!((0.0..=1.0).contains(&self.collision_restitution));
         assert!(self.absorb_ratio >= 1.0);
         assert!(self.episode_ticks > 0);
@@ -82,6 +83,8 @@ impl SimConfig {
         assert!(self.max_eject_rate.is_finite() && self.max_eject_rate > 0.0);
         assert!(self.min_mass.is_finite() && self.min_mass > 0.0);
         assert!(self.eject_speed.is_finite() && self.eject_speed > 0.0);
+        assert!(self.hunter_speed.is_finite() && self.hunter_speed > 0.0);
+        assert!(self.prey_speed.is_finite() && self.prey_speed > 0.0);
         assert!(self.target_mass.is_finite() && self.target_mass > self.mote_mass);
         assert!(self.ejecta_ttl_ticks > 0);
         assert!(self.ejecta_packet.is_finite() && self.ejecta_packet > 0.0);

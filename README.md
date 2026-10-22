@@ -2,11 +2,11 @@
 
 Rust + WASM + Vite + 质量生态
 
-当前进度是 Phase 6 预览加 APK 机制分析。世界包含质量、空间网格、16 扇区感知、55-8-2 控制网络、质量成本推进、喷出物、猎手、猎物、场景、中心场力和遗传算法。Web 支持质体检查面板和场景切换。学习检查使用隔离回合。
+当前进度是 Phase 6 预览加 APK 机制分析。世界包含质量、环绕边界、空间网格、16 扇区感知、55-8-2 控制网络、质量成本推进、喷出物、猎手、猎物、场景、中心场力和遗传算法。每个 AI 质体都可以是猎手或猎物。Web 支持质体检查面板和场景切换。训练使用隔离的捕食和被捕食回合。
 
 预览地址：<https://osmos.jerryshell.eu.org/next/>。生产根站仍是旧版，切换待确认。
 
-APK 机制分析和取舍见 `docs/apk-mechanics.md`。新增 `Orbital` 和 `Repulsor` 场景，分别使用中心吸引和排斥。
+APK 机制分析和取舍见 `docs/apk-mechanics.md`。环绕边界、传感器适配和双向捕食训练见 `docs/wrap-and-ecology.md`。新增 `Orbital` 和 `Repulsor` 场景，分别使用中心吸引和排斥。
 
 旧版演示：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 
@@ -59,12 +59,12 @@ osmos
 └── osmos-web  # SolidJS + Canvas 2D
 ```
 
-`osmos-sim` 默认生成 64 个质体和 236 个颗粒，一共 300 个实体。`Orbital` 和 `Repulsor` 使用 64 个质体、180 个颗粒和一口中心场力井。仿真以 60 Hz 固定步长推进，内部使用 2 个物理子步和 4 × 4 空间网格。控制网络拓扑为 55-8-2，基因组长度 466。
+`osmos-sim` 默认生成 64 个质体和 236 个颗粒，一共 300 个实体。`Orbital` 和 `Repulsor` 使用 64 个质体、180 个颗粒和一口中心场力井。仿真以 60 Hz 固定步长推进，内部使用 2 个物理子步和 8 × 8 空间网格。边界环绕，感知使用最短环绕距离。控制网络拓扑为 55-8-2，基因组长度 466。
 
 训练命令。
 
 ```bash
-cargo run --release -p osmos-headless -- --train --generations 60 --seed 42 --holdout 10
+cargo run --release -p osmos-headless -- --train --generations 60 --seed 42 --holdout 10 --probe
 ```
 
 ## 开源协议

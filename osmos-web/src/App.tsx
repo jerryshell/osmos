@@ -153,9 +153,11 @@ const App = () => {
     ctx.fillStyle = field;
     ctx.fillRect(left, top, size, size);
 
-    ctx.strokeStyle = "rgba(49, 214, 196, 0.24)";
+    ctx.strokeStyle = "rgba(49, 214, 196, 0.14)";
     ctx.lineWidth = 1;
+    ctx.setLineDash([3, 7]);
     ctx.strokeRect(left + 0.5, top + 0.5, size - 1, size - 1);
+    ctx.setLineDash([]);
 
     const wells = snapshot.wellState ?? new Float32Array(0);
     for (let index = 0; index < wells.length; index += WELL_STRIDE) {
@@ -318,6 +320,15 @@ const App = () => {
       const value = detail()?.sensor[offset + index] ?? 0;
       return <i style={{ height: `${Math.max(2, Math.min(100, Math.abs(value) * 100))}%` }} />;
     });
+
+  const signalBar = (index: number) => {
+    const value = Math.max(0, Math.min(1, detail()?.sensor[index] ?? 0));
+    return (
+      <div class="sensor-bars single">
+        <i style={{ height: `${Math.max(2, value * 100)}%` }} />
+      </div>
+    );
+  };
 
   onMount(() => {
     if (!canvas) return;
@@ -557,6 +568,8 @@ const App = () => {
           <div class="sensor-row"><span>MASS</span><div class="sensor-bars">{sensorBars(0)}</div></div>
           <div class="sensor-row"><span>PROX</span><div class="sensor-bars">{sensorBars(16)}</div></div>
           <div class="sensor-row"><span>RADIAL</span><div class="sensor-bars radial">{sensorBars(32)}</div></div>
+          <div class="sensor-row"><span>THREAT</span>{signalBar(51)}</div>
+          <div class="sensor-row"><span>FOOD</span>{signalBar(53)}</div>
 
           <p class="inspector-section">CONTROL OUTPUT</p>
           <div class="inspector-output">
@@ -576,10 +589,10 @@ const App = () => {
 
       <p id="caption">
         {scenario() === 2
-          ? "A CENTRAL ATTRACTOR BENDS EVERY ORBIT."
+          ? "A CENTRAL ATTRACTOR BENDS EVERY ORBIT. EDGES WRAP."
           : scenario() === 3
-            ? "A CENTRAL REPULSOR PUSHES EVERY ORBIT APART."
-            : "MASS IS THE ONLY RESOURCE. LARGER CIRCLES ABSORB SMALLER ONES."}
+            ? "A CENTRAL REPULSOR PUSHES EVERY ORBIT APART. EDGES WRAP."
+            : "MASS IS THE ONLY RESOURCE. LARGER CIRCLES ABSORB SMALLER ONES. EDGES WRAP."}
       </p>
 
       <footer id="controls">

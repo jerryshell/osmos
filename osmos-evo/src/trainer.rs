@@ -1,5 +1,6 @@
 use osmos_core::brain::{ControlNetwork, Genome};
-use osmos_sim::{SimConfig, World};
+use osmos_core::wrap_delta;
+use osmos_sim::{MoteRole, SimConfig, World};
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
@@ -7,6 +8,29 @@ use crate::fitness::{mean, median, score};
 use crate::ga::{next_population, random_population};
 
 const SEEDS_PER_GENOME: usize = 2;
+#[derive(Clone, Debug)]
+pub struct ProbeReport {
+    pub seed: u64,
+    pub predator_mass: f32,
+    pub predator_absorbed_motes: u32,
+    pub predator_absorbed_pellets: u32,
+    pub prey_survived: bool,
+    pub prey_alive_ticks: u64,
+    pub prey_mass: f32,
+    pub prey_min_hunter_distance: f32,
+    pub prey_mean_hunter_distance: f32,
+}
+
+struct ProbeRole {
+    survived: bool,
+    mass: f32,
+    alive_ticks: u64,
+    absorbed_motes: u32,
+    absorbed_pellets: u32,
+    min_hunter_distance: f32,
+    mean_hunter_distance: f32,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct TrainerReport {
     pub generation: u32,
@@ -16,6 +40,7 @@ pub struct TrainerReport {
     pub best_score: f32,
     pub mean_score: f32,
     pub target_rate: f32,
+    pub survival_rate: f32,
 }
 
 pub struct Trainer {
@@ -86,6 +111,80 @@ impl Trainer {
         total / seeds.len() as f32
     }
 
+    pub fn probe_best(&self, seed: u64) -> ProbeReport {
+        let predator = self.probe_role(seed, true);
+        let prey = self.probe_role(seed ^ 0xB22D_F602, false);
+        ProbeReport {
+            seed,
+            predator_mass: predator.mass,
+            predator_absorbed_motes: predator.absorbed_motes,
+            predator_absorbed_pellets: predator.absorbed_pellets,
+            prey_survived: prey.survived,
+            prey_alive_ticks: prey.alive_ticks,
+            prey_mass: prey.mass,
+            prey_min_hunter_distance: prey.min_hunter_distance,
+            prey_mean_hunter_distance: prey.mean_hunter_distance,
+        }
+    }
+
+    fn probe_role(&self, seed: u64, predator: bool) -> ProbeRole {
+        let config = SimConfig {
+            seed,
+            motes: 1,
+            pellets: 0,
+            episode_ticks: self.config.episode_ticks,
+            absorb_ratio: 1.5,
+            hunter_speed: 0.03,
+            prey_speed: 0.02,
+            ..self.config
+        };
+        let controller = ControlNetwork::from_genome(&self.best_genome);
+        let mut world = if predator {
+            World::with_predator_training(config, vec![controller])
+        } else {
+            World::with_prey_training(config, vec![controller])
+        };
+        let mut alive_ticks = 0;
+        let mut min_hunter_distance = f32::INFINITY;
+        let mut distance_sum = 0.0;
+        let mut distance_samples = 0;
+        for tick in 0..config.episode_ticks {
+            world.step();
+            let Some(learner) = world.motes.iter().find(|mote| mote.id.get() == 0) else {
+                break;
+            };
+            alive_ticks = tick + 1;
+            if let Some(hunter) = world
+                .motes
+                .iter()
+                .find(|mote| mote.role == MoteRole::Hunter)
+            {
+                let distance = wrap_delta(hunter.position - learner.position).length();
+                min_hunter_distance = min_hunter_distance.min(distance);
+                distance_sum += distance;
+                distance_samples += 1;
+            }
+        }
+        let learner = world.motes.iter().find(|mote| mote.id.get() == 0);
+        ProbeRole {
+            survived: learner.is_some(),
+            mass: learner.map(|mote| mote.mass.get()).unwrap_or(0.0),
+            alive_ticks,
+            absorbed_motes: learner.map(|mote| mote.absorbed_motes).unwrap_or(0),
+            absorbed_pellets: learner.map(|mote| mote.absorbed_pellets).unwrap_or(0),
+            min_hunter_distance: if min_hunter_distance.is_finite() {
+                min_hunter_distance
+            } else {
+                0.0
+            },
+            mean_hunter_distance: if distance_samples > 0 {
+                distance_sum / distance_samples as f32
+            } else {
+                0.0
+            },
+        }
+    }
+
     pub fn evaluate_genome_mass(&self, genome: &Genome, seeds: &[u64]) -> f32 {
         if seeds.is_empty() {
             return 0.0;
@@ -100,6 +199,7 @@ impl Trainer {
     fn evaluate_population(&mut self) -> Evaluation {
         let mut scores = Vec::with_capacity(self.population.len());
         let mut masses = Vec::with_capacity(self.population.len());
+        let mut survivals = Vec::with_capacity(self.population.len());
 
         let generation_seed =
             self.seed ^ (self.generation as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15);
@@ -112,9 +212,10 @@ impl Trainer {
             let mut total_score = 0.0;
             let mut total_mass = 0.0;
             for seed in seeds {
-                let mass = self.run_episode(genome, seed);
-                total_mass += mass;
-                total_score += score(mass, self.config.target_mass);
+                let episode = self.run_episode_stats(genome, seed);
+                total_mass += episode.mass;
+                total_score += episode.fitness;
+                survivals.push(episode.survived);
             }
 
             let mass = total_mass / SEEDS_PER_GENOME as f32;
@@ -149,38 +250,112 @@ impl Trainer {
                     .filter(|mass| **mass >= self.config.target_mass)
                     .count() as f32
                     / masses.len() as f32,
+                survival_rate: survivals.iter().filter(|survived| **survived).count() as f32
+                    / survivals.len() as f32,
             },
             scores,
         }
     }
 
     fn run_episode(&self, genome: &Genome, seed: u64) -> f32 {
+        self.run_episode_stats(genome, seed).mass
+    }
+
+    fn run_episode_stats(&self, genome: &Genome, seed: u64) -> EpisodeStats {
+        let predator = self.run_role(genome, seed ^ 0xA11C_E501, true);
+        let prey = self.run_role(genome, seed ^ 0xB22D_F602, false);
+        EpisodeStats {
+            mass: (predator.mass + prey.mass) * 0.5,
+            fitness: (predator.fitness + prey.fitness) * 0.5,
+            survived: predator.survived && prey.survived,
+        }
+    }
+
+    fn run_role(&self, genome: &Genome, seed: u64, predator: bool) -> EpisodeStats {
         let config = SimConfig {
             seed,
             motes: 1,
+            pellets: 0,
             episode_ticks: self.config.episode_ticks,
+            absorb_ratio: 1.5,
+            hunter_speed: 0.03,
+            prey_speed: 0.02,
             ..self.config
         };
-        let mut world = World::with_controllers(config, vec![ControlNetwork::from_genome(genome)]);
-        for _ in 0..config.episode_ticks {
+        let controller = ControlNetwork::from_genome(genome);
+        let mut world = if predator {
+            World::with_predator_training(config, vec![controller])
+        } else {
+            World::with_prey_training(config, vec![controller])
+        };
+        let mut alive_ticks = 0_u64;
+        let mut hunter_distance_sum = 0.0;
+        let mut hunter_distance_samples = 0;
+        let mut prey_distance_sum = 0.0;
+        let mut prey_distance_samples = 0;
+        for tick in 0..config.episode_ticks {
             world.step();
+            let Some(learner) = world.motes.iter().find(|mote| mote.id.get() == 0) else {
+                break;
+            };
+            alive_ticks = tick + 1;
+            if let Some(hunter) = world
+                .motes
+                .iter()
+                .find(|mote| mote.role == MoteRole::Hunter)
+            {
+                hunter_distance_sum += wrap_delta(hunter.position - learner.position).length();
+                hunter_distance_samples += 1;
+            }
+            for prey in world
+                .motes
+                .iter()
+                .filter(|mote| mote.role == MoteRole::Prey)
+            {
+                prey_distance_sum += wrap_delta(prey.position - learner.position).length();
+                prey_distance_samples += 1;
+            }
         }
-        world
-            .motes
-            .first()
-            .map(|mote| mote.mass.get())
-            .unwrap_or(0.0)
+        let learner = world.motes.iter().find(|mote| mote.id.get() == 0);
+        let mass = learner.map(|mote| mote.mass.get()).unwrap_or(0.0);
+        let absorbed = learner.map(|mote| mote.absorbed_motes).unwrap_or(0);
+        let survival = alive_ticks as f32 / config.episode_ticks.max(1) as f32;
+        let survival_weight = if predator { 0.5 } else { 2.0 };
+        let safety = if predator || hunter_distance_samples == 0 {
+            0.0
+        } else {
+            hunter_distance_sum / hunter_distance_samples as f32
+        };
+        let pursuit = if predator && prey_distance_samples > 0 {
+            (1.0 - prey_distance_sum / prey_distance_samples as f32).max(0.0)
+        } else {
+            0.0
+        };
+        EpisodeStats {
+            mass,
+            fitness: score(mass, self.config.target_mass)
+                + survival * survival_weight
+                + absorbed as f32 * 0.5
+                + safety * (if predator { 0.0 } else { 1.0 })
+                + pursuit * 0.5,
+            survived: learner.is_some(),
+        }
     }
 
     fn evaluate_on_seed(&self, genome: &Genome, seed: u64) -> f32 {
-        let mass = self.run_episode(genome, seed);
-        score(mass, self.config.target_mass)
+        self.run_episode_stats(genome, seed).fitness
     }
 }
 
 struct Evaluation {
     report: TrainerReport,
     scores: Vec<f32>,
+}
+
+struct EpisodeStats {
+    mass: f32,
+    fitness: f32,
+    survived: bool,
 }
 
 #[cfg(test)]

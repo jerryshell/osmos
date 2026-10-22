@@ -11,6 +11,7 @@ fn main() {
     let mut train = false;
     let mut holdout = 0_usize;
     let mut scenario = 0_u32;
+    let mut probe = false;
 
     let mut arguments = std::env::args().skip(1);
     while let Some(argument) = arguments.next() {
@@ -23,6 +24,7 @@ fn main() {
             "--train" => train = true,
             "--holdout" => holdout = parse(&mut arguments, "holdout"),
             "--scenario" => scenario = parse(&mut arguments, "scenario"),
+            "--probe" => probe = true,
             other => panic!("unknown argument: {other}"),
         }
     }
@@ -39,14 +41,15 @@ fn main() {
         for _ in 0..generations {
             let report = trainer.run_generation();
             println!(
-                "{{\"generation\":{},\"best_mass\":{:.4},\"median_mass\":{:.4},\"mean_mass\":{:.4},\"best_score\":{:.4},\"mean_score\":{:.4},\"target_rate\":{:.4}}}",
+                "{{\"generation\":{},\"best_mass\":{:.4},\"median_mass\":{:.4},\"mean_mass\":{:.4},\"best_score\":{:.4},\"mean_score\":{:.4},\"target_rate\":{:.4},\"survival_rate\":{:.4}}}",
                 report.generation,
                 report.best_mass,
                 report.median_mass,
                 report.mean_mass,
                 report.best_score,
                 report.mean_score,
-                report.target_rate
+                report.target_rate,
+                report.survival_rate
             );
         }
 
@@ -65,6 +68,21 @@ fn main() {
                 baseline_median,
                 evolved_median,
                 evolved_median / baseline_median.max(1e-6)
+            );
+        }
+        if probe {
+            let report = trainer.probe_best(9001);
+            println!(
+                "{{\"phase\":\"probe\",\"seed\":{},\"predator_mass\":{:.4},\"predator_absorbed_motes\":{},\"predator_absorbed_pellets\":{},\"prey_survived\":{},\"prey_alive_ticks\":{},\"prey_mass\":{:.4},\"prey_min_hunter_distance\":{:.4},\"prey_mean_hunter_distance\":{:.4}}}",
+                report.seed,
+                report.predator_mass,
+                report.predator_absorbed_motes,
+                report.predator_absorbed_pellets,
+                report.prey_survived,
+                report.prey_alive_ticks,
+                report.prey_mass,
+                report.prey_min_hunter_distance,
+                report.prey_mean_hunter_distance
             );
         }
         return;

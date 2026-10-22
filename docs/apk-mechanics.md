@@ -10,7 +10,9 @@
 
 APK 是 Marmalade C++ 原生版本，不是 Unity。游戏逻辑在 `lib/arm64-v8a/libosmos.so`，文件约 2.9 MB，已剥离但是保留了大量可读 C++ 符号。资源里有 `.loc` 文本、`.tga` 贴图、`.ogg` 音乐和 Marmalade 配置。
 
-本次只引入一个机制，即中心径向场力。正强度吸引，负强度排斥。新增 `Orbital` 和 `Repulsor` 两个场景。
+本次引入一个 APK 机制，即中心径向场力。正强度吸引，负强度排斥。新增 `Orbital` 和 `Repulsor` 两个场景。
+
+同时完成用户要求的环绕边界和双向捕食训练。细节见 `docs/wrap-and-ecology.md`。
 
 本次不引入原版关卡、贴图、音乐、字体、关卡文本、手动触屏操作、广告和内购。没有复制反编译代码。所有实现是 Rust 中的新代码。
 
@@ -78,36 +80,36 @@ Web 快照新增 `wellState`，每 4 个浮点数是一口井，依次为 `x`、
 
 当前网络是 55-8-2，基因组 466 个值。直接加入场力输入会改变输入数和基因组布局，使现有学习门禁失效。
 
-这次先利用固定场的特点。场的位置是常量，质体的位置和速度已经能表达它。`Ambient` 的随机数顺序和物理路径保持不变，1,000 步哈希仍是 `99b4716d6a4f0026`。
+这次先利用固定场的特点。场的位置是常量，质体的位置和速度已经能表达它。加入环绕后，1,000 步哈希仍为 `99b4716d6a4f0026`，但这只能说明该采样路径稳定，不能证明所有边界行为不变。
 
 直接场力输入留到下一轮。若加入 2 个输入，需要重新训练，并重新跑 3 个种子的 60 代门禁。
 
 ## 6. 验证
 
-- Rust 测试 39 个通过。`osmos-core` 5 个，`osmos-evo` 9 个，`osmos-sim` 25 个。
+- Rust 测试 44 个通过。`osmos-core` 6 个，`osmos-evo` 9 个，`osmos-sim` 29 个。
 - `cargo fmt`、Clippy、TypeScript 和 Oxlint 通过。
-- 1,000 步 Ambient 哈希不变，说明旧场景没有漂移。
-- 60 秒浏览器测试 8 个场景组合，帧率 58.85 到 59.98 fps，页面错误 0。
-- 8× 桌面 `step` p95 7.7 ms，手机 7.6 ms。
-- Orbital 手机 4× 为 59.90 fps，`step` p95 4.7 ms。
-- Repulsor 手机 4× 为 59.98 fps，`step` p95 3.7 ms。
-- 500 个实体，64 个 AI 加 436 个颗粒，Orbital 2,400 步 0.69 秒。
-- wasm 111.09 KB，gzip 46.74 KB。JavaScript 28.50 KB，gzip 11.06 KB。CSS 6.13 KB，gzip 1.76 KB。
+- 1,000 步 Ambient 哈希仍为 `99b4716d6a4f0026`。环绕边界由独立单元测试覆盖。
+- 60 秒浏览器测试 8 个场景组合，帧率 59.85 到 60.02 fps，页面错误 0。
+- 8× 桌面 `step` p95 6.5 ms，手机 6.7 ms。
+- Orbital 手机 4× 为 60.00 fps，`step` p95 2.6 ms。
+- Repulsor 手机 4× 为 60.00 fps，`step` p95 2.7 ms。
+- 500 个实体，64 个 AI 加 436 个颗粒，Ambient 2,400 步 1.30 秒，约 1,846 步/秒。低于 2,400 步/秒计划值。
+- wasm 112.43 KB，gzip 46.30 KB。JavaScript 28.97 KB，gzip 11.20 KB。CSS 6.18 KB，gzip 1.78 KB。
 - 交互测试确认 Pause、Reset、Orbital、Repulsor 按钮和 URL 同步可用。
 
 证据在 `docs/apk-mechanics/evidence/`。截图在 `docs/apk-mechanics/`。
 
 ## 7. 限制
 
-- Orbital 和 Repulsor 没有进入 60 代学习门禁。当前只验证物理、页面和性能。
-- 场力传感器没有加入。AI 依靠位置和速度间接感知固定场。
+- Orbital 和 Repulsor 没有单独进入 60 代学习门禁。当前只验证物理、页面和性能。
+- 场力传感器没有加入。AI 依靠位置和速度间接感知固定场。边界感知已改为威胁和食物通道。
 - 只有一个中心井。多井、椭圆轨道和太阳系还未实现。
 - Sentient personality、Antimatter、Mitosis、Spawner 和死亡墙仍是候选。
 - 生产根站仍是旧版。新构建只在 `/next/` 预览。
 
 ## 8. 下一轮候选
 
-1. 给 Orbital 加入 2 个场力输入，重新训练并跑 3 个种子的 60 代门禁。
+1. 给 Orbital 加入 2 个场力输入，重新训练并跑 3 个种子的行为门禁。
 2. 把 `CBlobBrain` 的 Scared、Killer 行为压缩成可测试的脚本 AI，先服务 Sentient。
 3. 用多井和负场构造 Epicycles 和 Repulsor 关卡。
 4. 最后再评估 Antimatter，因为它需要独立的质量湮灭账本。
