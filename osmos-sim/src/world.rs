@@ -21,6 +21,7 @@ pub struct World {
     mote_grid: Grid,
     pellet_grid: Grid,
     scratch: Vec<u32>,
+    ejected_total: f32,
 }
 
 impl World {
@@ -75,6 +76,7 @@ impl World {
             mote_grid: Grid::new(),
             pellet_grid: Grid::new(),
             scratch: Vec::new(),
+            ejected_total: 0.0,
         }
     }
 
@@ -84,6 +86,10 @@ impl World {
 
     pub fn tick(&self) -> u64 {
         self.tick
+    }
+
+    pub fn ejected_total(&self) -> f32 {
+        self.ejected_total
     }
 
     pub fn step(&mut self) {
@@ -138,6 +144,7 @@ impl World {
         let min_mass = self.config.min_mass;
         let eject_speed = self.config.eject_speed;
         let max_speed = self.config.max_speed;
+        let mut ejected = 0.0_f32;
 
         for mote in &mut self.motes {
             if !mote.is_alive() {
@@ -166,7 +173,10 @@ impl World {
             mote.velocity += direction * (eject_speed * mass_flow / new_mass);
             mote.velocity = mote.velocity.clamp_length(max_speed);
             mote.ejected_mass += mass_flow;
+            ejected += mass_flow;
         }
+
+        self.ejected_total += ejected;
     }
 
     pub fn total_mass(&self) -> f32 {
@@ -665,8 +675,10 @@ mod tests {
         let mut world = World::with_controllers(config, vec![network]);
         set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 1.0);
 
+        let before = world.total_mass();
         world.step();
-
+        let after = world.total_mass();
+        assert!((before - after - world.ejected_total()).abs() < 1e-5);
         assert!(world.motes[0].mass.get() < 1.0);
         assert!(world.motes[0].velocity.x > 0.0);
         assert!(world.motes[0].ejected_mass > 0.0);

@@ -101,14 +101,17 @@ impl Trainer {
         let mut scores = Vec::with_capacity(self.population.len());
         let mut masses = Vec::with_capacity(self.population.len());
 
-        for (index, genome) in self.population.iter().enumerate() {
+        let generation_seed =
+            self.seed ^ (self.generation as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15);
+        let seeds = [
+            generation_seed ^ 0x1111_1111_1111_1111,
+            generation_seed ^ 0x2222_2222_2222_2222,
+        ];
+
+        for genome in &self.population {
             let mut total_score = 0.0;
             let mut total_mass = 0.0;
-            for replicate in 0..SEEDS_PER_GENOME {
-                let seed = self.seed
-                    ^ (self.generation as u64).wrapping_mul(0x9E37_79B9_7F4A_7C15)
-                    ^ (index as u64).wrapping_mul(0x85EB_CA6B)
-                    ^ (replicate as u64).wrapping_mul(0xC2B2_AE35);
+            for seed in seeds {
                 let mass = self.run_episode(genome, seed);
                 total_mass += mass;
                 total_score += score(mass, self.config.target_mass);

@@ -169,7 +169,7 @@ impl Engine {
                 .sum::<f32>()
                 / alive as f32
         };
-        let ejected_mass = self.world.motes.iter().map(|mote| mote.ejected_mass).sum();
+        let ejected_mass = self.world.ejected_total();
 
         Evaluation {
             report: GenerationReport {

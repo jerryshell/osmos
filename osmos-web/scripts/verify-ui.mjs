@@ -80,8 +80,10 @@ if (process.env.VERIFY_INTERACTIONS === "1") {
 
 const cases = [
   { name: "desktop-1x", viewport: { width: 1280, height: 800 }, speed: 1 },
+  { name: "desktop-4x", viewport: { width: 1280, height: 800 }, speed: 4 },
   { name: "desktop-8x", viewport: { width: 1280, height: 800 }, speed: 8 },
   { name: "mobile-1x", viewport: { width: 390, height: 844 }, speed: 1 },
+  { name: "mobile-4x", viewport: { width: 390, height: 844 }, speed: 4 },
   { name: "mobile-8x", viewport: { width: 390, height: 844 }, speed: 8 }
 ];
 
@@ -93,9 +95,19 @@ for (const item of cases) {
     if (message.type() === "error") errors.push(message.text());
   });
 
+  await page.addInitScript(() => {
+    window.__longTasks = [];
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) window.__longTasks.push(entry.duration);
+    }).observe({ entryTypes: ["longtask"] });
+  });
   await page.goto(`http://127.0.0.1:${port}/?seed=42`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: `${item.speed}×` }).click();
   await page.waitForTimeout(300);
+  await page.evaluate(() => {
+    window.__osmosPerf?.reset();
+    window.__longTasks = [];
+  });
 
   const smallButtons = await page.evaluate(() =>
     [...document.querySelectorAll("button")]
@@ -118,9 +130,10 @@ for (const item of cases) {
               generation: Number(match[1]),
               tick: Number(match[2]),
               alive: Number(match[3]),
-              pellets: Number(match[4])
+              pellets: Number(match[4]),
+              best: Number(document.querySelector("#hud .best")?.textContent ?? 0)
             }
-          : { generation: 0, tick: 0, alive: 0, pellets: 0 };
+          : { generation: 0, tick: 0, alive: 0, pellets: 0, best: 0 };
       };
 
       const start = read();
@@ -158,10 +171,12 @@ for (const item of cases) {
     { durationMs: seconds * 1000 }
   );
 
+  const perf = await page.evaluate(() => window.__osmosPerf?.summary() ?? null);
   console.log(
     JSON.stringify({
       case: item.name,
       ...result,
+      perf,
       smallButtons,
       errors
     })

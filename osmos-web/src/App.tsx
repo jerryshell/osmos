@@ -24,6 +24,26 @@ const MOTE_STRIDE = 7;
 const PELLET_STRIDE = 4;
 const MAX_STEPS_PER_FRAME = 16;
 
+type PerfSummary = {
+  stepP50: number;
+  stepP95: number;
+  stepMax: number;
+  snapshotP50: number;
+  snapshotP95: number;
+  snapshotMax: number;
+  frameMax: number;
+  longTasks: number;
+};
+
+declare global {
+  interface Window {
+    __osmosPerf?: {
+      reset: () => void;
+      summary: () => PerfSummary;
+    };
+  }
+}
+
 const readSeed = (): number => {
   const value = new URLSearchParams(window.location.search).get("seed");
   const parsed = value ? Number.parseInt(value, 10) : Number.NaN;
@@ -183,24 +203,63 @@ const App = () => {
     let last = performance.now();
     let lastStats = 0;
     let accumulator = 0;
+    const stepTimes: number[] = [];
+    const snapshotTimes: number[] = [];
+    const frameTimes: number[] = [];
+
+    window.__osmosPerf = {
+      reset: () => {
+        stepTimes.length = 0;
+        snapshotTimes.length = 0;
+        frameTimes.length = 0;
+      },
+      summary: () => {
+        const percentile = (values: number[], value: number) => {
+          if (values.length === 0) return 0;
+          const sorted = [...values].sort((a, b) => a - b);
+          return sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * value))];
+        };
+        const high = (values: number[]) =>
+          values.length === 0 ? 0 : values.reduce((max, value) => Math.max(max, value), 0);
+        return {
+          stepP50: percentile(stepTimes, 0.5),
+          stepP95: percentile(stepTimes, 0.95),
+          stepMax: high(stepTimes),
+          snapshotP50: percentile(snapshotTimes, 0.5),
+          snapshotP95: percentile(snapshotTimes, 0.95),
+          snapshotMax: high(snapshotTimes),
+          frameMax: high(frameTimes),
+          longTasks: (window as Window & { __longTasks?: number[] }).__longTasks?.length ?? 0
+        };
+      }
+    };
 
     const render = (now: number) => {
+      const frameStart = performance.now();
       const elapsed = Math.min((now - last) / 1000, 0.1);
       last = now;
 
+      let snapshotStart = 0;
       if (!paused()) {
         accumulator += elapsed * 60 * speed();
         const wanted = Math.floor(accumulator);
         const steps = Math.min(wanted, MAX_STEPS_PER_FRAME);
         accumulator -= wanted;
+        const stepStart = performance.now();
         if (steps > 0) {
           engine?.step(steps);
         }
+        snapshotStart = performance.now();
+        stepTimes.push(snapshotStart - stepStart);
       } else {
         accumulator = 0;
       }
 
       const snapshot = engine?.snapshot();
+      const snapshotEnd = performance.now();
+      if (snapshotStart > 0) {
+        snapshotTimes.push(snapshotEnd - snapshotStart);
+      }
       if (snapshot) {
         draw(snapshot);
         if (now - lastStats >= 250) {
@@ -209,6 +268,7 @@ const App = () => {
         }
       }
 
+      frameTimes.push(performance.now() - frameStart);
       frame = requestAnimationFrame(render);
     };
 
