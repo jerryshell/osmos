@@ -1,0 +1,2 @@
+{"generation":0,"best_mass":23.4593,"median_mass":1.4187,"mean_mass":2.0821,"mean_speed":0.0172,"ejected_mass":3.2301,"alive":50,"best_score":24.2093}
+elapsed=0.80 rss=3660KB

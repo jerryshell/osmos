@@ -2,7 +2,7 @@
 
 Rust + WASM + Vite + 质量生态
 
-当前进度是 Phase 1。世界包含质量、吞噬、空间网格、固定步长和扁平快照。感知、控制网络、喷射推进和遗传算法在后续阶段加入。
+当前进度是 Phase 2。世界包含质量、空间网格、16 扇区感知、55-8-2 控制网络、质量成本推进、遗传算法和 headless 训练。Web 显示共享世界，学习检查使用隔离回合。
 
 旧版演示：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 
@@ -49,12 +49,19 @@ npm run build:all   # wasm-pack release + wasm-opt，然后 Vite 构建到 dist/
 osmos
 ├── osmos-core # ID、向量、质量、半径
 ├── osmos-sim  # 世界、质体、颗粒、碰撞、空间网格、快照
-├── osmos-evo  # 引擎外壳；遗传算法在后续阶段加入
+├── osmos-evo  # 控制网络、遗传算法、Trainer、共享世界 Engine
 ├── osmos-wasm # 扁平快照 ABI
+├── osmos-headless # 训练、基准、留出种子复评
 └── osmos-web  # SolidJS + Canvas 2D
 ```
 
-`osmos-sim` 默认生成 64 个质体和 236 个颗粒，一共 300 个实体。仿真以 60 Hz 固定步长推进，内部使用 2 个物理子步和 4 × 4 空间网格。
+`osmos-sim` 默认生成 64 个质体和 236 个颗粒，一共 300 个实体。仿真以 60 Hz 固定步长推进，内部使用 2 个物理子步和 4 × 4 空间网格。控制网络拓扑为 55-8-2，基因组长度 466。
+
+训练命令。
+
+```bash
+cargo run --release -p osmos-headless -- --train --generations 60 --seed 42 --holdout 10
+```
 
 ## 开源协议
 
