@@ -1,3 +1,6 @@
+//! All-learner ecology. Each generation runs one shared world and selects
+//! parents by final mass.
+
 use osmos_core::{wrap_delta, ControlNetwork, Genome};
 use osmos_sim::{MoteRole, SimConfig, World};
 use rand::rngs::StdRng;

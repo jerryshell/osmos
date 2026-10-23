@@ -19,6 +19,7 @@ pub fn random_population(rng: &mut StdRng, size: usize) -> Vec<Genome> {
         .collect()
 }
 
+/// Select parents by final mass and produce a fixed-size next generation.
 pub fn next_population_by_mass(
     rng: &mut StdRng,
     population: &[Genome],

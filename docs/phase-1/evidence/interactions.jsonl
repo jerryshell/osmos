@@ -1,5 +1,0 @@
-
-> osmos-web@0.0.0 verify:ui
-> node scripts/verify-ui.mjs
-
-{"case":"interactions","paused":"true","resetUrl":"http://127.0.0.1:4173/?seed=1976116712","reducedPaused":"true","errors":[],"reducedErrors":[]}

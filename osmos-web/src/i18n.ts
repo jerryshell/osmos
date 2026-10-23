@@ -107,7 +107,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = { en, zh };
 
 export const scenarioNames: Record<Locale, readonly string[]> = {
   en: ["Ambient", "Sentient", "Orbital", "Repulsor"],
-  zh: ["环境", "有觉", "轨道", "斥力"]
+  zh: ["环境", "感知", "轨道", "斥力"]
 };
 
 export function readLocale(): Locale {

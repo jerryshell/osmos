@@ -47,6 +47,9 @@ impl World {
         Self::with_scenario(config, controllers, 0, 0)
     }
 
+    /// Build a shared world where every mote is a learner.
+    ///
+    /// `initial_masses` is indexed like `controllers`.
     pub fn with_ecology(
         config: SimConfig,
         controllers: Vec<ControlNetwork>,
@@ -133,7 +136,7 @@ impl World {
         let mut pellets = Vec::with_capacity(config.pellets as usize);
 
         for index in 0..config.motes {
-            // Keep the original draw order so the Ambient seed sequence is unchanged.
+            // Consume the angle draw before the position draw to keep seed layout stable.
             let _angle = rng.random_range(0.0..TAU);
             let position = random_position(&mut rng);
             let mass = if config.initial_mass_spread > 0.0 {
@@ -671,6 +674,8 @@ impl World {
         }
     }
 
+    /// Resolve overlapping motes. Any mass difference starts gradual
+    /// absorption; equal masses bounce.
     fn resolve_motes(&mut self) {
         let restitution = self.config.collision_restitution;
         let max_speed = self.config.max_speed;
@@ -715,6 +720,7 @@ impl World {
         }
     }
 
+    /// Transfer a small fraction of the losing mote into the winner.
     fn absorb_step(&mut self, winner: usize, loser: usize, max_speed: f32) {
         if winner == loser {
             return;
@@ -862,6 +868,7 @@ impl World {
     }
 }
 
+/// Return the overlap lens area divided by the smaller circle area.
 fn overlap_fraction(large_radius: f32, small_radius: f32, distance: f32) -> f32 {
     let large = large_radius.max(small_radius);
     let small = large_radius.min(small_radius).max(1e-6);

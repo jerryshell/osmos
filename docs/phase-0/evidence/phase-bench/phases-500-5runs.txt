@@ -1,5 +1,0 @@
-steps=2000 objects=500 total_s=2.550 steps_per_s=784.3 sensor=84.2% network=1.4% collision=14.0% movement=0.3% epoch=0.2% population=94 generations=2
-steps=2000 objects=500 total_s=2.542 steps_per_s=786.8 sensor=84.7% network=1.3% collision=13.4% movement=0.3% epoch=0.3% population=93 generations=2
-steps=2000 objects=500 total_s=2.406 steps_per_s=831.4 sensor=85.1% network=1.2% collision=13.2% movement=0.3% epoch=0.2% population=102 generations=2
-steps=2000 objects=500 total_s=2.599 steps_per_s=769.6 sensor=84.2% network=1.5% collision=13.8% movement=0.3% epoch=0.2% population=62 generations=2
-steps=2000 objects=500 total_s=2.598 steps_per_s=769.8 sensor=84.6% network=1.4% collision=13.6% movement=0.3% epoch=0.2% population=107 generations=2

@@ -175,6 +175,7 @@ impl Engine {
             }
         }
 
+        // The shared world uses final mass as the parent weight.
         self.population =
             next_population_by_mass(&mut self.rng, &self.population, &evaluation.masses);
         self.generation += 1;

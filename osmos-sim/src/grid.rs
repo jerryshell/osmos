@@ -3,6 +3,7 @@ use osmos_core::Vec2;
 pub const GRID_SIDE: usize = 8;
 const CELL_SIZE: f32 = 1.0 / GRID_SIDE as f32;
 
+/// 8 x 8 toroidal lookup grid. A query covers five cells per axis.
 #[derive(Clone, Debug, Default)]
 pub struct Grid {
     cells: Vec<Vec<u32>>,

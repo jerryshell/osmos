@@ -2,7 +2,7 @@
 
 Osmos 是一个零玩家质量模拟项目，使用 Rust、WebAssembly、Vite 和 Canvas 2D 构建。项目关注质量、动量、吞噬、环绕边界和遗传算法共同形成的多质体行为。
 
-当前版本为 Phase 6 预览。生产站点仍为旧版，切换尚未确认。
+当前版本为预览版。生产站点仍为旧版，切换尚未确认。
 
 - 预览：<https://osmos.jerryshell.eu.org/next/>
 - 生产：<https://osmos.jerryshell.eu.org/>
@@ -14,7 +14,7 @@ Osmos 是一个零玩家质量模拟项目，使用 Rust、WebAssembly、Vite �
 - 质量较大者渐进吸收较小者，没有 2 倍门槛。质量相同时弹开。
 - 地图边界环绕。移动、碰撞、吸收、场力和感知都使用最短环绕距离。
 - 控制网络为 `55-8-2`，基因组长度为 466。
-- 场景包括环境、有觉、轨道和斥力。
+- 场景包括环境、感知、轨道和斥力。
 - 轨道和斥力场景使用中心场力。正强度吸引，负强度排斥。
 - 浏览器提供质体检查面板、场景切换、暂停、调速和重置。
 - 界面支持英语和简体中文。语言可由 URL、浏览器语言或本地设置决定。
@@ -79,19 +79,14 @@ npm run build:all
 cargo run --release -p osmos-headless -- --ecology --generations 60 --seed 42 --motes 64 --pellets 236 --episode 2400
 ```
 
-旧单学习者对照路径。
-
-```bash
-cargo run --release -p osmos-headless -- --train --generations 60 --seed 42 --holdout 10 --probe
-```
-
 全学习者路径每局让 64 个质体同场竞争。对局结束后按最终质量计算繁殖权重，死亡质体权重为 0。亲本通过质量概率选择，子代经过交叉和变异。
 
 ## 文档
 
-- `docs/wrap-and-ecology.md`：环绕边界、感知适配、渐进吸收和全学习者训练
+- `docs/architecture.md`：世界、质量、场力、感知、训练和浏览器结构
+- `docs/training.md`：全学习者训练、选择方式和当前结果
+- `docs/verification.md`：构建、浏览器、性能和语言验证
 - `docs/i18n.md`：英语和简体中文国际化
-- `docs/phase-0.md` 到 `docs/phase-6.md`：阶段记录和验证
 - `/home/ubuntu/osmos-apk-reverse/apk-mechanics.md`：APK 机制分析，仓库外
 
 ## 开源协议

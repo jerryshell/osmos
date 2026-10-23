@@ -7,6 +7,7 @@ use crate::grid::Grid;
 use crate::mote::Mote;
 use crate::pellet::Pellet;
 
+/// Sensor layout: 16 sectors with three channels, then seven self values.
 pub const SECTORS: usize = 16;
 const CHANNEL_OFFSET: usize = 16;
 const SELF_OFFSET: usize = SECTORS * 3;
