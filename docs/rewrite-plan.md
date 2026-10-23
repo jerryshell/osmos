@@ -854,7 +854,7 @@ CI 在干净环境运行这些命令。性能基准单独运行，不和功能 C
 - 当前模拟器：`osmos-sim/src/simulator.rs`
 - 当前前端：`osmos-web/src/App.tsx`
 
-许可说明。当前项目使用 AGPL-3.0。shorelark 使用 MIT。若复制 shorelark 的代码或测试，保留其版权和许可声明。Osmos 是 Hemisphere Games 的游戏名称，重写版不使用其美术、音乐、关卡文本或商标素材。
+许可说明。当前项目使用 MIT。shorelark 使用 MIT。若复制 shorelark 的代码或测试，保留其版权和许可声明。Osmos 是 Hemisphere Games 的游戏名称，重写版不使用其美术、音乐、关卡文本或商标素材。
 
 ## 附录 D. 术语
 

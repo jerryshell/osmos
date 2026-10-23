@@ -6,7 +6,6 @@ Osmos 是一个零玩家质量模拟项目，使用 Rust、WebAssembly、Vite �
 
 - 预览：<https://osmos.jerryshell.eu.org/next/>
 - 生产：<https://osmos.jerryshell.eu.org/>
-- 旧版演示视频：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 - APK 逆向材料：`/home/ubuntu/osmos-apk-reverse/`，不进入 Git 仓库
 
 ## 当前实现
@@ -97,4 +96,4 @@ cargo run --release -p osmos-headless -- --train --generations 60 --seed 42 --ho
 
 ## 开源协议
 
-[GNU Affero General Public License v3.0](LICENSE)
+[MIT](LICENSE)
