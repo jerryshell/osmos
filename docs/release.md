@@ -5,6 +5,9 @@
 - 预览版：<https://osmos.jerryshell.eu.org/next/>
 - 生产站点：仍为旧版，切换需要单独确认。
 - 当前定位：预览候选，不是正式版。
+- CI：已通过。
+- 浸泡：600 秒桌面 8× 通过。
+- 跨浏览器：Firefox 通过，WebKit 功能通过但帧率低于 60。
 
 ## 发布门禁
 
@@ -53,5 +56,5 @@ VERIFY_SECONDS=5 VERIFY_BROWSER=webkit VERIFY_CASE=mobile-1x npm run verify:ui
 ## 未验证
 
 - Safari 真机和真实移动网络。
-- GitHub Actions 的远端运行结果。
 - 生产切换和回滚演练。
+- WebKit 的 60 fps 目标。

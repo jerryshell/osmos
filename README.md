@@ -94,6 +94,7 @@ cargo run --release -p osmos-headless -- --generations 60 --seed 42 --motes 64 -
 - `docs/training.md`：全学习者训练、选择方式和当前结果
 - `docs/verification.md`：构建、浏览器、性能和语言验证
 - `docs/release.md`：发布门禁、浸泡、跨浏览器和生产切换
+- `CHANGELOG.md`：版本更新记录
 - `docs/i18n.md`：英语和简体中文国际化
 
 ## 开源协议

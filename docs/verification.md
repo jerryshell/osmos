@@ -56,6 +56,13 @@ npm run build:all
 - Firefox 手机 1×，5 秒，60 fps，页面错误 0。
 - WebKit 手机 1×，5 秒，44.6 fps，页面错误 0。Linux 无头 WebKit 性能低于 Chromium，未做真机验证。
 
+## 持续集成
+
+GitHub Actions 运行成功。
+
+- 工作流：`.github/workflows/ci.yml`
+- 运行：<https://github.com/jerryshell/osmos/actions/runs/39920365409>
+
 ## 预览
 
 <https://osmos.jerryshell.eu.org/next/>
@@ -65,6 +72,5 @@ npm run build:all
 ## 未验证
 
 - Safari 真机、真实移动网络和触摸操作。
-- GitHub Actions 的远端运行结果。
 - 生产切换和回滚演练。
 - WebKit 的 60 fps 目标。
