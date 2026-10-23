@@ -6,7 +6,7 @@ Rust + WASM + Vite + 质量生态
 
 预览地址：<https://osmos.jerryshell.eu.org/next/>。生产根站仍是旧版，切换待确认。
 
-APK 机制分析和取舍见 `docs/apk-mechanics.md`。环绕边界、传感器适配、全学习者生态和质量概率繁殖见 `docs/wrap-and-ecology.md`。新增 `Orbital` 和 `Repulsor` 场景，分别使用中心吸引和排斥。
+APK 逆向材料放在仓库外的 `/home/ubuntu/osmos-apk-reverse/`，不进入 git。环绕边界、传感器适配、全学习者生态和质量概率繁殖见 `docs/wrap-and-ecology.md`。新增 `Orbital` 和 `Repulsor` 场景，分别使用中心吸引和排斥。
 
 旧版演示：[BV1vj411A7k2](https://www.bilibili.com/video/BV1vj411A7k2)
 

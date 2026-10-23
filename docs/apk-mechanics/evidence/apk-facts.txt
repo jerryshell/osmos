@@ -1,8 +1,0 @@
-path: /home/ubuntu/osmos-v2.10.0-full.apk
-sha256: 951b2116e997a3810e415623467bf8f4eb4be0facc9518b07df30c006cf046bd
-apk_bytes: 29242867
-entries: 774
-unpacked_bytes: 51608882
-native: ELF64 AArch64, lib/arm64-v8a/libosmos.so, 2972072 bytes, stripped
-assets: Marmalade bindings.cfg, defaults.cfg, .loc text, .tga textures, .ogg audio
-readable_symbols: CBlobiverse::ComputeGravity, ComputeOrbitEllipse, FireMass, CBlobBrain::Hunt, s_KillerPersonality
