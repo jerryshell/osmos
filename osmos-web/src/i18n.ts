@@ -119,7 +119,7 @@ export function readLocale(): Locale {
     const stored = window.localStorage.getItem("osmos.locale");
     if (stored === "zh" || stored === "en") return stored;
   } catch {
-    // Storage can be unavailable in a private or sandboxed context.
+    // 隐私模式或沙箱环境可能禁用存储。
   }
 
   return window.navigator.language?.toLowerCase().startsWith("zh") ? "zh" : "en";
@@ -129,7 +129,7 @@ export function persistLocale(locale: Locale) {
   try {
     window.localStorage.setItem("osmos.locale", locale);
   } catch {
-    // Keep the in-memory locale when storage is unavailable.
+    // 存储不可用时保留内存中的语言设置。
   }
 }
 

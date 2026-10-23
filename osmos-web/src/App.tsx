@@ -94,6 +94,7 @@ const readScenario = (): number => {
   return 0;
 };
 
+// === 状态 ===
 const App = () => {
   const [locale, setLocale] = createSignal<Locale>(readLocale());
   const t = (key: MessageKey) => messages[locale()][key];
@@ -155,6 +156,7 @@ const App = () => {
     return { width, height, size, left, top };
   };
 
+  // === 渲染 ===
   const draw = (snapshot: Snapshot) => {
     if (!ctx) return;
 
@@ -353,6 +355,7 @@ const App = () => {
     );
   };
 
+  // === 主循环 ===
   onMount(() => {
     if (!canvas) return;
 
@@ -513,6 +516,7 @@ const App = () => {
     });
   });
 
+  // === 界面 ===
   return (
     <div id="app">
       <header id="topbar">

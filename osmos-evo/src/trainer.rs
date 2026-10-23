@@ -43,8 +43,7 @@ pub struct TrainerReport {
     pub survival_rate: f32,
 }
 
-/// Single-learner baseline with scripted rivals. The main ecology path is
-/// `EcologyTrainer`.
+/// 单学习者基线，使用脚本对手。主要生态路径是 `EcologyTrainer`。
 pub struct Trainer {
     config: SimConfig,
     seed: u64,

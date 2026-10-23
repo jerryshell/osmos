@@ -1,5 +1,4 @@
-//! All-learner ecology. Each generation runs one shared world and selects
-//! parents by final mass.
+//! 全学习者生态。每一代运行一个共享世界，并按最终质量选择亲本。
 
 use osmos_core::{wrap_delta, ControlNetwork, Genome};
 use osmos_sim::{MoteRole, SimConfig, World};
@@ -28,6 +27,7 @@ pub struct EcologyTrainer {
 }
 
 impl EcologyTrainer {
+    // === 构建 ===
     pub fn new(seed: u64) -> Self {
         Self::with_config(SimConfig {
             seed,
@@ -54,6 +54,7 @@ impl EcologyTrainer {
         &self.population
     }
 
+    // === 一局 ===
     pub fn run_generation(&mut self) -> EcologyReport {
         let masses = (0..self.config.motes)
             .map(|_| self.rng.random_range(0.4..3.0))
@@ -113,6 +114,7 @@ impl EcologyTrainer {
     }
 }
 
+// === 行为采样 ===
 fn sample_behavior(world: &World) -> (u32, u32, u32) {
     let mut flee = 0;
     let mut hunt = 0;

@@ -46,7 +46,7 @@ impl Vec2 {
     }
 }
 
-/// Wrap a position into the unit torus.
+/// 将位置环绕到单位环面。
 pub fn wrap_position(position: Vec2) -> Vec2 {
     Vec2::new(wrap_coordinate(position.x), wrap_coordinate(position.y))
 }
@@ -61,7 +61,7 @@ fn wrap_coordinate(value: f32) -> f32 {
     }
 }
 
-/// Return the shortest signed delta on the unit torus.
+/// 返回单位环面上的最短有符号差值。
 pub fn wrap_delta(delta: Vec2) -> Vec2 {
     Vec2::new(wrap_component(delta.x), wrap_component(delta.y))
 }

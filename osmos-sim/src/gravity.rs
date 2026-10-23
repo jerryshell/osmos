@@ -2,10 +2,9 @@ use osmos_core::{wrap_delta, Vec2};
 
 use crate::config::SimConfig;
 
-/// A fixed radial force field. Positive strength attracts, negative repels.
+/// 固定的径向力场。正强度吸引，负强度排斥。
 ///
-/// The field is acceleration, not force. `strength` is scaled by inverse
-/// squared distance with a softening radius, then capped by `max_accel`.
+/// 场值表示加速度。强度按距离平方反比缩放，经过软化半径处理，再按最大加速度截断。
 #[derive(Clone, Copy, Debug)]
 pub struct GravityWell {
     pub center: Vec2,

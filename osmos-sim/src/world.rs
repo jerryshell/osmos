@@ -22,6 +22,7 @@ const LINEAGES: u16 = 12;
 const HUNTER_MASS: f32 = 2.0;
 const PREY_MASS: f32 = 0.6;
 
+// === 世界状态 ===
 pub struct World {
     config: SimConfig,
     tick: u64,
@@ -39,6 +40,7 @@ pub struct World {
 }
 
 impl World {
+    // === 世界构建 ===
     pub fn new(config: SimConfig) -> Self {
         Self::build(config, Vec::new(), 0, 0)
     }
@@ -47,9 +49,9 @@ impl World {
         Self::with_scenario(config, controllers, 0, 0)
     }
 
-    /// Build a shared world where every mote is a learner.
+    /// 构建所有质体都是学习者的共享世界。
     ///
-    /// `initial_masses` is indexed like `controllers`.
+    /// `initial_masses` 与 `controllers` 使用相同索引。
     pub fn with_ecology(
         config: SimConfig,
         controllers: Vec<ControlNetwork>,
@@ -136,7 +138,7 @@ impl World {
         let mut pellets = Vec::with_capacity(config.pellets as usize);
 
         for index in 0..config.motes {
-            // Consume the angle draw before the position draw to keep seed layout stable.
+            // 先消耗角度抽取，再抽取位置，保持种子布局稳定。
             let _angle = rng.random_range(0.0..TAU);
             let position = random_position(&mut rng);
             let mass = if config.initial_mass_spread > 0.0 {
@@ -230,6 +232,7 @@ impl World {
         self.ejected_total
     }
 
+    // === 主循环 ===
     pub fn step(&mut self) {
         self.tick += 1;
         for ejecta in &mut self.ejecta {
@@ -257,6 +260,7 @@ impl World {
         self.expire_ejecta();
     }
 
+    // === 控制 ===
     fn drive_hunters(&mut self) {
         let hunter_speed = self.config.hunter_speed;
 
@@ -447,6 +451,7 @@ impl World {
                 .sum::<f32>()
     }
 
+    // === 快照 ===
     pub fn snapshot(&self) -> Snapshot {
         let mut snapshot = Snapshot {
             tick: self.tick,
@@ -536,6 +541,7 @@ impl World {
         snapshot
     }
 
+    // === 物理与碰撞 ===
     fn integrate(&mut self, dt: f32) {
         let max_speed = self.config.max_speed;
         let gravity = self.gravity;
@@ -674,8 +680,7 @@ impl World {
         }
     }
 
-    /// Resolve overlapping motes. Any mass difference starts gradual
-    /// absorption; equal masses bounce.
+    /// 处理质体重叠。质量不同时开始渐进吸收，质量相同时弹开。
     fn resolve_motes(&mut self) {
         let restitution = self.config.collision_restitution;
         let max_speed = self.config.max_speed;
@@ -720,7 +725,7 @@ impl World {
         }
     }
 
-    /// Transfer a small fraction of the losing mote into the winner.
+    /// 将失败质体的一小部分质量转移给胜利者。
     fn absorb_step(&mut self, winner: usize, loser: usize, max_speed: f32) {
         if winner == loser {
             return;
@@ -868,7 +873,8 @@ impl World {
     }
 }
 
-/// Return the overlap lens area divided by the smaller circle area.
+// === 几何工具 ===
+/// 返回重叠透镜面积与小圆面积之比。
 fn overlap_fraction(large_radius: f32, small_radius: f32, distance: f32) -> f32 {
     let large = large_radius.max(small_radius);
     let small = large_radius.min(small_radius).max(1e-6);
