@@ -1,7 +1,7 @@
 # APK 机制分析与场力引入
 
 - 日期：2026-10-23
-- 分支：`feature/apk-mechanics`
+- 分支：`rewrite/osmos-v2`
 - APK：`/home/ubuntu/osmos-v2.10.0-full.apk`
 - SHA-256：`951b2116e997a3810e415623467bf8f4eb4be0facc9518b07df30c006cf046bd`
 - APK 未提交。解包目录在 `/tmp`，仓库只保留结论、截图和原始日志。
@@ -80,21 +80,21 @@ Web 快照新增 `wellState`，每 4 个浮点数是一口井，依次为 `x`、
 
 当前网络是 55-8-2，基因组 466 个值。直接加入场力输入会改变输入数和基因组布局，使现有学习门禁失效。
 
-这次先利用固定场的特点。场的位置是常量，质体的位置和速度已经能表达它。加入环绕后，1,000 步哈希仍为 `99b4716d6a4f0026`，但这只能说明该采样路径稳定，不能证明所有边界行为不变。
+这次先利用固定场的特点。场的位置是常量，质体的位置和速度已经能表达它。加入随机初始质量和环绕后，1,000 步哈希为 `1a642d38315998a3`。
 
 直接场力输入留到下一轮。若加入 2 个输入，需要重新训练，并重新跑 3 个种子的 60 代门禁。
 
 ## 6. 验证
 
-- Rust 测试 44 个通过。`osmos-core` 6 个，`osmos-evo` 9 个，`osmos-sim` 29 个。
+- Rust 测试 45 个通过。`osmos-core` 6 个，`osmos-evo` 10 个，`osmos-sim` 29 个。
 - `cargo fmt`、Clippy、TypeScript 和 Oxlint 通过。
-- 1,000 步 Ambient 哈希仍为 `99b4716d6a4f0026`。环绕边界由独立单元测试覆盖。
-- 60 秒浏览器测试 8 个场景组合，帧率 59.85 到 60.02 fps，页面错误 0。
-- 8× 桌面 `step` p95 6.5 ms，手机 6.7 ms。
-- Orbital 手机 4× 为 60.00 fps，`step` p95 2.6 ms。
-- Repulsor 手机 4× 为 60.00 fps，`step` p95 2.7 ms。
-- 500 个实体，64 个 AI 加 436 个颗粒，Ambient 2,400 步 1.30 秒，约 1,846 步/秒。低于 2,400 步/秒计划值。
-- wasm 112.43 KB，gzip 46.30 KB。JavaScript 28.97 KB，gzip 11.20 KB。CSS 6.18 KB，gzip 1.78 KB。
+- 1,000 步 Ambient 哈希为 `1a642d38315998a3`。环绕边界由独立单元测试覆盖。
+- 60 秒浏览器测试 8 个场景组合，帧率 57.80 到 59.97 fps，页面错误 0。
+- 8× 桌面 `step` p95 8.5 ms，手机 8.0 ms。
+- Orbital 手机 4× 为 59.93 fps，`step` p95 3.8 ms。
+- Repulsor 手机 4× 为 59.97 fps，`step` p95 3.7 ms。
+- 500 个实体，64 个 AI 加 436 个颗粒，Ambient 2,400 步 0.99 秒，约 2,424 步/秒。
+- wasm 105.01 KB，gzip 43.56 KB。JavaScript 28.97 KB，gzip 11.20 KB。CSS 6.18 KB，gzip 1.78 KB。
 - 交互测试确认 Pause、Reset、Orbital、Repulsor 按钮和 URL 同步可用。
 
 证据在 `docs/apk-mechanics/evidence/`。截图在 `docs/apk-mechanics/`。

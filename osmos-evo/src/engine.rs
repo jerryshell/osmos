@@ -4,7 +4,7 @@ use rand::rngs::StdRng;
 use rand::SeedableRng;
 
 use crate::fitness::{median, score};
-use crate::ga::{next_population, random_population};
+use crate::ga::{next_population_by_mass, random_population};
 use crate::scenario::Scenario;
 
 #[derive(Clone, Debug)]
@@ -175,7 +175,8 @@ impl Engine {
             }
         }
 
-        self.population = next_population(&mut self.rng, &self.population, &evaluation.scores);
+        self.population =
+            next_population_by_mass(&mut self.rng, &self.population, &evaluation.masses);
         self.generation += 1;
 
         let mut next_config = self.config;
@@ -247,7 +248,7 @@ impl Engine {
                 alive,
                 best_score,
             },
-            scores,
+            masses,
             best_index,
         }
     }
@@ -255,7 +256,7 @@ impl Engine {
 
 struct Evaluation {
     report: GenerationReport,
-    scores: Vec<f32>,
+    masses: Vec<f32>,
     best_index: Option<usize>,
 }
 
@@ -324,18 +325,11 @@ mod tests {
     }
 
     #[test]
-    fn scenario_spawns_hunters_and_prey() {
+    fn sentient_scenario_is_all_learners() {
         let engine = Engine::with_scenario(7, Scenario::Sentient);
         let snapshot = engine.snapshot();
 
-        assert_eq!(snapshot.stats.alive, 48 + 4 + 12);
-        assert_eq!(
-            snapshot.mote_role.iter().filter(|role| **role == 1).count(),
-            4
-        );
-        assert_eq!(
-            snapshot.mote_role.iter().filter(|role| **role == 2).count(),
-            12
-        );
+        assert_eq!(snapshot.stats.alive, 64);
+        assert!(snapshot.mote_role.iter().all(|role| *role == 0));
     }
 }

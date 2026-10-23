@@ -47,6 +47,20 @@ impl World {
         Self::with_scenario(config, controllers, 0, 0)
     }
 
+    pub fn with_ecology(
+        config: SimConfig,
+        controllers: Vec<ControlNetwork>,
+        initial_masses: &[f32],
+    ) -> Self {
+        assert_eq!(controllers.len(), initial_masses.len());
+        let mut world = Self::with_scenario(config, controllers, 0, 0);
+        for (mote, mass) in world.motes.iter_mut().zip(initial_masses.iter().copied()) {
+            mote.mass = Mass::new(mass);
+            mote.velocity = Vec2::ZERO;
+        }
+        world
+    }
+
     pub fn with_predator_training(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
         let mut world = Self::with_scenario(config, controllers, 0, 2);
         if world.motes.len() >= 3 {
@@ -122,6 +136,13 @@ impl World {
             // Keep the original draw order so the Ambient seed sequence is unchanged.
             let _angle = rng.random_range(0.0..TAU);
             let position = random_position(&mut rng);
+            let mass = if config.initial_mass_spread > 0.0 {
+                (config.mote_mass
+                    + rng.random_range(-config.initial_mass_spread..config.initial_mass_spread))
+                .max(0.2)
+            } else {
+                config.mote_mass
+            };
             let velocity = if config.orbit_speed_factor > 0.0 {
                 let radial = position - Vec2::new(config.gravity_center_x, config.gravity_center_y);
                 let distance = radial.length();
@@ -136,7 +157,7 @@ impl World {
                 MoteId::new(index),
                 LineageId::new((index % LINEAGES as u32) as u16),
                 MoteRole::Ai,
-                Mass::new(config.mote_mass),
+                Mass::new(mass),
                 position,
                 velocity,
             );

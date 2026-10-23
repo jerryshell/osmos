@@ -1,5 +1,5 @@
 use osmos_core::brain::Genome;
-use osmos_evo::{Engine, Scenario, Trainer};
+use osmos_evo::{EcologyTrainer, Engine, Scenario, Trainer};
 use osmos_sim::SimConfig;
 
 fn main() {
@@ -12,6 +12,7 @@ fn main() {
     let mut holdout = 0_usize;
     let mut scenario = 0_u32;
     let mut probe = false;
+    let mut ecology = false;
 
     let mut arguments = std::env::args().skip(1);
     while let Some(argument) = arguments.next() {
@@ -25,6 +26,7 @@ fn main() {
             "--holdout" => holdout = parse(&mut arguments, "holdout"),
             "--scenario" => scenario = parse(&mut arguments, "scenario"),
             "--probe" => probe = true,
+            "--ecology" => ecology = true,
             other => panic!("unknown argument: {other}"),
         }
     }
@@ -36,6 +38,25 @@ fn main() {
         episode_ticks: episode,
         ..SimConfig::default()
     };
+    if ecology {
+        let mut trainer = EcologyTrainer::with_config(config);
+        for _ in 0..generations {
+            let report = trainer.run_generation();
+            println!(
+                "{{\"generation\":{},\"best_mass\":{:.4},\"mean_mass\":{:.4},\"survivors\":{},\"predation\":{},\"flee_events\":{},\"hunt_events\":{},\"behavior_samples\":{}}}",
+                report.generation,
+                report.best_mass,
+                report.mean_mass,
+                report.survivors,
+                report.predation,
+                report.flee_events,
+                report.hunt_events,
+                report.behavior_samples
+            );
+        }
+        return;
+    }
+
     if train {
         let mut trainer = Trainer::with_config(config);
         for _ in 0..generations {

@@ -7,6 +7,7 @@ pub struct SimConfig {
     pub motes: u32,
     pub pellets: u32,
     pub mote_mass: f32,
+    pub initial_mass_spread: f32,
     pub pellet_mass: f32,
     pub max_speed: f32,
     pub collision_restitution: f32,
@@ -41,6 +42,7 @@ impl Default for SimConfig {
             motes: 64,
             pellets: 236,
             mote_mass: 1.0,
+            initial_mass_spread: 0.75,
             pellet_mass: 0.12,
             max_speed: 0.25,
             collision_restitution: 0.8,
@@ -74,6 +76,7 @@ impl SimConfig {
     pub fn validate(&self) {
         assert!(self.motes > 0, "at least one mote is required");
         assert!(self.mote_mass.is_finite() && self.mote_mass > 0.0);
+        assert!(self.initial_mass_spread.is_finite() && self.initial_mass_spread >= 0.0);
         assert!(self.pellet_mass.is_finite() && self.pellet_mass > 0.0);
         assert!(self.max_speed.is_finite() && self.max_speed > 0.0);
         assert!((0.0..=1.0).contains(&self.collision_restitution));

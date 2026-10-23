@@ -19,6 +19,39 @@ pub fn random_population(rng: &mut StdRng, size: usize) -> Vec<Genome> {
         .collect()
 }
 
+pub fn next_population_by_mass(
+    rng: &mut StdRng,
+    population: &[Genome],
+    masses: &[f32],
+) -> Vec<Genome> {
+    let total = masses.iter().map(|mass| mass.max(0.0)).sum::<f32>();
+    let mut next = Vec::with_capacity(population.len());
+
+    while next.len() < population.len() {
+        let a = weighted_index(rng, masses, total);
+        let b = weighted_index(rng, masses, total);
+        let mut child = crossover(rng, &population[a], &population[b]);
+        mutation(rng, &mut child);
+        next.push(child);
+    }
+
+    next
+}
+
+fn weighted_index(rng: &mut StdRng, masses: &[f32], total: f32) -> usize {
+    if total <= 0.0 {
+        return rng.random_range(0..masses.len());
+    }
+    let mut pick = rng.random::<f32>() * total;
+    for (index, mass) in masses.iter().enumerate() {
+        pick -= mass.max(0.0);
+        if pick <= 0.0 {
+            return index;
+        }
+    }
+    masses.len() - 1
+}
+
 pub fn next_population(rng: &mut StdRng, population: &[Genome], scores: &[f32]) -> Vec<Genome> {
     let mut order = (0..population.len()).collect::<Vec<_>>();
     order.sort_by(|left, right| scores[*right].total_cmp(&scores[*left]));

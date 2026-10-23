@@ -40,8 +40,8 @@ impl Scenario {
         match self {
             Self::Ambient => base,
             Self::Sentient => SimConfig {
-                motes: 48,
-                pellets: 100,
+                motes: 64,
+                pellets: 180,
                 ..base
             },
             Self::Orbital => SimConfig {
@@ -62,17 +62,11 @@ impl Scenario {
     }
 
     pub const fn hunters(self) -> u32 {
-        match self {
-            Self::Sentient => 4,
-            _ => 0,
-        }
+        0
     }
 
     pub const fn prey(self) -> u32 {
-        match self {
-            Self::Sentient => 12,
-            _ => 0,
-        }
+        0
     }
 }
 
@@ -81,11 +75,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sentient_has_hunters_and_prey() {
+    fn sentient_is_all_learners() {
         assert_eq!(Scenario::from_id(1), Scenario::Sentient);
-        assert!(Scenario::Sentient.hunters() > 0);
-        assert!(Scenario::Sentient.prey() > 0);
-        assert_eq!(Scenario::Sentient.config(SimConfig::default()).motes, 48);
+        assert_eq!(Scenario::Sentient.hunters(), 0);
+        assert_eq!(Scenario::Sentient.prey(), 0);
+        assert_eq!(Scenario::Sentient.config(SimConfig::default()).motes, 64);
     }
 
     #[test]
