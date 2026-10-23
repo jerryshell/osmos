@@ -11,7 +11,7 @@ use crate::config::{SimConfig, SUBSTEPS, TICKS_PER_SECOND};
 use crate::ejecta::Ejecta;
 use crate::gravity::GravityWell;
 use crate::grid::Grid;
-use crate::mote::{Mote, MoteRole, MoteState};
+use crate::mote::{Mote, MoteState};
 use crate::pellet::Pellet;
 use crate::sensor::SenseContext;
 use crate::snapshot::{
@@ -19,8 +19,6 @@ use crate::snapshot::{
 };
 
 const LINEAGES: u16 = 12;
-const HUNTER_MASS: f32 = 2.0;
-const PREY_MASS: f32 = 0.6;
 
 // === 世界状态 ===
 pub struct World {
@@ -46,11 +44,11 @@ pub struct World {
 impl World {
     // === 世界构建 ===
     pub fn new(config: SimConfig) -> Self {
-        Self::build(config, Vec::new(), 0, 0)
+        Self::build(config, Vec::new())
     }
 
     pub fn with_controllers(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
-        Self::with_scenario(config, controllers, 0, 0)
+        Self::with_scenario(config, controllers)
     }
 
     /// 构建所有质体都是学习者的共享世界。
@@ -62,7 +60,7 @@ impl World {
         initial_masses: &[f32],
     ) -> Self {
         assert_eq!(controllers.len(), initial_masses.len());
-        let mut world = Self::with_scenario(config, controllers, 0, 0);
+        let mut world = Self::with_scenario(config, controllers);
         for (mote, mass) in world.motes.iter_mut().zip(initial_masses.iter().copied()) {
             mote.mass = Mass::new(mass);
             mote.velocity = Vec2::ZERO;
@@ -70,70 +68,16 @@ impl World {
         world
     }
 
-    pub fn with_predator_training(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
-        let mut world = Self::with_scenario(config, controllers, 0, 2);
-        if world.motes.len() >= 3 {
-            world.motes[0].position = Vec2::new(0.5, 0.5);
-            world.motes[1].position = Vec2::new(0.2, 0.5);
-            world.motes[2].position = Vec2::new(0.8, 0.5);
-            for mote in &mut world.motes {
-                mote.velocity = Vec2::ZERO;
-            }
-        }
-        world
-    }
-
-    pub fn with_prey_training(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
-        let mut world = Self::with_scenario(config, controllers, 1, 0);
-        if world.motes.len() >= 2 {
-            world.motes[0].position = Vec2::new(0.5, 0.5);
-            world.motes[1].position = Vec2::new(0.95, 0.5);
-            for mote in &mut world.motes {
-                mote.velocity = Vec2::ZERO;
-            }
-        }
-        world
-    }
-
-    pub fn with_training(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
-        let mut world = Self::with_scenario(config, controllers, 1, 2);
-        if world.motes.len() >= 4 {
-            world.motes[0].position = Vec2::new(0.5, 0.5);
-            world.motes[1].position = Vec2::new(0.92, 0.5);
-            world.motes[2].position = Vec2::new(0.08, 0.5);
-            world.motes[3].position = Vec2::new(0.5, 0.08);
-            for mote in &mut world.motes {
-                mote.velocity = Vec2::ZERO;
-            }
-        }
-        world
-    }
-
-    pub fn with_scenario(
-        config: SimConfig,
-        controllers: Vec<ControlNetwork>,
-        hunters: u32,
-        prey: u32,
-    ) -> Self {
+    pub fn with_scenario(config: SimConfig, controllers: Vec<ControlNetwork>) -> Self {
         assert_eq!(
             controllers.len(),
             config.motes as usize,
             "controller count must match mote count"
         );
-        Self::build(
-            config,
-            controllers.into_iter().map(Some).collect(),
-            hunters,
-            prey,
-        )
+        Self::build(config, controllers.into_iter().map(Some).collect())
     }
 
-    fn build(
-        config: SimConfig,
-        controllers: Vec<Option<ControlNetwork>>,
-        hunters: u32,
-        prey: u32,
-    ) -> Self {
+    fn build(config: SimConfig, controllers: Vec<Option<ControlNetwork>>) -> Self {
         config.validate();
 
         let mut rng = StdRng::seed_from_u64(config.seed);
@@ -165,7 +109,6 @@ impl World {
             let mut mote = Mote::new(
                 MoteId::new(index),
                 LineageId::new((index % LINEAGES as u32) as u16),
-                MoteRole::Ai,
                 Mass::new(mass),
                 position,
                 velocity,
@@ -180,31 +123,6 @@ impl World {
                 Mass::new(config.pellet_mass),
                 random_position(&mut rng),
             ));
-        }
-
-        let mut next_id = config.motes;
-        for _ in 0..hunters {
-            motes.push(Mote::new(
-                MoteId::new(next_id),
-                LineageId::new(0),
-                MoteRole::Hunter,
-                Mass::new(HUNTER_MASS),
-                random_position(&mut rng),
-                random_velocity(&mut rng),
-            ));
-            next_id += 1;
-        }
-
-        for _ in 0..prey {
-            motes.push(Mote::new(
-                MoteId::new(next_id),
-                LineageId::new(0),
-                MoteRole::Prey,
-                Mass::new(PREY_MASS),
-                random_position(&mut rng),
-                random_velocity(&mut rng),
-            ));
-            next_id += 1;
         }
 
         Self {
@@ -253,8 +171,6 @@ impl World {
 
         self.rebuild_grids();
         self.sense_and_control();
-        self.drive_hunters();
-        self.drive_prey();
         self.apply_thrust(1.0 / TICKS_PER_SECOND as f32);
         self.rebuild_grids();
 
@@ -274,76 +190,6 @@ impl World {
     }
 
     // === 控制 ===
-    fn drive_hunters(&mut self) {
-        let hunter_speed = self.config.hunter_speed;
-
-        for index in 0..self.motes.len() {
-            if !self.motes[index].is_alive() || self.motes[index].role != MoteRole::Hunter {
-                continue;
-            }
-
-            let hunter = &self.motes[index];
-            let mut target = None;
-            let mut best = f32::INFINITY;
-            for other_index in 0..self.motes.len() {
-                if other_index == index {
-                    continue;
-                }
-                let other = &self.motes[other_index];
-                if !other.is_alive() || other.mass.get() >= hunter.mass.get() {
-                    continue;
-                }
-                let distance = wrap_delta(other.position - hunter.position).length_squared();
-                if distance < best {
-                    best = distance;
-                    target = Some(other.position);
-                }
-            }
-
-            if let Some(target) = target {
-                let direction = wrap_delta(target - hunter.position).normalize_or_zero();
-                if direction != Vec2::ZERO {
-                    self.motes[index].velocity = direction * hunter_speed;
-                }
-            }
-        }
-    }
-
-    fn drive_prey(&mut self) {
-        let prey_speed = self.config.prey_speed;
-
-        for index in 0..self.motes.len() {
-            if !self.motes[index].is_alive() || self.motes[index].role != MoteRole::Prey {
-                continue;
-            }
-
-            let prey = &self.motes[index];
-            let mut threat = None;
-            let mut best = f32::INFINITY;
-            for other_index in 0..self.motes.len() {
-                if other_index == index {
-                    continue;
-                }
-                let other = &self.motes[other_index];
-                if !other.is_alive() || other.mass.get() <= prey.mass.get() {
-                    continue;
-                }
-                let distance = wrap_delta(other.position - prey.position).length_squared();
-                if distance < best {
-                    best = distance;
-                    threat = Some(other.position);
-                }
-            }
-
-            if let Some(threat) = threat {
-                let direction = wrap_delta(prey.position - threat).normalize_or_zero();
-                if direction != Vec2::ZERO {
-                    self.motes[index].velocity = direction * prey_speed;
-                }
-            }
-        }
-    }
-
     fn sense_and_control(&mut self) {
         let mut nearby = Vec::new();
 
@@ -494,7 +340,6 @@ impl World {
         snapshot
             .mote_state
             .reserve(self.motes.len() * MOTE_STATE_STRIDE);
-        snapshot.mote_role.reserve(self.motes.len());
         snapshot.mote_flags.reserve(self.motes.len());
         snapshot
             .pellet_state
@@ -519,7 +364,6 @@ impl World {
                 mote.radius(),
                 mote.hue(),
             ]);
-            snapshot.mote_role.push(mote.role.as_u8());
             snapshot.mote_flags.push(FLAG_ALIVE);
             best_mass = best_mass.max(mote.mass.get());
         }
@@ -940,12 +784,6 @@ fn random_position(rng: &mut StdRng) -> Vec2 {
     Vec2::new(rng.random_range(0.03..0.97), rng.random_range(0.03..0.97))
 }
 
-fn random_velocity(rng: &mut StdRng) -> Vec2 {
-    let angle = rng.random_range(0.0..TAU);
-    let speed = rng.random_range(0.0..0.01);
-    Vec2::new(angle.cos() * speed, angle.sin() * speed)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1196,7 +1034,6 @@ mod tests {
 
         assert_eq!(snapshot.mote_count(), 4);
         assert_eq!(snapshot.mote_state.len(), 4 * MOTE_STATE_STRIDE);
-        assert_eq!(snapshot.mote_role.len(), 4);
         assert_eq!(snapshot.mote_flags.len(), 4);
         assert_eq!(snapshot.pellet_count(), 7);
         assert_eq!(snapshot.pellet_state.len(), 7 * PELLET_STATE_STRIDE);

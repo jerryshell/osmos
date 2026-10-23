@@ -28,7 +28,7 @@ App -> Engine -> World -> Snapshot -> wasm -> Canvas 2D
 ## 世界
 
 - 默认场景为 64 个质体和 236 个颗粒，共 300 个实体。
-- 场景 `Ambient`、`Sentient`、`Orbital` 和 `Repulsor` 都使用 64 个 AI，不生成脚本猎手或脚本猎物。
+- 场景 `Ambient`、`Sentient`、`Orbital` 和 `Repulsor` 都使用 64 个学习者。
 - `Sentient`、`Orbital` 和 `Repulsor` 使用 180 个颗粒。
 - 仿真以 60 Hz 固定步长推进，内部使用 2 个物理子步。
 - 位置位于单位环面。移动、距离、碰撞、场力和感知都使用最短环绕向量。

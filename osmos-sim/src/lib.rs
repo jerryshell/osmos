@@ -11,7 +11,7 @@ pub mod world;
 pub use config::SimConfig;
 pub use ejecta::Ejecta;
 pub use gravity::GravityWell;
-pub use mote::{Mote, MoteRole, MoteState};
+pub use mote::{Mote, MoteState};
 pub use pellet::Pellet;
 pub use snapshot::{Snapshot, Stats};
 pub use world::World;

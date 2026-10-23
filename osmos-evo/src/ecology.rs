@@ -1,7 +1,7 @@
 //! 全学习者生态。每一代运行一个共享世界，并按最终质量选择亲本。
 
 use osmos_core::{wrap_delta, ControlNetwork, Genome};
-use osmos_sim::{MoteRole, SimConfig, World};
+use osmos_sim::{SimConfig, World};
 use rand::rngs::StdRng;
 use rand::{RngExt, SeedableRng};
 
@@ -124,7 +124,7 @@ fn sample_behavior(world: &World) -> (u32, u32, u32) {
     let range_squared = world.config().sensor_range * world.config().sensor_range;
 
     for mote in &world.motes {
-        if !mote.is_alive() || mote.role != MoteRole::Ai {
+        if !mote.is_alive() {
             continue;
         }
         let mut larger: Option<(f32, osmos_core::Vec2)> = None;

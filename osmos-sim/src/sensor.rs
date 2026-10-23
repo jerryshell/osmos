@@ -175,14 +175,12 @@ fn sector_of(direction: Vec2) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mote::MoteRole;
     use osmos_core::{LineageId, Mass, MoteId, PelletId};
 
     fn mote(position: Vec2, mass: f32) -> Mote {
         Mote::new(
             MoteId::new(0),
             LineageId::new(0),
-            MoteRole::Ai,
             Mass::new(mass),
             position,
             Vec2::ZERO,

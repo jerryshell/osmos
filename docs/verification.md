@@ -13,7 +13,7 @@ npm run build:all
 
 当前结果。
 
-- Rust 测试 52 个通过。core 6 个，evo 12 个，sim 34 个。
+- Rust 测试 50 个通过。core 6 个，evo 10 个，sim 34 个。
 - 格式检查、Clippy、TypeScript 和 Oxlint 通过。
 - 1,000 步 Ambient 哈希为 `65b791be50513d5b`。
 
@@ -46,8 +46,8 @@ npm run build:all
 ## 性能与体积
 
 - 500 个实体运行 2,400 步耗时 1.21 秒，约 1,983 步/秒。
-- wasm 111.16 KB，gzip 46.29 KB。
-- JavaScript 38.72 KB，gzip 16.18 KB。
+- wasm 102.09 KB，gzip 42.96 KB。
+- JavaScript 38.33 KB，gzip 16.02 KB。
 - CSS 6.22 KB，gzip 1.79 KB。
 
 ## 跨浏览器

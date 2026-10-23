@@ -1,23 +1,6 @@
 use osmos_core::{ControlNetwork, LineageId, Mass, MoteId, Vec2, SENSOR_INPUTS};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum MoteRole {
-    Ai,
-    Hunter,
-    Prey,
-}
-
-impl MoteRole {
-    pub const fn as_u8(self) -> u8 {
-        match self {
-            Self::Ai => 0,
-            Self::Hunter => 1,
-            Self::Prey => 2,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MoteState {
     Alive,
     Absorbed,
@@ -34,7 +17,6 @@ impl MoteState {
 pub struct Mote {
     pub id: MoteId,
     pub lineage: LineageId,
-    pub role: MoteRole,
     pub mass: Mass,
     pub position: Vec2,
     pub velocity: Vec2,
@@ -49,18 +31,10 @@ pub struct Mote {
 }
 
 impl Mote {
-    pub fn new(
-        id: MoteId,
-        lineage: LineageId,
-        role: MoteRole,
-        mass: Mass,
-        position: Vec2,
-        velocity: Vec2,
-    ) -> Self {
+    pub fn new(id: MoteId, lineage: LineageId, mass: Mass, position: Vec2, velocity: Vec2) -> Self {
         Self {
             id,
             lineage,
-            role,
             mass,
             position,
             velocity,

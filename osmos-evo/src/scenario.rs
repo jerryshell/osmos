@@ -60,14 +60,6 @@ impl Scenario {
             },
         }
     }
-
-    pub const fn hunters(self) -> u32 {
-        0
-    }
-
-    pub const fn prey(self) -> u32 {
-        0
-    }
 }
 
 #[cfg(test)]
@@ -77,8 +69,6 @@ mod tests {
     #[test]
     fn sentient_is_all_learners() {
         assert_eq!(Scenario::from_id(1), Scenario::Sentient);
-        assert_eq!(Scenario::Sentient.hunters(), 0);
-        assert_eq!(Scenario::Sentient.prey(), 0);
         assert_eq!(Scenario::Sentient.config(SimConfig::default()).motes, 64);
     }
 

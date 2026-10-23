@@ -24,7 +24,6 @@ type Stats = {
 type Detail = {
   id: number;
   mass: number;
-  role: number;
   sensor: Float32Array;
   thrustX: number;
   thrustY: number;
@@ -37,7 +36,6 @@ type Snapshot = {
   tick: number;
   moteIds: Uint32Array;
   moteState: Float32Array;
-  moteRole: Uint8Array;
   moteFlags: Uint8Array;
   pelletState: Float32Array;
   ejectaState: Float32Array;
@@ -108,11 +106,6 @@ const readScenario = (): number => {
 const App = () => {
   const [locale, setLocale] = createSignal<Locale>(readLocale());
   const t = (key: MessageKey) => messages[locale()][key];
-  const roleName = (role: number) => {
-    if (role === 1) return t("roleHunter");
-    if (role === 2) return t("rolePrey");
-    return t("roleAi");
-  };
   const [scenario, setScenario] = createSignal(0);
   const [paused, setPaused] = createSignal(false);
   const [speed, setSpeed] = createSignal(1);
@@ -250,27 +243,17 @@ const App = () => {
     }
 
     const motes = snapshot.moteState;
-    const roles = snapshot.moteRole;
     for (let index = 0; index < motes.length; index += MOTE_STRIDE) {
       const x = left + motes[index] * size;
       const y = top + (1 - motes[index + 1]) * size;
       const mass = motes[index + 4];
       const radius = Math.max(2, motes[index + 5] * size);
       const hue = motes[index + 6] * 360;
-      const role = roles[index / MOTE_STRIDE] ?? 0;
 
       ctx.beginPath();
       ctx.fillStyle = `hsl(${hue}, 64%, 72%)`;
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
-
-      if (role === 1 || role === 2) {
-        ctx.beginPath();
-        ctx.strokeStyle = role === 1 ? "#ff7369" : "#ffc857";
-        ctx.lineWidth = 1.5;
-        ctx.arc(x, y, radius + 3, 0, Math.PI * 2);
-        ctx.stroke();
-      }
 
       if (mass >= snapshot.stats.bestMass - 1e-5) {
         ctx.beginPath();
@@ -590,7 +573,7 @@ const App = () => {
           >
             ×
           </button>
-          <p class="inspector-eyebrow">{roleName(detail()!.role)} · {t("lineage")} {String(selectedId()! % 12).padStart(2, "0")}</p>
+          <p class="inspector-eyebrow">{t("lineage")} {String(selectedId()! % 12).padStart(2, "0")}</p>
           <h2 class="inspector-title">{t("mote")} #{selectedId()}</h2>
           <p class="inspector-sub">
             {t("massLong")} {detail()!.mass.toFixed(2)} · {t("absorbed")} {detail()!.absorbedPellets} {t("pellets")} · {detail()!.absorbedMotes} {t("motes")}

@@ -33,7 +33,6 @@ impl Engine {
         let result = Object::new();
         set(&result, "id", JsValue::from_f64(detail.id as f64));
         set(&result, "mass", JsValue::from_f64(detail.mass as f64));
-        set(&result, "role", JsValue::from_f64(detail.role as f64));
         set(
             &result,
             "sensor",
@@ -81,11 +80,6 @@ impl Engine {
             &result,
             "moteState",
             Float32Array::from(snapshot.mote_state.as_slice()).into(),
-        );
-        set(
-            &result,
-            "moteRole",
-            Uint8Array::from(snapshot.mote_role.as_slice()).into(),
         );
         set(
             &result,

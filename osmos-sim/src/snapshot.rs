@@ -22,7 +22,6 @@ pub struct Snapshot {
     pub tick: u64,
     pub mote_ids: Vec<u32>,
     pub mote_state: Vec<f32>,
-    pub mote_role: Vec<u8>,
     pub mote_flags: Vec<u8>,
     pub pellet_state: Vec<f32>,
     pub ejecta_state: Vec<f32>,

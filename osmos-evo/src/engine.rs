@@ -24,7 +24,6 @@ pub struct GenerationReport {
 pub struct Inspect {
     pub id: u32,
     pub mass: f32,
-    pub role: u8,
     pub sensor: [f32; SENSOR_INPUTS],
     pub thrust: [f32; 2],
     pub absorbed_pellets: u32,
@@ -35,8 +34,6 @@ pub struct Inspect {
 pub struct Engine {
     config: SimConfig,
     scenario: Scenario,
-    hunters: u32,
-    prey: u32,
     seed: u64,
     rng: StdRng,
     generation: u32,
@@ -87,15 +84,11 @@ impl Engine {
             None => random_population(&mut rng, config.motes as usize),
         };
         let best_genome = champion.clone().unwrap_or_else(|| population[0].clone());
-        let hunters = scenario.hunters();
-        let prey = scenario.prey();
-        let world = World::with_scenario(config, controllers(&population), hunters, prey);
+        let world = World::with_scenario(config, controllers(&population));
 
         Self {
             config,
             scenario,
-            hunters,
-            prey,
             seed,
             rng,
             generation: 0,
@@ -160,7 +153,6 @@ impl Engine {
             .map(|mote| Inspect {
                 id: mote.id.get(),
                 mass: mote.mass.get(),
-                role: mote.role.as_u8(),
                 sensor: mote.sensor,
                 thrust: [mote.thrust.x, mote.thrust.y],
                 absorbed_pellets: mote.absorbed_pellets,
@@ -183,12 +175,7 @@ impl Engine {
             .clone()
             .unwrap_or_else(|| self.population[0].clone());
         self.best_score = f32::NEG_INFINITY;
-        self.world = World::with_scenario(
-            self.config,
-            controllers(&self.population),
-            self.hunters,
-            self.prey,
-        );
+        self.world = World::with_scenario(self.config, controllers(&self.population));
     }
 
     fn evolve(&mut self) -> GenerationReport {
@@ -209,12 +196,7 @@ impl Engine {
 
         let mut next_config = self.config;
         next_config.seed = self.seed;
-        self.world = World::with_scenario(
-            next_config,
-            controllers(&self.population),
-            self.hunters,
-            self.prey,
-        );
+        self.world = World::with_scenario(next_config, controllers(&self.population));
 
         report
     }
@@ -378,6 +360,5 @@ mod tests {
         let snapshot = engine.snapshot();
 
         assert_eq!(snapshot.stats.alive, 64);
-        assert!(snapshot.mote_role.iter().all(|role| *role == 0));
     }
 }
