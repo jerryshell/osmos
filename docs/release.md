@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-- 预览版：<https://osmos.jerryshell.eu.org/next/>
-- 生产站点：仍为旧版，切换需要单独确认。
-- 当前定位：`v2.0.0-rc.2` 预览候选，不是正式版。
+- 生产版：<https://osmos.jerryshell.eu.org/>，`v2.0.0` 已上线。
+- 预览版：<https://osmos.jerryshell.eu.org/next/>，同一构建。
+- 当前定位：`v2.0.0` 正式版。
 - CI：已通过。
 - 浸泡：600 秒桌面 8× 通过。
 - 跨浏览器：Firefox 通过，WebKit 功能通过但帧率低于 60。

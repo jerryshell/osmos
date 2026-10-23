@@ -2,10 +2,10 @@
 
 Osmos 是一个零玩家质量模拟项目，使用 Rust、WebAssembly、Vite 和 Canvas 2D 构建。项目关注质量、动量、吞噬、环绕边界和遗传算法共同形成的多质体行为。
 
-当前版本为预览版。生产站点仍为旧版，切换尚未确认。
+当前版本为 `v2.0.0`。生产站点已切换。
 
-- 预览：<https://osmos.jerryshell.eu.org/next/>
 - 生产：<https://osmos.jerryshell.eu.org/>
+- 预览：<https://osmos.jerryshell.eu.org/next/>
 
 ## 当前实现
 

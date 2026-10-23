@@ -65,9 +65,9 @@ GitHub Actions 运行成功。
 
 ## 预览
 
-<https://osmos.jerryshell.eu.org/next/>
+<https://osmos.jerryshell.eu.org/>
 
-生产站点仍为旧版，切换尚未执行。
+生产站点已切换为 `v2.0.0`。预览站点 `/next/` 使用同一构建。
 
 ## 未验证
 
