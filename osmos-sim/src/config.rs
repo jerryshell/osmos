@@ -11,7 +11,6 @@ pub struct SimConfig {
     pub pellet_mass: f32,
     pub max_speed: f32,
     pub collision_restitution: f32,
-    pub absorb_ratio: f32,
     pub episode_ticks: u64,
     pub sensor_range: f32,
     pub max_eject_rate: f32,
@@ -46,7 +45,6 @@ impl Default for SimConfig {
             pellet_mass: 0.12,
             max_speed: 0.25,
             collision_restitution: 0.8,
-            absorb_ratio: 2.0,
             episode_ticks: 2400,
             sensor_range: 0.25,
             max_eject_rate: 0.005,
@@ -80,7 +78,6 @@ impl SimConfig {
         assert!(self.pellet_mass.is_finite() && self.pellet_mass > 0.0);
         assert!(self.max_speed.is_finite() && self.max_speed > 0.0);
         assert!((0.0..=1.0).contains(&self.collision_restitution));
-        assert!(self.absorb_ratio >= 1.0);
         assert!(self.episode_ticks > 0);
         assert!(self.sensor_range.is_finite() && self.sensor_range > 0.0);
         assert!(self.max_eject_rate.is_finite() && self.max_eject_rate > 0.0);

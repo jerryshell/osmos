@@ -134,7 +134,6 @@ impl Trainer {
             pellets: 0,
             episode_ticks: self.config.episode_ticks,
             initial_mass_spread: 0.0,
-            absorb_ratio: 1.5,
             hunter_speed: 0.03,
             prey_speed: 0.02,
             ..self.config
@@ -279,7 +278,6 @@ impl Trainer {
             pellets: 0,
             episode_ticks: self.config.episode_ticks,
             initial_mass_spread: 0.0,
-            absorb_ratio: 1.5,
             hunter_speed: 0.03,
             prey_speed: 0.02,
             ..self.config

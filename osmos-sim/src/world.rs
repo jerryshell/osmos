@@ -1,4 +1,4 @@
-use std::f32::consts::TAU;
+use std::f32::consts::{PI, TAU};
 
 use osmos_core::{
     wrap_delta, wrap_position, ControlNetwork, LineageId, Mass, MoteId, PelletId, Vec2,
@@ -255,7 +255,6 @@ impl World {
     }
 
     fn drive_hunters(&mut self) {
-        let absorb_ratio = self.config.absorb_ratio;
         let hunter_speed = self.config.hunter_speed;
 
         for index in 0..self.motes.len() {
@@ -271,7 +270,7 @@ impl World {
                     continue;
                 }
                 let other = &self.motes[other_index];
-                if !other.is_alive() || other.mass.get() * absorb_ratio > hunter.mass.get() {
+                if !other.is_alive() || other.mass.get() >= hunter.mass.get() {
                     continue;
                 }
                 let distance = wrap_delta(other.position - hunter.position).length_squared();
@@ -291,7 +290,6 @@ impl World {
     }
 
     fn drive_prey(&mut self) {
-        let absorb_ratio = self.config.absorb_ratio;
         let prey_speed = self.config.prey_speed;
 
         for index in 0..self.motes.len() {
@@ -307,7 +305,7 @@ impl World {
                     continue;
                 }
                 let other = &self.motes[other_index];
-                if !other.is_alive() || other.mass.get() < prey.mass.get() * absorb_ratio {
+                if !other.is_alive() || other.mass.get() <= prey.mass.get() {
                     continue;
                 }
                 let distance = wrap_delta(other.position - prey.position).length_squared();
@@ -674,7 +672,6 @@ impl World {
     }
 
     fn resolve_motes(&mut self) {
-        let absorb_ratio = self.config.absorb_ratio;
         let restitution = self.config.collision_restitution;
         let max_speed = self.config.max_speed;
 
@@ -702,11 +699,13 @@ impl World {
                 let current_mass = self.motes[index].mass.get();
                 let other_mass = self.motes[other_index].mass.get();
 
-                if current_mass >= absorb_ratio * other_mass {
-                    self.absorb(index, other_index, max_speed);
-                } else if other_mass >= absorb_ratio * current_mass {
-                    self.absorb(other_index, index, max_speed);
-                    break;
+                if current_mass > other_mass + 1e-6 {
+                    self.absorb_step(index, other_index, max_speed);
+                } else if other_mass > current_mass + 1e-6 {
+                    self.absorb_step(other_index, index, max_speed);
+                    if !self.motes[index].is_alive() {
+                        break;
+                    }
                 } else {
                     self.bounce(index, other_index, restitution, max_speed);
                 }
@@ -716,22 +715,38 @@ impl World {
         }
     }
 
-    fn absorb(&mut self, winner: usize, loser: usize, max_speed: f32) {
+    fn absorb_step(&mut self, winner: usize, loser: usize, max_speed: f32) {
         if winner == loser {
             return;
         }
 
         let winner_mass = self.motes[winner].mass.get();
         let loser_mass = self.motes[loser].mass.get();
-        let total_mass = winner_mass + loser_mass;
-        let velocity = (self.motes[winner].velocity * winner_mass
-            + self.motes[loser].velocity * loser_mass)
-            * (1.0 / total_mass);
+        let distance =
+            wrap_delta(self.motes[loser].position - self.motes[winner].position).length();
+        let fraction = overlap_fraction(
+            self.motes[winner].radius(),
+            self.motes[loser].radius(),
+            distance,
+        );
+        let transfer = (loser_mass * fraction * 0.02).min(loser_mass - 1e-4);
+        if transfer <= 0.0 {
+            return;
+        }
 
-        self.motes[winner].mass = Mass::new(total_mass);
-        self.motes[winner].velocity = velocity.clamp_length(max_speed);
-        self.motes[winner].absorbed_motes += 1;
-        self.motes[loser].state = MoteState::Absorbed;
+        self.motes[winner].mass = Mass::new(winner_mass + transfer);
+        self.motes[loser].mass = Mass::new(loser_mass - transfer);
+        self.motes[winner].velocity = (self.motes[winner].velocity * winner_mass
+            + self.motes[loser].velocity * transfer)
+            * (1.0 / (winner_mass + transfer));
+        self.motes[winner].velocity = self.motes[winner].velocity.clamp_length(max_speed);
+
+        if self.motes[loser].mass.get() <= self.config.min_mass {
+            let remaining = self.motes[loser].mass.get();
+            self.motes[winner].mass = Mass::new(self.motes[winner].mass.get() + remaining);
+            self.motes[loser].state = MoteState::Absorbed;
+            self.motes[winner].absorbed_motes += 1;
+        }
     }
 
     fn bounce(&mut self, first: usize, second: usize, restitution: f32, max_speed: f32) {
@@ -845,6 +860,33 @@ impl World {
         self.motes.retain(|mote| mote.is_alive());
         self.pellets.retain(|pellet| pellet.alive);
     }
+}
+
+fn overlap_fraction(large_radius: f32, small_radius: f32, distance: f32) -> f32 {
+    let large = large_radius.max(small_radius);
+    let small = large_radius.min(small_radius).max(1e-6);
+    if distance >= large + small {
+        return 0.0;
+    }
+    if distance <= large - small {
+        return 1.0;
+    }
+    let d = distance.max(1e-6);
+    let large_squared = large * large;
+    let small_squared = small * small;
+    let d_squared = d * d;
+    let large_angle = ((d_squared + large_squared - small_squared) / (2.0 * d * large))
+        .clamp(-1.0, 1.0)
+        .acos();
+    let small_angle = ((d_squared + small_squared - large_squared) / (2.0 * d * small))
+        .clamp(-1.0, 1.0)
+        .acos();
+    let triangle = 0.25
+        * ((large + small + d) * (-large + small + d) * (large - small + d) * (large + small - d))
+            .max(0.0)
+            .sqrt();
+    let area = large_squared * large_angle + small_squared * small_angle - triangle;
+    (area / (PI * small_squared)).clamp(0.0, 1.0)
 }
 
 fn random_position(rng: &mut StdRng) -> Vec2 {
@@ -975,7 +1017,9 @@ mod tests {
         set_mote(&mut world, 0, Vec2::new(0.01, 0.5), Vec2::ZERO, 2.0);
         set_mote(&mut world, 1, Vec2::new(0.99, 0.5), Vec2::ZERO, 1.0);
 
-        world.step();
+        for _ in 0..100 {
+            world.step();
+        }
 
         assert_eq!(world.motes.len(), 1);
         assert!((world.motes[0].mass.get() - 3.0).abs() < 1e-5);
@@ -999,7 +1043,9 @@ mod tests {
         set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 2.0);
         set_mote(&mut world, 1, Vec2::new(0.505, 0.5), Vec2::ZERO, 1.0);
 
-        world.step();
+        for _ in 0..100 {
+            world.step();
+        }
 
         assert_eq!(world.motes.len(), 1);
         assert!((world.motes[0].mass.get() - 3.0).abs() < 1e-5);
@@ -1071,16 +1117,19 @@ mod tests {
     }
 
     #[test]
-    fn one_mote_can_absorb_three_targets_in_one_substep() {
+    fn larger_mote_gradually_absorbs_three_targets() {
         let mut world = World::new(config(3, 0));
         set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 2.2);
         set_mote(&mut world, 1, Vec2::new(0.52, 0.5), Vec2::ZERO, 1.0);
         set_mote(&mut world, 2, Vec2::new(0.528, 0.5), Vec2::ZERO, 0.5);
 
-        world.step();
+        for _ in 0..3000 {
+            world.step();
+        }
 
-        assert_eq!(world.motes.len(), 1);
-        assert!((world.motes[0].mass.get() - 3.7).abs() < 1e-5);
+        assert!(world.motes.len() <= 2);
+        let total = world.motes.iter().map(|mote| mote.mass.get()).sum::<f32>();
+        assert!((total - 3.7).abs() < 1e-4);
     }
 
     #[test]

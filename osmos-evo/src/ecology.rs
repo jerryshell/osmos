@@ -132,14 +132,14 @@ fn sample_behavior(world: &World) -> (u32, u32, u32) {
             if distance_squared <= 1e-8 || distance_squared > range_squared {
                 continue;
             }
-            if other.mass.get() >= mote.mass.get() * world.config().absorb_ratio {
+            if other.mass.get() > mote.mass.get() {
                 if larger
                     .map(|(best, _)| distance_squared < best)
                     .unwrap_or(true)
                 {
                     larger = Some((distance_squared, delta));
                 }
-            } else if mote.mass.get() >= other.mass.get() * world.config().absorb_ratio
+            } else if mote.mass.get() > other.mass.get()
                 && smaller
                     .map(|(best, _)| distance_squared < best)
                     .unwrap_or(true)
