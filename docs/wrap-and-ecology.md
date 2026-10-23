@@ -97,12 +97,12 @@ Web 的共享 `Engine` 也改为按最终质量选择下一代，初始质量有
 ## 6. 验证
 
 - Rust 测试 45 个通过。core 6 个，evo 10 个，sim 29 个。
-- 60 秒浏览器测试 8 个组合，帧率 59.88 到 60.02 fps，页面错误 0。
-- 8× 桌面 `step` p95 6.0 ms，手机 5.7 ms。
-- Orbital 手机 4× 60.00 fps，`step` p95 2.4 ms。
-- Repulsor 手机 4× 60.00 fps，`step` p95 2.4 ms。
+- 60 秒浏览器测试 8 个组合，帧率 58.23 到 59.97 fps，页面错误 0。
+- 8× 桌面 `step` p95 7.8 ms，手机 8.4 ms。
+- Orbital 手机 4× 59.93 fps，`step` p95 4.4 ms。
+- Repulsor 手机 4× 59.97 fps，`step` p95 4.3 ms。
 - 500 个实体，64 个 AI 加 436 个颗粒，Ambient 2,400 步 0.98 秒，约 2,449 步/秒。
-- wasm 约 105 KB，gzip 约 43.6 KB。JavaScript 28.97 KB，gzip 11.20 KB。CSS 6.18 KB，gzip 1.78 KB。
+- wasm 106.11 KB，gzip 44.08 KB。JavaScript 33.28 KB，gzip 13.03 KB。CSS 6.22 KB，gzip 1.79 KB。
 - 1,000 步 Ambient 哈希为 `0b058a3f390d9701`。
 
 500 实体达到 2,400 步/秒计划值。

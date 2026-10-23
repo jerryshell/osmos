@@ -1,5 +1,14 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import * as osmos from "../osmos-wasm";
+import {
+  localeTag,
+  messages,
+  persistLocale,
+  readLocale,
+  scenarioNames,
+  type Locale,
+  type MessageKey
+} from "./i18n";
 
 type Stats = {
   generation: number;
@@ -67,12 +76,13 @@ const readSeed = (): number => {
   return Number.isFinite(parsed) ? parsed >>> 0 : (Date.now() >>> 0);
 };
 
-const writeState = (seed: number, scenario: number) => {
+const writeState = (seed: number, scenario: number, locale: Locale) => {
   const url = new URL(window.location.href);
   url.searchParams.set("seed", String(seed));
   const name =
     scenario === 1 ? "sentient" : scenario === 2 ? "orbital" : scenario === 3 ? "repulsor" : "ambient";
   url.searchParams.set("scenario", name);
+  url.searchParams.set("lang", locale);
   window.history.replaceState(null, "", url);
 };
 
@@ -84,13 +94,14 @@ const readScenario = (): number => {
   return 0;
 };
 
-const roleName = (role: number) => {
-  if (role === 1) return "Hunter";
-  if (role === 2) return "Prey";
-  return "AI mote";
-};
-
 const App = () => {
+  const [locale, setLocale] = createSignal<Locale>(readLocale());
+  const t = (key: MessageKey) => messages[locale()][key];
+  const roleName = (role: number) => {
+    if (role === 1) return t("roleHunter");
+    if (role === 2) return t("rolePrey");
+    return t("roleAi");
+  };
   const [scenario, setScenario] = createSignal(0);
   const [paused, setPaused] = createSignal(false);
   const [speed, setSpeed] = createSignal(1);
@@ -104,6 +115,18 @@ const App = () => {
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
   const [detail, setDetail] = createSignal<Detail | null>(null);
   const [error, setError] = createSignal("");
+
+  createEffect(() => {
+    document.documentElement.lang = localeTag(locale());
+    document.title = t("documentTitle");
+  });
+
+  const toggleLocale = () => {
+    const next: Locale = locale() === "en" ? "zh" : "en";
+    setLocale(next);
+    persistLocale(next);
+    if (engine) writeState(seed(), scenario(), next);
+  };
 
   let canvas: HTMLCanvasElement | undefined;
   let engine: osmos.Engine | undefined;
@@ -291,7 +314,7 @@ const App = () => {
     resetStats();
     setSelectedId(null);
     setDetail(null);
-    writeState(next, scenario());
+    writeState(next, scenario(), locale());
   };
 
   const resetStats = () => {
@@ -312,7 +335,7 @@ const App = () => {
     resetStats();
     setSelectedId(null);
     setDetail(null);
-    writeState(seed(), next);
+    writeState(seed(), next, locale());
   };
 
   const sensorBars = (offset: number) =>
@@ -337,13 +360,13 @@ const App = () => {
     const initialScenario = readScenario();
     setSeed(initialSeed);
     setScenario(initialScenario);
-    writeState(initialSeed, initialScenario);
+    writeState(initialSeed, initialScenario, locale());
     resize();
 
     try {
       engine = new osmos.Engine(initialSeed, initialScenario);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "The simulation engine failed to load.");
+      setError(cause instanceof Error ? cause.message : t("errorMessage"));
       return;
     }
 
@@ -496,38 +519,38 @@ const App = () => {
         <h1 class="brand">
           OSMOS <span>FIELD</span>
         </h1>
-        <p class="tagline">mass, momentum, absorption</p>
-        <div class="scenarios" role="group" aria-label="Scenario">
+        <p class="tagline">{t("tagline")}</p>
+        <div class="scenarios" role="group" aria-label={t("scenarioGroup")}>
           <button
             type="button"
             aria-pressed={scenario() === 0}
             onClick={() => chooseScenario(0)}
           >
-            Ambient
+            {scenarioNames[locale()][0]}
           </button>
           <button
             type="button"
             aria-pressed={scenario() === 1}
             onClick={() => chooseScenario(1)}
           >
-            Sentient
+            {scenarioNames[locale()][1]}
           </button>
           <button
             type="button"
             aria-pressed={scenario() === 2}
             onClick={() => chooseScenario(2)}
           >
-            Orbital
+            {scenarioNames[locale()][2]}
           </button>
           <button
             type="button"
             aria-pressed={scenario() === 3}
             onClick={() => chooseScenario(3)}
           >
-            Repulsor
+            {scenarioNames[locale()][3]}
           </button>
         </div>
-        <span class="seed">SEED {seed().toString(16).toUpperCase().padStart(8, "0")}</span>
+        <span class="seed">{t("seed")} {seed().toString(16).toUpperCase().padStart(8, "0")}</span>
       </header>
 
       <main id="stage">
@@ -536,16 +559,16 @@ const App = () => {
             canvas = element;
           }}
           role="img"
-          aria-label="A simulation of motes absorbing smaller motes and pellets. Each circle is a mote, and larger circles have more mass."
+          aria-label={t("canvasLabel")}
         />
       </main>
 
       {selectedId() !== null && detail() && (
-        <aside id="inspector" aria-label="Selected mote">
+        <aside id="inspector" aria-label={t("selectedMote")}>
           <button
             class="inspector-close"
             type="button"
-            aria-label="Close inspector"
+            aria-label={t("closeInspector")}
             onClick={() => {
               setSelectedId(null);
               setDetail(null);
@@ -553,46 +576,48 @@ const App = () => {
           >
             ×
           </button>
-          <p class="inspector-eyebrow">{roleName(detail()!.role)} · LINEAGE {String(selectedId()! % 12).padStart(2, "0")}</p>
-          <h2 class="inspector-title">Mote #{selectedId()}</h2>
+          <p class="inspector-eyebrow">{roleName(detail()!.role)} · {t("lineage")} {String(selectedId()! % 12).padStart(2, "0")}</p>
+          <h2 class="inspector-title">{t("mote")} #{selectedId()}</h2>
           <p class="inspector-sub">
-            mass {detail()!.mass.toFixed(2)} · absorbed {detail()!.absorbedPellets} pellets · {detail()!.absorbedMotes} motes
+            {t("massLong")} {detail()!.mass.toFixed(2)} · {t("absorbed")} {detail()!.absorbedPellets} {t("pellets")} · {detail()!.absorbedMotes} {t("motes")}
           </p>
 
           <div class="inspector-metrics">
-            <div><span>MASS</span><strong>{detail()!.mass.toFixed(2)}</strong></div>
-            <div><span>EJECTED</span><strong>{detail()!.ejectedMass.toFixed(2)}</strong></div>
+            <div><span>{t("massShort")}</span><strong>{detail()!.mass.toFixed(2)}</strong></div>
+            <div><span>{t("ejected")}</span><strong>{detail()!.ejectedMass.toFixed(2)}</strong></div>
           </div>
 
-          <p class="inspector-section">SENSORY RING · 16 SECTORS</p>
-          <div class="sensor-row"><span>MASS</span><div class="sensor-bars">{sensorBars(0)}</div></div>
-          <div class="sensor-row"><span>PROX</span><div class="sensor-bars">{sensorBars(16)}</div></div>
-          <div class="sensor-row"><span>RADIAL</span><div class="sensor-bars radial">{sensorBars(32)}</div></div>
-          <div class="sensor-row"><span>THREAT</span>{signalBar(51)}</div>
-          <div class="sensor-row"><span>FOOD</span>{signalBar(53)}</div>
+          <p class="inspector-section">{t("sensoryRing")}</p>
+          <div class="sensor-row"><span>{t("massShort")}</span><div class="sensor-bars">{sensorBars(0)}</div></div>
+          <div class="sensor-row"><span>{t("proximity")}</span><div class="sensor-bars">{sensorBars(16)}</div></div>
+          <div class="sensor-row"><span>{t("radial")}</span><div class="sensor-bars radial">{sensorBars(32)}</div></div>
+          <div class="sensor-row"><span>{t("threat")}</span>{signalBar(51)}</div>
+          <div class="sensor-row"><span>{t("food")}</span>{signalBar(53)}</div>
 
-          <p class="inspector-section">CONTROL OUTPUT</p>
+          <p class="inspector-section">{t("controlOutput")}</p>
           <div class="inspector-output">
-            <div><span>THRUST X</span><strong>{detail()!.thrustX >= 0 ? "+" : ""}{detail()!.thrustX.toFixed(2)}</strong></div>
-            <div><span>THRUST Y</span><strong>{detail()!.thrustY >= 0 ? "+" : ""}{detail()!.thrustY.toFixed(2)}</strong></div>
+            <div><span>{t("thrustX")}</span><strong>{detail()!.thrustX >= 0 ? "+" : ""}{detail()!.thrustX.toFixed(2)}</strong></div>
+            <div><span>{t("thrustY")}</span><strong>{detail()!.thrustY >= 0 ? "+" : ""}{detail()!.thrustY.toFixed(2)}</strong></div>
           </div>
         </aside>
       )}
 
       <section id="hud">
-        <span class="eyebrow">BEST MASS</span>
+        <span class="eyebrow">{t("bestMass")}</span>
         <strong class="best">{bestMass().toFixed(2)}</strong>
         <span class="meta">
-          GEN {generation()} · TICK {tick()} · {alive()} ALIVE · {pellets()} PELLETS · {snapshotEjecta()} EJECTA
+          {locale() === "zh"
+            ? `${t("gen")} ${generation()} 代 · ${t("tick")} ${tick()} · ${t("alive")} ${alive()} · ${t("pellets")} ${pellets()} · ${t("ejecta")} ${snapshotEjecta()}`
+            : `${t("gen")} ${generation()} · ${t("tick")} ${tick()} · ${alive()} ${t("alive")} · ${pellets()} ${t("pellets").toUpperCase()} · ${snapshotEjecta()} ${t("ejecta")}`}
         </span>
       </section>
 
       <p id="caption">
         {scenario() === 2
-          ? "A CENTRAL ATTRACTOR BENDS EVERY ORBIT. EDGES WRAP."
+          ? t("captionOrbital")
           : scenario() === 3
-            ? "A CENTRAL REPULSOR PUSHES EVERY ORBIT APART. EDGES WRAP."
-            : "MASS IS THE ONLY RESOURCE. LARGER CIRCLES ABSORB SMALLER ONES. EDGES WRAP."}
+            ? t("captionRepulsor")
+            : t("captionMass")}
       </p>
 
       <footer id="controls">
@@ -601,10 +626,10 @@ const App = () => {
           aria-pressed={paused()}
           onClick={() => setPaused(!paused())}
         >
-          {paused() ? "Resume" : "Pause"}
+          {paused() ? t("resume") : t("pause")}
         </button>
 
-        <div class="speed-group" role="group" aria-label="Simulation speed">
+        <div class="speed-group" role="group" aria-label={t("speedGroup")}>
           <button
             type="button"
             aria-pressed={speed() === 1}
@@ -636,16 +661,26 @@ const App = () => {
         </div>
 
         <button type="button" onClick={reset}>
-          Reset
+          {t("reset")}
+        </button>
+
+        <button
+          class="locale-switch"
+          type="button"
+          aria-label={locale() === "en" ? t("switchToChinese") : t("switchToEnglish")}
+          title={locale() === "en" ? t("switchToChinese") : t("switchToEnglish")}
+          onClick={toggleLocale}
+        >
+          {locale() === "en" ? t("languageChinese") : t("languageEnglish")}
         </button>
       </footer>
 
       {error() && (
         <div class="error" role="alert">
-          <strong>Simulation failed to load</strong>
+          <strong>{t("errorTitle")}</strong>
           <span>{error()}</span>
           <button type="button" onClick={() => window.location.reload()}>
-            Retry
+            {t("retry")}
           </button>
         </div>
       )}

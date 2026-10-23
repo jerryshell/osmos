@@ -67,6 +67,14 @@ if (process.env.VERIFY_INTERACTIONS === "1") {
   await page.getByRole("button", { name: "Repulsor" }).click();
   const repulsorUrl = page.url();
   const repulsorPressed = await page.getByRole("button", { name: "Repulsor" }).getAttribute("aria-pressed");
+  await page.getByRole("button", { name: "Switch to Chinese" }).click();
+  const zhLang = await page.evaluate(() => document.documentElement.lang);
+  const zhBest = await page.locator("#hud .eyebrow").textContent();
+  const zhUrl = page.url();
+  await page.getByRole("button", { name: "切换到英文" }).click();
+  const enLang = await page.evaluate(() => document.documentElement.lang);
+  const enBest = await page.locator("#hud .eyebrow").textContent();
+  const enUrl = page.url();
 
   const reducedErrors = [];
   const reduced = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -85,6 +93,12 @@ if (process.env.VERIFY_INTERACTIONS === "1") {
       orbitalPressed,
       repulsorUrl,
       repulsorPressed,
+      zhLang,
+      zhBest,
+      zhUrl,
+      enLang,
+      enBest,
+      enUrl,
       reducedPaused,
       errors,
       reducedErrors

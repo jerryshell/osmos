@@ -431,6 +431,11 @@ button[aria-pressed="true"]:hover {
   .speed-group button {
     padding: 0 7px;
   }
+
+  .locale-switch {
+    padding: 0 6px;
+    font-size: 9px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
