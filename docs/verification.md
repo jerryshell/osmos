@@ -13,17 +13,17 @@ npm run build:all
 
 当前结果。
 
-- Rust 测试 45 个通过。core 6 个，evo 10 个，sim 29 个。
+- Rust 测试 48 个通过。core 6 个，evo 10 个，sim 32 个。
 - 格式检查、Clippy、TypeScript 和 Oxlint 通过。
-- 1,000 步 Ambient 哈希为 `0b058a3f390d9701`。
+- 1,000 步 Ambient 哈希为 `3f908b96443bc945`。
 
 ## 浏览器
 
 - 60 秒测试 8 个组合，覆盖桌面、手机、1×、4×、8×、Orbital 和 Repulsor。
-- 帧率 58.23 到 59.97 fps。
-- 8× 桌面 `step` p95 为 7.8 ms，手机为 8.4 ms。
-- Orbital 手机 4× 为 59.93 fps，`step` p95 为 4.4 ms。
-- Repulsor 手机 4× 为 59.97 fps，`step` p95 为 4.3 ms。
+- 帧率 59.83 到 60.02 fps。
+- 8× 桌面 `step` p95 为 5.7 ms，手机为 5.6 ms。
+- Orbital 手机 4× 为 60.02 fps，`step` p95 为 2.2 ms。
+- Repulsor 手机 4× 为 60.00 fps，`step` p95 为 2.1 ms。
 - 页面错误为 0。
 - 所有按钮不小于 44 px。
 
@@ -37,8 +37,8 @@ npm run build:all
 
 ## 性能与体积
 
-- 500 个实体运行 2,400 步耗时 0.98 秒，约 2,449 步/秒。
-- wasm 106.11 KB，gzip 44.08 KB。
+- 500 个实体运行 2,400 步耗时 0.79 秒，约 3,038 步/秒。
+- wasm 107.60 KB，gzip 44.95 KB。
 - JavaScript 33.28 KB，gzip 13.03 KB。
 - CSS 6.22 KB，gzip 1.79 KB。
 

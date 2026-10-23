@@ -735,12 +735,17 @@ impl World {
         let loser_mass = self.motes[loser].mass.get();
         let distance =
             wrap_delta(self.motes[loser].position - self.motes[winner].position).length();
-        let fraction = overlap_fraction(
-            self.motes[winner].radius(),
-            self.motes[loser].radius(),
-            distance,
-        );
-        let transfer = (loser_mass * fraction * 0.02).min(loser_mass - 1e-4);
+        let winner_radius = self.motes[winner].radius();
+        let loser_radius = self.motes[loser].radius();
+        let contained = distance <= winner_radius - loser_radius;
+        let fraction = absorb_fraction(winner_radius, loser_radius, distance);
+        // 完全包含时一次并入。部分重叠时，每个 60 Hz tick 转移一次。
+        // 本项目每 tick 有两个物理子步，因此部分重叠每步取一半。
+        let transfer = if contained {
+            loser_mass - 1e-4
+        } else {
+            (loser_mass * fraction / SUBSTEPS as f32).min(loser_mass - 1e-4)
+        };
         if transfer <= 0.0 {
             return;
         }
@@ -874,32 +879,27 @@ impl World {
 }
 
 // === 几何工具 ===
-/// 返回重叠透镜面积与小圆面积之比。
-fn overlap_fraction(large_radius: f32, small_radius: f32, distance: f32) -> f32 {
-    let large = large_radius.max(small_radius);
-    let small = large_radius.min(small_radius).max(1e-6);
-    if distance >= large + small {
+/// 返回重叠面积比例。
+///
+/// 分子是半个弦长乘重叠深度，分母是小圆面积。结果再乘小圆质量，就是本次转移的质量。
+fn absorb_fraction(winner_radius: f32, loser_radius: f32, distance: f32) -> f32 {
+    let reach = winner_radius + loser_radius;
+    if distance >= reach || loser_radius <= 0.0 {
         return 0.0;
     }
-    if distance <= large - small {
+    if distance <= winner_radius - loser_radius {
         return 1.0;
     }
-    let d = distance.max(1e-6);
-    let large_squared = large * large;
-    let small_squared = small * small;
-    let d_squared = d * d;
-    let large_angle = ((d_squared + large_squared - small_squared) / (2.0 * d * large))
-        .clamp(-1.0, 1.0)
-        .acos();
-    let small_angle = ((d_squared + small_squared - large_squared) / (2.0 * d * small))
-        .clamp(-1.0, 1.0)
-        .acos();
-    let triangle = 0.25
-        * ((large + small + d) * (-large + small + d) * (large - small + d) * (large + small - d))
-            .max(0.0)
-            .sqrt();
-    let area = large_squared * large_angle + small_squared * small_angle - triangle;
-    (area / (PI * small_squared)).clamp(0.0, 1.0)
+
+    let depth = reach - distance;
+    let half_chord_squared =
+        loser_radius * loser_radius - (distance - winner_radius) * (distance - winner_radius);
+    if half_chord_squared <= 0.0 {
+        return 1.0;
+    }
+
+    let half_chord = half_chord_squared.sqrt();
+    (half_chord * depth / (PI * loser_radius * loser_radius)).clamp(0.0, 1.0)
 }
 
 fn random_position(rng: &mut StdRng) -> Vec2 {
@@ -1048,6 +1048,28 @@ mod tests {
 
         assert_eq!(world.pellets.len(), 0);
         assert!((world.motes[0].mass.get() - 1.12).abs() < 1e-5);
+    }
+
+    #[test]
+    fn contained_mote_merges_in_one_tick() {
+        let mut world = World::new(config(2, 0));
+        set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 2.0);
+        set_mote(&mut world, 1, Vec2::new(0.505, 0.5), Vec2::ZERO, 0.5);
+
+        world.step();
+
+        assert_eq!(world.motes.len(), 1);
+        assert!((world.motes[0].mass.get() - 2.5).abs() < 1e-4);
+    }
+
+    #[test]
+    fn absorb_fraction_matches_overlap() {
+        assert_eq!(absorb_fraction(0.2, 0.1, 0.3), 0.0);
+        assert_eq!(absorb_fraction(0.2, 0.1, 0.05), 1.0);
+
+        let fraction = absorb_fraction(0.2, 0.1, 0.25);
+        let expected = 0.086_602_54 * 0.05 / (PI * 0.1 * 0.1);
+        assert!((fraction - expected).abs() < 1e-6);
     }
 
     #[test]
