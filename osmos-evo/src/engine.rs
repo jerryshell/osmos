@@ -16,6 +16,7 @@ pub struct GenerationReport {
     pub mean_speed: f32,
     pub ejected_mass: f32,
     pub alive: u32,
+    pub pellet_intake: u32,
     pub best_score: f32,
 }
 
@@ -241,6 +242,7 @@ impl Engine {
         let best_score = best_index.map(|index| scores[index]).unwrap_or(0.0);
         let best_mass = masses.iter().copied().fold(0.0_f32, f32::max);
         let median_mass = median(&masses);
+        let pellet_intake = self.world.absorbed_pellets();
         let alive_motes = self
             .world
             .motes
@@ -273,6 +275,7 @@ impl Engine {
                 mean_speed,
                 ejected_mass,
                 alive,
+                pellet_intake,
                 best_score,
             },
             masses,

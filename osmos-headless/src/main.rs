@@ -8,6 +8,7 @@ fn main() {
     let mut motes = 64_u32;
     let mut pellets = 236_u32;
     let mut episode = 2400_u64;
+    let mut pellet_reserve = SimConfig::default().pellet_reserve;
     let mut train = false;
     let mut holdout = 0_usize;
     let mut scenario = 0_u32;
@@ -23,6 +24,7 @@ fn main() {
             "--motes" => motes = parse(&mut arguments, "motes"),
             "--pellets" => pellets = parse(&mut arguments, "pellets"),
             "--episode" => episode = parse(&mut arguments, "episode"),
+            "--pellet-reserve" => pellet_reserve = parse(&mut arguments, "pellet reserve"),
             "--train" => train = true,
             "--holdout" => holdout = parse(&mut arguments, "holdout"),
             "--scenario" => scenario = parse(&mut arguments, "scenario"),
@@ -40,6 +42,7 @@ fn main() {
         motes,
         pellets,
         episode_ticks: episode,
+        pellet_reserve,
         ..SimConfig::default()
     };
     if ecology {
@@ -47,12 +50,13 @@ fn main() {
         for _ in 0..generations {
             let report = trainer.run_generation();
             println!(
-                "{{\"generation\":{},\"best_mass\":{:.4},\"mean_mass\":{:.4},\"survivors\":{},\"predation\":{},\"flee_events\":{},\"hunt_events\":{},\"behavior_samples\":{}}}",
+                "{{\"generation\":{},\"best_mass\":{:.4},\"mean_mass\":{:.4},\"survivors\":{},\"predation\":{},\"pellet_intake\":{},\"flee_events\":{},\"hunt_events\":{},\"behavior_samples\":{}}}",
                 report.generation,
                 report.best_mass,
                 report.mean_mass,
                 report.survivors,
                 report.predation,
+                report.pellet_intake,
                 report.flee_events,
                 report.hunt_events,
                 report.behavior_samples
@@ -118,7 +122,7 @@ fn main() {
     for _ in 0..generations {
         let report = engine.run_generation();
         println!(
-            "{{\"generation\":{},\"best_mass\":{:.4},\"median_mass\":{:.4},\"mean_mass\":{:.4},\"mean_speed\":{:.4},\"ejected_mass\":{:.4},\"alive\":{},\"best_score\":{:.4}}}",
+            "{{\"generation\":{},\"best_mass\":{:.4},\"median_mass\":{:.4},\"mean_mass\":{:.4},\"mean_speed\":{:.4},\"ejected_mass\":{:.4},\"alive\":{},\"pellet_intake\":{},\"best_score\":{:.4}}}",
             report.generation,
             report.best_mass,
             report.median_mass,
@@ -126,6 +130,7 @@ fn main() {
             report.mean_speed,
             report.ejected_mass,
             report.alive,
+            report.pellet_intake,
             report.best_score
         );
     }

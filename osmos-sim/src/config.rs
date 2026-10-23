@@ -24,6 +24,7 @@ pub struct SimConfig {
     pub ejecta_packet: f32,
     pub max_ejecta: usize,
     pub max_pellets: usize,
+    pub pellet_reserve: f32,
     pub owner_immunity_ticks: u32,
     pub gravity_center_x: f32,
     pub gravity_center_y: f32,
@@ -59,6 +60,7 @@ impl Default for SimConfig {
             ejecta_packet: 0.01,
             max_ejecta: 512,
             max_pellets: 300,
+            pellet_reserve: 120.0,
             owner_immunity_ticks: 18,
             gravity_center_x: 0.5,
             gravity_center_y: 0.5,
@@ -92,6 +94,7 @@ impl SimConfig {
         assert!(self.ejecta_packet.is_finite() && self.ejecta_packet > 0.0);
         assert!(self.max_ejecta > 0);
         assert!(self.max_pellets > 0);
+        assert!(self.pellet_reserve.is_finite() && self.pellet_reserve >= 0.0);
         assert!(self.gravity_center_x.is_finite() && (0.0..=1.0).contains(&self.gravity_center_x));
         assert!(self.gravity_center_y.is_finite() && (0.0..=1.0).contains(&self.gravity_center_y));
         assert!(self.gravity_strength.is_finite());

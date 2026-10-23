@@ -35,6 +35,10 @@ pub struct World {
     gravity: GravityWell,
     scratch: Vec<u32>,
     ejected_total: f32,
+    absorbed_pellets: u32,
+    pellet_reserve: f32,
+    pellet_target: u32,
+    pellet_rng: StdRng,
     next_ejecta_id: u32,
     next_pellet_id: u32,
 }
@@ -215,6 +219,10 @@ impl World {
             gravity,
             scratch: Vec::new(),
             ejected_total: 0.0,
+            absorbed_pellets: 0,
+            pellet_reserve: config.pellet_reserve,
+            pellet_target: config.pellets,
+            pellet_rng: StdRng::seed_from_u64(config.seed ^ 0x5045_4C4C_4554_0001),
             next_ejecta_id: 0,
             next_pellet_id: config.pellets,
         }
@@ -230,6 +238,10 @@ impl World {
 
     pub fn ejected_total(&self) -> f32 {
         self.ejected_total
+    }
+
+    pub fn absorbed_pellets(&self) -> u32 {
+        self.absorbed_pellets
     }
 
     // === 主循环 ===
@@ -258,6 +270,7 @@ impl World {
         }
 
         self.expire_ejecta();
+        self.replenish_pellets();
     }
 
     // === 控制 ===
@@ -449,6 +462,26 @@ impl World {
                 .filter(|ejecta| ejecta.alive)
                 .map(|ejecta| ejecta.mass.get())
                 .sum::<f32>()
+            + self.pellet_reserve
+    }
+
+    fn replenish_pellets(&mut self) {
+        if self.pellet_reserve <= 0.0 {
+            return;
+        }
+        while self.pellets.len() < self.pellet_target as usize {
+            let mass = self.config.pellet_mass;
+            if self.pellet_reserve < mass {
+                break;
+            }
+            self.pellet_reserve -= mass;
+            self.pellets.push(Pellet::new(
+                PelletId::new(self.next_pellet_id),
+                Mass::new(mass),
+                random_position(&mut self.pellet_rng),
+            ));
+            self.next_pellet_id = self.next_pellet_id.wrapping_add(1);
+        }
     }
 
     // === 快照 ===
@@ -628,6 +661,7 @@ impl World {
             }
 
             if count > 0 {
+                self.absorbed_pellets += count;
                 let mote = &mut self.motes[index];
                 let old_mass = mote.mass.get();
                 let new_mass = old_mass + gained;
@@ -924,6 +958,7 @@ mod tests {
             seed: 7,
             motes,
             pellets,
+            pellet_reserve: 0.0,
             ..SimConfig::default()
         }
     }
@@ -1009,6 +1044,31 @@ mod tests {
 
         assert!(world.motes[0].velocity.x > 0.0);
         assert_eq!(world.snapshot().well_state[3], -1.0);
+    }
+
+    #[test]
+    fn pellet_reserve_replenishes_and_conserves_mass() {
+        let mut setup = config(1, 1);
+        setup.pellet_reserve = 1.0;
+        let mut world = World::new(setup);
+        set_mote(&mut world, 0, Vec2::new(0.5, 0.5), Vec2::ZERO, 1.0);
+        world.pellets[0].position = Vec2::new(0.505, 0.5);
+        let before = world.total_mass();
+
+        world.step();
+
+        assert_eq!(world.motes[0].absorbed_pellets, 1);
+        assert_eq!(world.pellets.len(), 1);
+        assert!((world.total_mass() - before).abs() < 1e-4);
+    }
+
+    #[test]
+    fn default_reserve_keeps_pellets_available() {
+        let mut world = World::new(SimConfig::default());
+        for _ in 0..600 {
+            world.step();
+        }
+        assert_eq!(world.pellets.len(), 236);
     }
 
     #[test]
