@@ -1,0 +1,69 @@
+name: ci
+
+on:
+  push:
+    branches: [master, "rewrite/**"]
+  pull_request:
+
+jobs:
+  rust-and-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Test Rust workspace
+        run: cargo test --workspace
+
+      - name: Lint Rust workspace
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: osmos-web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: osmos-web
+        run: npm ci
+
+      - name: Build wasm
+        working-directory: osmos-web
+        run: npm run build:wasm
+
+      - name: Typecheck and lint web
+        working-directory: osmos-web
+        run: npm run check
+
+      - name: Build web
+        working-directory: osmos-web
+        run: npm run build
+
+      - name: Install Playwright browser
+        working-directory: osmos-web
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify UI
+        working-directory: osmos-web
+        env:
+          VERIFY_SECONDS: 5
+        run: npm run verify:ui
+
+      - name: Verify interactions
+        working-directory: osmos-web
+        env:
+          VERIFY_INTERACTIONS: 1
+        run: npm run verify:ui

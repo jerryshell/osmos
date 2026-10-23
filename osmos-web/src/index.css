@@ -1,166 +1,440 @@
 :root {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: dark;
-  background-color: #242424;
+  background: #071013;
+  color: #e6f5f1;
+  font-synthesis: none;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
-  min-height: 100dvh;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 50% 42%, #123037 0%, #081316 48%, #050b0d 100%);
+  overflow: hidden;
 }
 
 #app {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 0 8px;
-  text-align: center;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
 }
 
-#header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 0;
-}
-
-#info {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 12px;
-  margin: 4px 0;
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
-  font-variant-numeric: tabular-nums;
-  color: #17c3b2;
-}
-
-#info > span {
-  white-space: nowrap;
-}
-
-#info > span + span::before {
-  content: "·";
-  margin-right: 12px;
-  opacity: 0.55;
-}
-
-#controls {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-}
-
-#footer {
-  margin: 10px;
-  font-size: 1.2rem;
-  color: #17c3b2;
-}
-
-a {
-  color: #17c3b2;
+#stage {
+  position: fixed;
+  inset: 0;
 }
 
 canvas {
   display: block;
-  width: min(900px, calc(100% - 16px));
-  height: auto;
-  aspect-ratio: 1;
-  margin: 8px auto;
-  border: 2px solid #17c3b2;
+  width: 100%;
+  height: 100%;
 }
 
-input,
-button {
-  padding: 0.8em 1.8em;
-  border: 2px solid #17c3b2;
-  position: relative;
-  overflow: hidden;
-  background-color: transparent;
-  text-transform: uppercase;
-  font-size: 16px;
-  color: #17c3b2;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: rgba(23, 195, 178, 0.2);
+#topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: linear-gradient(
+    to bottom,
+    rgba(7, 16, 19, 0.9),
+    rgba(7, 16, 19, 0)
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+.brand {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+
+.brand span {
+  color: #31d6c4;
+}
+
+.tagline {
+  margin: 0;
+  color: #7e9b98;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.scenarios {
+  display: flex;
+  pointer-events: auto;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgba(49, 214, 196, 0.2);
+  border-radius: 999px;
+}
+
+.scenarios button {
   min-height: 44px;
+  min-width: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #8aa7a4;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
 }
 
-input:user-invalid {
-  border-color: #f47c7c;
+.scenarios button[aria-pressed="true"] {
+  background: #31d6c4;
+  color: #06201d;
 }
 
-input {
-  width: 8.5em;
-  text-align: center;
+.seed {
+  margin-left: auto;
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+#hud {
+  position: fixed;
+  left: 22px;
+  top: 74px;
+  display: grid;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.eyebrow {
+  color: #31d6c4;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.best {
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: clamp(30px, 6vw, 54px);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
   font-variant-numeric: tabular-nums;
 }
 
-button {
-  text-align: center;
-  transition: color 0.3s ease, border-color 0.3s ease;
-  z-index: 1;
-  cursor: pointer;
+.meta {
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
-button::before {
-  content: "";
-  width: 100%;
-  height: 300%;
+#inspector {
+  position: fixed;
+  top: 84px;
+  right: 18px;
+  bottom: 78px;
+  width: 320px;
+  padding: 16px;
+  border: 1px solid rgba(49, 214, 196, 0.24);
+  border-radius: 14px;
+  background: rgba(12, 24, 27, 0.94);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  overflow: auto;
+  z-index: 6;
+}
+
+.inspector-close {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
-  background: #17c3b2;
-  transition: transform 0.35s ease;
-  display: block;
-  z-index: -1;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(49, 214, 196, 0.2);
+  border-radius: 999px;
+  background: transparent;
+  color: #8aa7a4;
+  font-size: 18px;
 }
 
-button:hover::before {
-  transform: translate(-50%, -50%) rotate(45deg) scaleX(1.05);
+.inspector-eyebrow,
+.inspector-section {
+  margin: 0 0 8px;
+  color: #31d6c4;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+.inspector-title {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+
+.inspector-sub {
+  margin: 4px 0 14px;
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.inspector-metrics,
+.inspector-output {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border: 1px solid rgba(49, 214, 196, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(49, 214, 196, 0.15);
+}
+
+.inspector-metrics div,
+.inspector-output div {
+  padding: 8px 9px;
+  background: #101b1e;
+}
+
+.inspector-metrics span,
+.inspector-output span {
+  display: block;
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.inspector-metrics strong,
+.inspector-output strong {
+  display: block;
+  margin-top: 2px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.inspector-section {
+  margin-top: 16px;
+}
+
+.sensor-row {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  color: #7e9b98;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 8px;
+}
+
+.sensor-bars {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  align-items: end;
+  gap: 2px;
+  height: 22px;
+}
+
+.sensor-bars i {
+  display: block;
+  min-height: 2px;
+  border-radius: 1px;
+  background: #31d6c4;
+  opacity: 0.8;
+}
+
+.sensor-bars.radial i {
+  background: #ffc857;
+}
+
+.sensor-bars.single {
+  grid-template-columns: 1fr;
+}
+
+#caption {
+  position: fixed;
+  left: 22px;
+  bottom: 96px;
+  max-width: 280px;
+  margin: 0;
+  color: #6f8b88;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  z-index: 2;
+}
+
+#controls {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgba(49, 214, 196, 0.24);
+  border-radius: 999px;
+  background: rgba(10, 22, 25, 0.84);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  transform: translateX(-50%);
+  z-index: 4;
+}
+
+button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #e6f5f1;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(49, 214, 196, 0.2);
+}
+
+button[aria-pressed="true"] {
+  background: #31d6c4;
+  color: #06201d;
+}
+
+.speed-group {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid rgba(49, 214, 196, 0.2);
+  border-radius: 999px;
+}
+
+.speed-group button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 9px;
+  color: #8aa7a4;
+}
+
+.speed-group button[aria-pressed="true"] {
+  color: #06201d;
 }
 
 button:hover {
-  color: #242424;
+  color: #ffffff;
 }
 
-button:active {
-  transform: translateY(1px);
+button[aria-pressed="true"]:hover {
+  color: #06201d;
 }
 
-:where(a, button, input):focus-visible {
-  outline: 2px solid #17c3b2;
+:where(button):focus-visible {
+  outline: 2px solid #31d6c4;
   outline-offset: 3px;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
+.error {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  gap: 8px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 18px;
+  border: 1px solid #ff7369;
+  border-radius: 12px;
+  background: #101a1d;
+  color: #e6f5f1;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  z-index: 20;
 }
 
-@media (max-width: 480px) {
-  #info > span + span::before {
-    content: none;
+.error strong {
+  font-size: 14px;
+}
+
+.error span {
+  color: #b7cbc8;
+  font-size: 12px;
+}
+
+.error button {
+  justify-self: center;
+  border: 1px solid #ff7369;
+}
+
+@media (max-width: 640px) {
+  #topbar {
+    padding: 12px 14px;
   }
 
-  input,
+  .tagline,
+  .seed {
+    display: none;
+  }
+
+  #hud {
+    left: 14px;
+    top: 62px;
+  }
+
+  #inspector {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 72px;
+    width: auto;
+    max-height: 52dvh;
+  }
+
+#caption {
+    left: 14px;
+    bottom: 84px;
+    max-width: 240px;
+    font-size: 8px;
+  }
+
+  #controls {
+    gap: 2px;
+    padding: 4px;
+  }
+
   button {
-    padding: 0.7em 1em;
+    padding: 0 9px;
+    font-size: 10px;
   }
 
-  #footer {
-    font-size: 1rem;
+  .speed-group button {
+    padding: 0 7px;
+  }
+
+  .locale-switch {
+    padding: 0 6px;
+    font-size: 9px;
   }
 }
 

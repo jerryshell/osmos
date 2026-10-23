@@ -1,0 +1,9 @@
+[package]
+name = "osmos-headless"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+osmos-evo = { path = "../osmos-evo" }
+osmos-sim = { path = "../osmos-sim" }
+osmos-core = { path = "../osmos-core" }

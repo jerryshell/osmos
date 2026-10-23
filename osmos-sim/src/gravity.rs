@@ -1,0 +1,106 @@
+use osmos_core::{wrap_delta, Vec2};
+
+use crate::config::SimConfig;
+
+/// 固定的径向力场。正强度吸引，负强度排斥。
+///
+/// 场值表示加速度。强度按距离的 `power` 次方反比缩放，经过软化半径处理，再按最大加速度截断。
+///
+/// `power` 默认是二次幂。软化半径和加速度上限是数值保护。
+#[derive(Clone, Copy, Debug)]
+pub struct GravityWell {
+    pub center: Vec2,
+    pub strength: f32,
+    pub softening: f32,
+    pub power: f32,
+    pub max_accel: f32,
+    pub radius: f32,
+}
+
+impl GravityWell {
+    pub fn from_config(config: &SimConfig) -> Self {
+        Self {
+            center: Vec2::new(config.gravity_center_x, config.gravity_center_y),
+            strength: config.gravity_strength,
+            softening: config.gravity_softening,
+            power: config.gravity_power,
+            max_accel: config.gravity_max_accel,
+            radius: config.gravity_well_radius,
+        }
+    }
+
+    pub fn is_active(self) -> bool {
+        self.strength.abs() > f32::EPSILON
+    }
+
+    pub fn acceleration(self, position: Vec2) -> Vec2 {
+        if !self.is_active() {
+            return Vec2::ZERO;
+        }
+
+        let delta = wrap_delta(self.center - position);
+        let distance = delta.length().max(self.softening);
+        let magnitude =
+            (self.strength / distance.powf(self.power)).clamp(-self.max_accel, self.max_accel);
+        delta.normalize_or_zero() * magnitude
+    }
+
+    pub fn kind(self) -> f32 {
+        if self.strength > 0.0 {
+            1.0
+        } else if self.strength < 0.0 {
+            -1.0
+        } else {
+            0.0
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn well(strength: f32) -> GravityWell {
+        GravityWell {
+            center: Vec2::new(0.5, 0.5),
+            strength,
+            softening: 0.04,
+            power: 2.0,
+            max_accel: 0.12,
+            radius: 0.045,
+        }
+    }
+
+    #[test]
+    fn attractor_pulls_toward_the_center() {
+        let acceleration = well(0.002).acceleration(Vec2::new(0.7, 0.5));
+        assert!(acceleration.x < 0.0);
+        assert!(acceleration.y.abs() < 1e-6);
+        assert!(acceleration.length() <= 0.12 + 1e-6);
+    }
+
+    #[test]
+    fn repulsor_pushes_away_from_the_center() {
+        let acceleration = well(-0.002).acceleration(Vec2::new(0.7, 0.5));
+        assert!(acceleration.x > 0.0);
+        assert!(acceleration.length() <= 0.12 + 1e-6);
+    }
+
+    #[test]
+    fn power_changes_the_falloff() {
+        let mut linear = well(0.002);
+        linear.power = 1.0;
+
+        let squared = well(0.002).acceleration(Vec2::new(0.7, 0.5)).length();
+        let linear = linear.acceleration(Vec2::new(0.7, 0.5)).length();
+
+        assert!(linear < squared);
+        assert!(linear > 0.0);
+    }
+
+    #[test]
+    fn inactive_field_has_no_acceleration() {
+        assert_eq!(well(0.0).acceleration(Vec2::new(0.2, 0.8)), Vec2::ZERO);
+        assert_eq!(well(0.0).kind(), 0.0);
+    }
+}
