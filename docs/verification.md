@@ -61,7 +61,7 @@ npm run build:all
 GitHub Actions 运行成功。
 
 - 工作流：`.github/workflows/ci.yml`
-- 运行：<https://github.com/jerryshell/osmos/actions/runs/39920365409>
+- 运行：<https://github.com/jerryshell/osmos/actions/runs/39931590182>
 
 ## 预览
 
