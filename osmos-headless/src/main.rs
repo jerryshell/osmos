@@ -13,6 +13,7 @@ fn main() {
     let mut scenario = 0_u32;
     let mut probe = false;
     let mut ecology = false;
+    let mut export_champion: Option<String> = None;
 
     let mut arguments = std::env::args().skip(1);
     while let Some(argument) = arguments.next() {
@@ -27,6 +28,9 @@ fn main() {
             "--scenario" => scenario = parse(&mut arguments, "scenario"),
             "--probe" => probe = true,
             "--ecology" => ecology = true,
+            "--export-champion" => {
+                export_champion = Some(next_value(&mut arguments, "champion path"))
+            }
             other => panic!("unknown argument: {other}"),
         }
     }
@@ -125,6 +129,16 @@ fn main() {
             report.best_score
         );
     }
+
+    if let Some(path) = export_champion {
+        write_champion(&path, seed, engine.generation(), engine.best_genome());
+    }
+}
+
+fn next_value(arguments: &mut impl Iterator<Item = String>, name: &str) -> String {
+    arguments
+        .next()
+        .unwrap_or_else(|| panic!("missing value for {name}"))
 }
 
 fn parse<T: std::str::FromStr>(arguments: &mut impl Iterator<Item = String>, name: &str) -> T {
@@ -133,6 +147,18 @@ fn parse<T: std::str::FromStr>(arguments: &mut impl Iterator<Item = String>, nam
         .unwrap_or_else(|| panic!("missing value for --{name}"))
         .parse()
         .unwrap_or_else(|_| panic!("invalid value for --{name}"))
+}
+
+fn write_champion(path: &str, seed: u64, generation: u32, genome: &Genome) {
+    let mut text = format!("{{\"seed\":{seed},\"generation\":{generation},\"genome\":[");
+    for (index, value) in genome.as_slice().iter().enumerate() {
+        if index > 0 {
+            text.push(',');
+        }
+        text.push_str(&format!("{value:.8}"));
+    }
+    text.push_str("]}");
+    std::fs::write(path, text).unwrap_or_else(|error| panic!("write champion: {error}"));
 }
 
 fn masses_for(trainer: &Trainer, population: &[Genome], seeds: &[u64]) -> Vec<f32> {

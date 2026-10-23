@@ -12,6 +12,7 @@ App -> Engine -> World -> Snapshot -> wasm -> Canvas 2D
 
 - `App` 负责帧循环、渲染、交互和 URL 状态。
 - `Engine` 维护基因组、世代和共享世界。
+- 浏览器加载扁平冠军基因组。`Engine` 用 8 个精确副本和其余变异副本启动第一代。
 - `World` 维护物理、碰撞、感知、喷出物和快照。
 - `osmos-wasm` 把快照和检查数据转成 JavaScript 类型。
 

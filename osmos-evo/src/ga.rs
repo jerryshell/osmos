@@ -19,6 +19,24 @@ pub fn random_population(rng: &mut StdRng, size: usize) -> Vec<Genome> {
         .collect()
 }
 
+/// Seed a population from one champion. The first copies stay exact.
+pub fn seeded_population(
+    rng: &mut StdRng,
+    size: usize,
+    champion: &Genome,
+    exact: usize,
+) -> Vec<Genome> {
+    (0..size)
+        .map(|index| {
+            let mut genome = champion.clone();
+            if index >= exact {
+                mutation(rng, &mut genome);
+            }
+            genome
+        })
+        .collect()
+}
+
 /// 按最终质量选择亲本，生成固定大小的下一代。
 pub fn next_population_by_mass(
     rng: &mut StdRng,
@@ -100,5 +118,26 @@ fn mutation(rng: &mut StdRng, genome: &mut Genome) {
             let sign = if rng.random_bool(0.5) { -1.0 } else { 1.0 };
             *value = (*value + sign * MUTATION_COEFFICIENT * rng.random::<f32>()).clamp(-3.0, 3.0);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::SeedableRng;
+
+    #[test]
+    fn seeded_population_keeps_exact_copies() {
+        let mut rng = StdRng::seed_from_u64(7);
+        let champion = Genome::new(
+            (0..GENOME_LENGTH)
+                .map(|index| index as f32 / 100.0)
+                .collect(),
+        );
+        let population = seeded_population(&mut rng, 4, &champion, 2);
+
+        assert_eq!(population.len(), 4);
+        assert_eq!(population[0], champion);
+        assert_eq!(population[1], champion);
     }
 }

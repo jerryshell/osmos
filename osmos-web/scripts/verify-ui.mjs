@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium } from "playwright";
+import { chromium, firefox, webkit } from "playwright";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "dist");
 const port = 4173;
@@ -42,10 +42,19 @@ const server = createServer(async (request, response) => {
 
 await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
 
-const browser = await chromium.launch({
+const browserName = process.env.VERIFY_BROWSER || "chromium";
+const browserType = { chromium, firefox, webkit }[browserName];
+if (!browserType) {
+  throw new Error(`unknown VERIFY_BROWSER: ${browserName}`);
+}
+const browser = await browserType.launch({
   headless: true,
-  executablePath: process.env.CHROME_PATH || undefined,
-  args: ["--no-sandbox", "--disable-dev-shm-usage"]
+  ...(browserName === "chromium"
+    ? {
+        executablePath: process.env.CHROME_PATH || undefined,
+        args: ["--no-sandbox", "--disable-dev-shm-usage"]
+      }
+    : {})
 });
 
 if (process.env.VERIFY_INTERACTIONS === "1") {
@@ -132,7 +141,13 @@ const cases = [
   }
 ];
 
-for (const item of cases) {
+const only = process.env.VERIFY_CASE;
+const selectedCases = only ? cases.filter((item) => item.name === only) : cases;
+if (selectedCases.length === 0) {
+  throw new Error(`unknown VERIFY_CASE: ${only}`);
+}
+
+for (const item of selectedCases) {
   const page = await browser.newPage({ viewport: item.viewport, deviceScaleFactor: 1 });
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
@@ -150,6 +165,10 @@ for (const item of cases) {
   await page.goto(`http://127.0.0.1:${port}/${query}`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: `${item.speed}×` }).click();
   await page.waitForTimeout(300);
+  const memoryStart = await page.evaluate(() => {
+    const memory = performance.memory;
+    return memory ? memory.usedJSHeapSize : null;
+  });
   await page.evaluate(() => {
     window.__osmosPerf?.reset();
     window.__longTasks = [];
@@ -218,9 +237,20 @@ for (const item of cases) {
   );
 
   const perf = await page.evaluate(() => window.__osmosPerf?.summary() ?? null);
+  const champion = await page.evaluate(
+    () => document.querySelector("#app")?.getAttribute("data-champion") ?? null
+  );
+  const memoryEnd = await page.evaluate(() => {
+    const memory = performance.memory;
+    return memory ? memory.usedJSHeapSize : null;
+  });
   console.log(
     JSON.stringify({
       case: item.name,
+      browser: browserName,
+      champion,
+      memoryStart,
+      memoryEnd,
       ...result,
       perf,
       smallButtons,

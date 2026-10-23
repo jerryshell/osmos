@@ -1,5 +1,6 @@
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import * as osmos from "../osmos-wasm";
+import championData from "./champion.json";
 import {
   localeTag,
   messages,
@@ -49,6 +50,15 @@ const PELLET_STRIDE = 4;
 const EJECTA_STRIDE = 5;
 const WELL_STRIDE = 4;
 const MAX_STEPS_PER_FRAME = 16;
+const CHAMPION = Float32Array.from(championData.genome);
+const CHAMPION_LOADED = CHAMPION.length === osmos.genomeLength();
+
+const createEngine = (seed: number, scenario: number): osmos.Engine => {
+  if (CHAMPION_LOADED) {
+    return osmos.newEngineWithChampion(seed, scenario, CHAMPION);
+  }
+  return new osmos.Engine(seed, scenario);
+};
 
 type PerfSummary = {
   stepP50: number;
@@ -331,7 +341,7 @@ const App = () => {
   const chooseScenario = (next: number) => {
     if (next === scenario()) return;
     setScenario(next);
-    engine = new osmos.Engine(seed(), next);
+    engine = createEngine(seed(), next);
     setSpeed(1);
     setPaused(false);
     resetStats();
@@ -367,7 +377,7 @@ const App = () => {
     resize();
 
     try {
-      engine = new osmos.Engine(initialSeed, initialScenario);
+      engine = createEngine(initialSeed, initialScenario);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("errorMessage"));
       return;
@@ -518,7 +528,7 @@ const App = () => {
 
   // === 界面 ===
   return (
-    <div id="app">
+    <div id="app" data-champion={CHAMPION_LOADED ? "true" : "false"}>
       <header id="topbar">
         <h1 class="brand">
           OSMOS <span>FIELD</span>

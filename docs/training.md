@@ -14,6 +14,16 @@ cargo run --release -p osmos-headless -- --ecology --generations 60 --seed 42 --
 - 所有质体在同一世界运动，位置和初始体型都受随机影响。
 - 质量较大者渐进吸收较小者。
 
+## 浏览器加载
+
+训练后的最佳基因组导出为 `osmos-web/src/champion.json`。
+
+```bash
+cargo run --release -p osmos-headless -- --generations 60 --seed 42 --motes 64 --pellets 236 --episode 2400 --export-champion osmos-web/src/champion.json
+```
+
+浏览器启动时用冠军基因组初始化种群。8 个副本保持原始权重，其余副本经过变异后继续演化。冠军只影响起点，不冻结后续选择。
+
 ## 选择与繁殖
 
 - 对局结束后取每个学习者的最终质量。

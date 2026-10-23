@@ -153,3 +153,20 @@ impl Engine {
 fn set(object: &Object, key: &str, value: JsValue) {
     Reflect::set(object, &JsValue::from_str(key), &value).expect("snapshot object is writable");
 }
+
+#[wasm_bindgen(js_name = newEngineWithChampion)]
+pub fn new_engine_with_champion(seed: u32, scenario: u32, champion: &[f32]) -> Engine {
+    Engine {
+        inner: osmos_evo::Engine::with_scenario_champion(
+            seed as u64,
+            osmos_evo::Scenario::from_id(scenario),
+            osmos_sim::SimConfig::default(),
+            champion.to_vec(),
+        ),
+    }
+}
+
+#[wasm_bindgen(js_name = genomeLength)]
+pub fn genome_length() -> usize {
+    osmos_evo::GENOME_LENGTH
+}

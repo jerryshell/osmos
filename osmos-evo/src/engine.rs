@@ -4,7 +4,7 @@ use rand::rngs::StdRng;
 use rand::SeedableRng;
 
 use crate::fitness::{median, score};
-use crate::ga::{next_population_by_mass, random_population};
+use crate::ga::{next_population_by_mass, random_population, seeded_population};
 use crate::scenario::Scenario;
 
 #[derive(Clone, Debug)]
@@ -42,6 +42,7 @@ pub struct Engine {
     population: Vec<Genome>,
     best_genome: Genome,
     best_score: f32,
+    seed_genome: Option<Genome>,
     world: World,
 }
 
@@ -54,7 +55,7 @@ impl Engine {
     }
 
     pub fn with_config(config: SimConfig) -> Self {
-        Self::build(config, Scenario::Ambient)
+        Self::build(config, Scenario::Ambient, None)
     }
 
     pub fn with_scenario(seed: u64, scenario: Scenario) -> Self {
@@ -63,14 +64,28 @@ impl Engine {
 
     pub fn with_scenario_config(seed: u64, scenario: Scenario, base: SimConfig) -> Self {
         let config = scenario.config(SimConfig { seed, ..base });
-        Self::build(config, scenario)
+        Self::build(config, scenario, None)
     }
 
-    fn build(config: SimConfig, scenario: Scenario) -> Self {
+    /// Start from a trained champion. Exact copies keep the learned policy visible.
+    pub fn with_scenario_champion(
+        seed: u64,
+        scenario: Scenario,
+        base: SimConfig,
+        champion: Vec<f32>,
+    ) -> Self {
+        let config = scenario.config(SimConfig { seed, ..base });
+        Self::build(config, scenario, Some(Genome::new(champion)))
+    }
+
+    fn build(config: SimConfig, scenario: Scenario, champion: Option<Genome>) -> Self {
         let seed = config.seed;
         let mut rng = StdRng::seed_from_u64(seed ^ 0xA5A5_5A5A_1234_5678);
-        let population = random_population(&mut rng, config.motes as usize);
-        let best_genome = population[0].clone();
+        let population = match &champion {
+            Some(genome) => seeded_population(&mut rng, config.motes as usize, genome, 8),
+            None => random_population(&mut rng, config.motes as usize),
+        };
+        let best_genome = champion.clone().unwrap_or_else(|| population[0].clone());
         let hunters = scenario.hunters();
         let prey = scenario.prey();
         let world = World::with_scenario(config, controllers(&population), hunters, prey);
@@ -86,6 +101,7 @@ impl Engine {
             population,
             best_genome,
             best_score: f32::NEG_INFINITY,
+            seed_genome: champion,
             world,
         }
     }
@@ -127,6 +143,10 @@ impl Engine {
         self.config
     }
 
+    pub fn best_genome(&self) -> &Genome {
+        &self.best_genome
+    }
+
     pub fn scenario(&self) -> Scenario {
         self.scenario
     }
@@ -153,8 +173,14 @@ impl Engine {
         self.config.seed = seed;
         self.generation = 0;
         self.rng = StdRng::seed_from_u64(seed ^ 0xA5A5_5A5A_1234_5678);
-        self.population = random_population(&mut self.rng, self.config.motes as usize);
-        self.best_genome = self.population[0].clone();
+        self.population = match &self.seed_genome {
+            Some(genome) => seeded_population(&mut self.rng, self.config.motes as usize, genome, 8),
+            None => random_population(&mut self.rng, self.config.motes as usize),
+        };
+        self.best_genome = self
+            .seed_genome
+            .clone()
+            .unwrap_or_else(|| self.population[0].clone());
         self.best_score = f32::NEG_INFINITY;
         self.world = World::with_scenario(
             self.config,
@@ -323,6 +349,24 @@ mod tests {
         assert_eq!(engine.generation(), 1);
         assert_eq!(engine.tick(), 0);
         assert_eq!(engine.snapshot().stats.generation, 1);
+    }
+
+    #[test]
+    fn champion_seeds_the_initial_population() {
+        let champion = Genome::new(
+            (0..osmos_core::brain::GENOME_LENGTH)
+                .map(|value| value as f32)
+                .collect(),
+        );
+        let engine = Engine::with_scenario_champion(
+            11,
+            Scenario::Ambient,
+            small_config(),
+            champion.as_slice().to_vec(),
+        );
+
+        assert_eq!(engine.best_genome(), &champion);
+        assert_eq!(engine.snapshot().stats.alive, 8);
     }
 
     #[test]

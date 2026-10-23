@@ -10,6 +10,7 @@ Osmos 是一个零玩家质量模拟项目，使用 Rust、WebAssembly、Vite �
 ## 当前实现
 
 - 64 个质体全部是学习者，不生成脚本猎手或脚本猎物。
+- 浏览器启动时加载 `osmos-web/src/champion.json` 中的冠军基因组。8 个精确副本保留训练策略，其余副本变异后继续演化。
 - 质量较大者渐进吸收较小者，没有 2 倍门槛。质量相同时弹开。
 - 吸收比例按重叠面积计算，每 60 Hz tick 转移一次。
 - 地图边界环绕。移动、碰撞、吸收、场力和感知都使用最短环绕距离。
@@ -81,11 +82,18 @@ cargo run --release -p osmos-headless -- --ecology --generations 60 --seed 42 --
 
 全学习者路径每局让 64 个质体同场竞争。对局结束后按最终质量计算繁殖权重，死亡质体权重为 0。亲本通过质量概率选择，子代经过交叉和变异。
 
+导出浏览器冠军基因组。
+
+```bash
+cargo run --release -p osmos-headless -- --generations 60 --seed 42 --motes 64 --pellets 236 --episode 2400 --export-champion osmos-web/src/champion.json
+```
+
 ## 文档
 
 - `docs/architecture.md`：世界、质量、场力、感知、训练和浏览器结构
 - `docs/training.md`：全学习者训练、选择方式和当前结果
 - `docs/verification.md`：构建、浏览器、性能和语言验证
+- `docs/release.md`：发布门禁、浸泡、跨浏览器和生产切换
 - `docs/i18n.md`：英语和简体中文国际化
 
 ## 开源协议
