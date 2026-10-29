@@ -1,5 +1,15 @@
 # 更新记录
 
+## v2.0.1
+
+- 删除脚本猎手、脚本猎物和单学习者训练路径。64 个质体全部是学习者。
+- 删除 `Trainer`、`--train`、`--holdout`、`--probe`。
+- 删除质体角色字段以及浏览器中的角色标签和描边。
+- 删除 `osmos-wasm/cargo_watch.bat`、`wasm_pack_build.bat`、`wasm_pack_build.sh`。
+- wasm 从 111.16 KB 降到 102.09 KB，gzip 从 46.29 KB 降到 42.96 KB。
+- 站点纳入 1Panel 管理，类型 `static`。
+- 生产站点全量静态部署，`/next/` 同步为同一构建。
+
 ## v2.0.0
 
 - 正式发布零玩家质量生态。

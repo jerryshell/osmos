@@ -2,12 +2,14 @@
 
 ## 当前状态
 
-- 生产版：<https://osmos.jerryshell.eu.org/>，`v2.0.0` 已上线。
+- 生产版：<https://osmos.jerryshell.eu.org/>，`v2.0.1` 已上线。
 - 预览版：<https://osmos.jerryshell.eu.org/next/>，同一构建。
-- 当前定位：`v2.0.0` 正式版。
+- 当前定位：`v2.0.1` 正式版。
 - CI：已通过。
-- 浸泡：600 秒桌面 8× 通过。
-- 跨浏览器：Firefox 通过，WebKit 功能通过但帧率低于 60。
+- 浸泡：600 秒桌面 8× 通过，`v2.0.0` 记录。
+- 跨浏览器：Firefox 通过，WebKit 功能通过但帧率低于 60，`v2.0.0` 记录。
+- 站点托管：1Panel 站点类型 `static`，内容在 `/www/sites/osmos.jerryshell.eu.org/index/`。
+- 线上构建：提交 `c500b25`，wasm 102.09 KB，JavaScript 38.33 KB。
 
 ## 发布门禁
 
